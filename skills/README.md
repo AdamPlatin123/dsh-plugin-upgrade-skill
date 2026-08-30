@@ -37,4 +37,4 @@ description: 一句话说明这个 skill 做什么、什么时候触发。agent 
 
 | Skill | 说明 | 作者 |
 | --- | --- | --- |
-| [plugin-upgrade](plugin-upgrade/) | 升级 DSH 插件：盘点版本 → 评估 changelog → 迁移 cordis.yml → 执行升级 → 验证 | [@oh-my-dsh](https://github.com/oh-my-dsh) |
+| [plugin-upgrade](plugin-upgrade/) | 升级 DSH 插件：盘点版本 → 评估 changelog → 迁移 cordis.yml → 执行升级 → 验证；含宿主版本迁移分支（触点自查 + 版本变更卡片） | [@oh-my-dsh](https://github.com/oh-my-dsh) |

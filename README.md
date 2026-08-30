@@ -19,7 +19,7 @@ DSH 插件生态的 **skill 合集仓库**，社区共建。
 
 | Skill | 说明 |
 | --- | --- |
-| [plugin-upgrade](skills/plugin-upgrade/) | 升级 DSH 插件：盘点版本 → 评估 changelog → 迁移 cordis.yml → 执行升级 → 验证 |
+| [plugin-upgrade](skills/plugin-upgrade/) | 升级 DSH 插件：盘点版本 → 评估 changelog → 迁移 cordis.yml → 执行升级 → 验证；含宿主版本迁移分支（触点自查 + 版本变更卡片，见 references/） |
 
 ## 如何贡献
 
