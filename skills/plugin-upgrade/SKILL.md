@@ -46,3 +46,7 @@ description: 升级 DSH（DeepSeek Harness）插件的 skill。当用户想检�
 | [pre-flight.md](references/pre-flight.md) | 六类触点自查清单（含 ripgrep 检出模式与汇总模板） |
 | [v0.1.2-alpha.1.md](references/v0.1.2-alpha.1.md) | 0.1.1 → alpha.1：12 张卡（含 APIProxy→`@Remote` 17 条操作映射表） |
 | [v0.1.2-alpha.2.md](references/v0.1.2-alpha.2.md) | alpha.1 → alpha.2：4 张卡（`ignorable` 恢复、`RemoteError` 封装等） |
+
+自测夹具：[examples/legacy-plugin/](examples/legacy-plugin/) —— 一个停留在 0.1.1 写法的
+最小插件，覆盖六类触点；在上面跑 pre-flight 检出应六类全命中，再走一遍
+「套卡片 → 分层验证」即可验证本 skill 是否好使。
