@@ -42,6 +42,12 @@ export function runVerifyRuntimeChecks() {
       attribution: 'profile-config',
     },
     {
+      name: 'malformed plugin overlay (loader patch parse failure) is plugin-code',
+      log: 'Error: dsh: overlay /x/node_modules/@demo/p/cordis.patch.yml must be a top-level YAML array of loader patch entries',
+      verdict: 'activation-failed',
+      attribution: 'plugin-code',
+    },
+    {
       name: 'module resolve crash',
       log: "node:internal/process/esm_loader:404\nError [ERR_MODULE_NOT_FOUND]: Cannot find module '@demo/missing'",
       verdict: 'load-crash-module-resolve',

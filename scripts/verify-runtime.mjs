@@ -32,7 +32,7 @@ import { fileURLToPath } from 'node:url'
 // it anywhere in a stack path misfires (fleet-proven).
 const TRANSPORT_RE = /TRANSPORT|STREAM_CLOSED|EMPTY_RESPONSE|ECONNREFUSED|ECONNRESET|ETIMEDOUT|socket hang up|fetch failed/i
 const MODULE_RESOLVE_RE = /ERR_MODULE_NOT_FOUND|esm\/loader|Cannot find module/i
-const ACTIVATION_RE = /1 entry did not activate|plugin tree failed to load|did not activate/
+const ACTIVATION_RE = /1 entry did not activate|plugin tree failed to load|did not activate|must be a top-level YAML array of loader patch entries/
 // Only a wait for the webServer service means "wrong environment, re-probe
 // under the web host": a plugin waiting for a REMOVED service (e.g. apiProxy,
 // the #5120 signature) is an activation failure that migration must fix.
