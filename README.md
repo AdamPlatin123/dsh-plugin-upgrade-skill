@@ -110,7 +110,7 @@ cp -r dsh-plugin-upgrade-skill/skills/* .cursor/skills/
 
 | Skill | 说明 | 版本覆盖 |
 | --- | --- | --- |
-| [plugin-upgrade](skills/plugin-upgrade/) | 升级 DSH 插件：盘点版本 → 评估 changelog → 迁移配置 → 源码适配 → 验证；含宿主版本迁移（触点自查 + 版本变更卡片） | 0.1.1 → 0.1.2 |
+| [plugin-upgrade](skills/plugin-upgrade/) | 三模式安全升级：只读检查、已安装插件升级、DSH 宿主兼容迁移；含七类触点、版本卡片与回滚约束 | 0.1.1 → 0.1.2 |
 
 ## 版本数据现状
 
@@ -118,7 +118,7 @@ cp -r dsh-plugin-upgrade-skill/skills/* .cursor/skills/
 | --- | --- | --- | --- |
 | 0.1.1 → 0.1.2 alpha.1 | ✅ 完成 | [v0.1.2-alpha.1.md](skills/plugin-upgrade/references/v0.1.2-alpha.1.md) | Alpha 1 破坏性变更 |
 | 0.1.1 → 0.1.2 alpha.2 | ✅ 完成 | [v0.1.2-alpha.2.md](skills/plugin-upgrade/references/v0.1.2-alpha.2.md) | Alpha 2 增量变更 |
-| 0.1.1 → 0.1.2 走廊 | ✅ 完成（基于 alpha.2） | [v0.1.2.md](skills/plugin-upgrade/references/v0.1.2.md) | Rollup 层增量：跨 cohort 共存、未发布 cohort 安装、`RemoteResult` 错误流、分层验证 |
+| 0.1.1 → 0.1.2 走廊 | ✅ 完成（基于 alpha.2） | [rollup-0.1.2.md](skills/plugin-upgrade/references/rollup-0.1.2.md) | Rollup 层增量：跨 cohort 共存、未发布 cohort 安装、`RemoteResult` 错误流、分层验证 |
 | 0.1.1 → 0.1.2 | 🔄 待官方发布 tag | — | 0.1.2 正式版尚未发布（当前最新：alpha.2） |
 | 0.1.2 → 0.1.3+ | 📝 待认领 | — | 等待社区贡献（[贡献指南](CONTRIBUTING.md)） |
 
@@ -128,26 +128,46 @@ cp -r dsh-plugin-upgrade-skill/skills/* .cursor/skills/
 - [Discussion #5120](https://github.com/deepseek-ai/deepseek-harness/discussions/5120) — 社区迁移实践与痛点征集
 - [dsh-web 迁移实例](https://github.com/zhu1090093659/dsh-web) — @zhu1090093659 的完整迁移案例
 
-## 如何贡献
+## 安装与触发
 
-### 贡献新版本卡片
+项目级使用可把 `skills/plugin-upgrade/` 复制到：
 
-1. 在 `skills/plugin-upgrade/references/` 下按 [CONTRIBUTING.md](CONTRIBUTING.md) 格式创建版本卡片
-2. 更新 `skills/plugin-upgrade/references/README.md` 索引
-3. 提 PR，标题格式：`feat(plugin-upgrade): add vX.Y.Z migration guide`
+```text
+<your-project>/.agents/skills/plugin-upgrade/
+```
 
-### 贡献迁移示例
+也可以让 DSH 本地 Skill provider 直接加载本仓库的 `skills/` 根目录。确认目录中保留
+`SKILL.md` 与 `references/`，不要只复制主文件。
 
-1. 在 `skills/plugin-upgrade/examples/` 下创建示例文件（参考现有示例）
-2. 更新 `skills/plugin-upgrade/examples/README.md` 索引
-3. 提 PR
+示例请求：
 
-### 贡献新 skill
+- `只读检查这个 DSH 插件有没有新版本，不要修改任何文件。`
+- `把已安装插件升级到 1.4.0，先给计划，确认后再执行。`
+- `把这个插件从 dsh-v0.1.1-rc.2 适配到 dsh-v0.1.2-alpha.2。`
 
-1. 在 `skills/` 下新建文件夹，kebab-case 命名（如 `plugin-audit`）
-2. 按 [skills/README.md](skills/README.md) 规范编写 `SKILL.md`
-3. 在本 README 的 Skill 索引表格里登记
-4. 提 PR
+## 目录
+
+```text
+skills/<skill-name>/
+├── SKILL.md
+├── references/     # 按需加载的版本事实与清单
+└── examples/       # 静态夹具，不默认执行
+scripts/validate.mjs            # Skill 结构校验
+scripts/validate-manifests.mjs  # 多 agent manifest 校验
+```
+
+## 贡献与验证
+
+1. 按 [skills/README.md](skills/README.md) 编写或更新 Skill；
+2. 版本卡遵循 [card schema](skills/plugin-upgrade/references/README.md)；
+3. 运行：
+
+```sh
+node scripts/validate.mjs
+node scripts/validate-manifests.mjs
+```
+
+4. 提 PR，并说明已运行的验证。
 
 ## 致谢
 
@@ -157,4 +177,4 @@ cp -r dsh-plugin-upgrade-skill/skills/* .cursor/skills/
 
 ## License
 
-MIT
+[MIT](LICENSE)

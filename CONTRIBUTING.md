@@ -91,7 +91,7 @@
 ```markdown
 | 文件 | 内容 |
 | --- | --- |
-| [vX.Y.Z.md](vX.Y.Z.md) | A → B：N 张卡（简述主要变更） |
+| `vX.Y.Z.md` | A → B：N 张卡（简述主要变更） |
 ```
 
 ### 5. 添加典型示例（可选但推荐）
@@ -153,7 +153,7 @@
 标注信息来源：
 
 ```markdown
-> 素材来源：官方 release notes + [discussion #NNNN](链接) 社区迁移实践
+> 素材来源：官方 release notes + discussion #NNNN（链接）社区迁移实践
 ```
 
 ## 协作与致谢

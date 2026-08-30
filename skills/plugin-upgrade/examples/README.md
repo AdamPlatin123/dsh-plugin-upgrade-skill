@@ -8,9 +8,9 @@
 |---|---|---|
 | [01-simple-client-plugin.md](01-simple-client-plugin.md) | 纯客户端 UI 插件（仅 SDK 包迁移） | ⭐ |
 | [02-host-side-plugin.md](02-host-side-plugin.md) | 宿主侧插件（Gateway 调用迁移） | ⭐⭐ |
-| [03-dual-cohort-plugin.md](03-dual-cohort-plugin.md) | 跨 cohort 兼容插件（双版本支持） | ⭐⭐⭐ |
-| [04-preview-cohort-upgrade.md](04-preview-cohort-upgrade.md) | 未发布 preview cohort 升级（完整流程） | ⭐⭐⭐⭐ |
-| [05-third-party-plugin-patch.md](05-third-party-plugin-patch.md) | 第三方预构建插件 pnpm patch | ⭐⭐⭐ |
+| `03-dual-cohort-plugin.md`（待补充） | 跨 cohort 兼容插件（双版本支持） | ⭐⭐⭐ |
+| `04-preview-cohort-upgrade.md`（待补充） | 未发布 preview cohort 升级（完整流程） | ⭐⭐⭐⭐ |
+| `05-third-party-plugin-patch.md`（待补充） | 第三方预构建插件 pnpm patch | ⭐⭐⭐ |
 
 ## 如何使用
 
