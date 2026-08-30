@@ -149,6 +149,7 @@ skills/<skill-name>/
 └── examples/       # 示例代码（只读，不要运行）
 scripts/validate.mjs            # 仓库自检
 scripts/validate-manifests.mjs  # 多 agent 清单自检
+scripts/verify-runtime.mjs      # 插件运行时验证（隔离环境装好→加载→启动探测→失败归因）
 benchmark/                      # 6 道考题 + 判分 + 验证报告
 ```
 
