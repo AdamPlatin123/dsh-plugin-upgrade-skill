@@ -154,11 +154,21 @@ for (const file of cardFiles) {
   if (!['curated', 'complete'].includes(meta.coverage)) fail(file, `invalid coverage: ${meta.coverage}`)
   if (edges.has(meta.from)) fail(file, `duplicate corridor edge from ${meta.from}`)
   edges.set(meta.from, meta.to)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(meta.verifiedAt))) fail(file, `verifiedAt must be an ISO date (YYYY-MM-DD), got: ${meta.verifiedAt}`)
 
   const headings = [...body.matchAll(/^###\s+([A-Za-z0-9.-]+)\s+·\s+.+$/gm)]
   if (headings.length !== meta.cardCount) fail(file, `cardCount=${meta.cardCount}, found ${headings.length}`)
   if (!indexText.includes(`](${basename(file)})`) || !indexText.includes(`| ${meta.cardCount} |`)) {
     fail(file, 'version index is missing this file or its card count')
+  }
+  let previousSuffix = 0
+  for (const heading of headings) {
+    const match = /-(\d{2})$/.exec(heading[1])
+    const suffix = match === null ? NaN : Number(match[1])
+    if (!Number.isInteger(suffix) || suffix <= previousSuffix) {
+      fail(file, `${heading[1]} must use a two-digit suffix strictly increasing from the previous card`)
+    }
+    previousSuffix = suffix
   }
 
   for (let index = 0; index < headings.length; index += 1) {
@@ -179,6 +189,12 @@ for (const file of cardFiles) {
     if (!allowedTypes.has(type)) fail(file, `${id} invalid type: ${type}`)
     if (!allowedActions.test(action ?? '')) fail(file, `${id} invalid action: ${action}`)
     if (!/^- \*\*来源\*\*:[\s\S]*?https:\/\//m.test(card)) fail(file, `${id} must cite a primary URL`)
+    const sourceLine = /^- \*\*来源\*\*:([^\r\n]+)/m.exec(card)?.[1] ?? ''
+    for (const match of sourceLine.matchAll(/https:\/\/[^ )]+/g)) {
+      if (/github\.com\/[^/]+\/[^/]+\/blob\/(main|master)([/?#]|$)/.test(match[0])) {
+        fail(file, `${id} source must pin a tag or commit, got an unpinned blob link: ${match[0]}`)
+      }
+    }
   }
 }
 
