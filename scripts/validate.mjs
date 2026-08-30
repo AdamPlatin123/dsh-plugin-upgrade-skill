@@ -247,10 +247,19 @@ try {
   fail(faceCheckFile, `face contract check failed: ${error.stack ?? error.message}`)
 }
 
+// The planner must stay read-only, redact source lines, resolve card corridors, and report gaps.
+const plannerCheckFile = join(root, 'scripts', 'plan-migration.check.mjs')
+try {
+  const { runMigrationPlannerChecks } = await import(pathToFileURL(plannerCheckFile).href)
+  await runMigrationPlannerChecks()
+} catch (error) {
+  fail(plannerCheckFile, `migration planner check failed: ${error.stack ?? error.message}`)
+}
+
 if (failures.length) {
   console.error(`Validation failed (${failures.length}):`)
   for (const failure of failures) console.error(`- ${failure}`)
   process.exit(1)
 }
 
-console.log(`Validation OK: ${skillEntries.length} skill, ${cardFiles.length} card sets, ${totalCards} cards, ${markdownFiles.length} Markdown files, 7 touchpoint fixtures, 2 face contracts`)
+console.log(`Validation OK: ${skillEntries.length} skill, ${cardFiles.length} card sets, ${totalCards} cards, ${markdownFiles.length} Markdown files, 7 touchpoint fixtures, 2 face contracts, read-only planner`)
