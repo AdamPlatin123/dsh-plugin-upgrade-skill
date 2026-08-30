@@ -13,6 +13,8 @@ DSH 插件生态的 **Skill 合集仓库**，社区共建。
 | Skill | 说明 |
 |---|---|
 | [plugin-upgrade](skills/plugin-upgrade/) | 三模式安全升级：只读检查、已安装插件升级、DSH 宿主兼容迁移；含七类触点、版本卡片与回滚约束 |
+| [plugin-write](skills/plugin-write/) | 按目标 Harness 合约编写 DSH 插件，区分官方单仓包与外部可安装插件 |
+| [plugin-test](skills/plugin-test/) | 为 DSH 插件变更选择最小充分测试层级，覆盖单元测试、覆盖率、真实 API、快照、Web 及真实发布入口 |
 
 ## 安装与触发
 
