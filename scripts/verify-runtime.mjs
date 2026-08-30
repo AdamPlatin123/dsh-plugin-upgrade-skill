@@ -1,32 +1,22 @@
 #!/usr/bin/env node
-// verify-runtime.mjs — deterministic runtime verification for a DSH plugin.
+// verify-runtime.mjs — structured signature-based runtime verification for a
+// DSH plugin (failure attribution in four classes: plugin-code /
+// dependency-resolution / profile-config / dsh-runtime).
 //
 // Implements verification tier 3 of skills/plugin-upgrade/SKILL.md (real
-// profile cold boot, entry activation, Cordis services not stuck pending) as
-// an executable check, with failure attribution into four classes:
-// plugin-code / dependency-resolution / profile-config / dsh-runtime.
+// profile cold boot, entry activation, Cordis services not stuck pending).
 //
 // Method (battle-tested on a large plugin fleet): a deliberately dead model
 // endpoint lets boot reach the model stage with a deterministic transport
 // signature, because DSH asserts plugin-tree activation BEFORE any model call.
 // A broken plugin fails activation in ~1s; a healthy one only fails later at
-// the (dead) transport stage. A transport error is therefore a PASS signature
-// for "plugin tree fully loaded and activated" — zero tokens, zero keys, and
-// the verdict is fully decoupled from model availability.
+// the (dead) transport stage. On DSH 0.1.2 the agent retries the dead endpoint
+// silently, so liveness through the probe window is the pass signal there.
 //
-// Usage:
-//   node scripts/verify-runtime.mjs <plugin-spec> [options]
-//
-//   <plugin-spec>       npm package name, git URL, or local plugin directory
-//   --profile <name>    verify inside this profile name (default: "verify";
-//                       runs in an isolated temp DSH_HOME, your own profiles
-//                       and $DSH_HOME are never touched)
-//   --timeout <seconds> boot probe timeout (default 120)
-//   --json              machine-readable result on stdout
-//   --keep-workspace    keep the temp DSH_HOME for inspection
-//   -h, --help          show this help
-//
-// Exit codes: 0=pass  1=fail  2=inconclusive  3=skipped
+// Usage: node scripts/verify-runtime.mjs <plugin-spec> [options] — the full
+// contract (options, exit codes, the honest NOT-a-sandbox security boundary,
+// verdict semantics, POSIX-only note) lives in the USAGE constant below, also
+// printed by --help.
 //
 // No npm dependencies; requires node >= 20 and `dsh` on PATH (`git`/`npm`
 // only for git-URL / npm-name specs).
@@ -50,6 +40,15 @@ const ACTIVATION_RE = /1 entry did not activate|plugin tree failed to load|did n
 // only the singular form missed those cases (root cause of a mass
 // misjudgement batch in the original fleet).
 const HOST_WAIT_RE = /waiting for services?:.*webServer/i
+// A wait for any OTHER service is inconclusive, never a pass: the plugin may
+// inject a service the host simply does not provide (plugin-code) or the
+// environment may lack it (profile-config) — that distinction needs a human.
+const GENERIC_WAIT_RE = /waiting for services?:/i
+// Veto for the transport signature: an Error line that is NOT itself a
+// transport failure means the log cannot prove "tree loaded and only the
+// model call failed" — a plugin can print a transport word itself.
+const ERROR_LINE_RE = /^\s*.*\bError\b.*$/gm
+const ANSI_RE = /\x1b\[[0-9;]*[A-Za-z]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)/g
 
 const DEAD_MODEL_BASE_URL = 'http://127.0.0.1:9/v1' // port 9 (discard): nothing listens -> immediate ECONNREFUSED
 const EXIT_CODES = { pass: 0, fail: 1, inconclusive: 2, skipped: 3 }
@@ -57,23 +56,51 @@ const USAGE = `Usage: node scripts/verify-runtime.mjs <plugin-spec> [options]
 
   <plugin-spec>       npm package name, git URL, or local plugin directory
   --profile <name>    profile name inside an isolated temp DSH_HOME (default "verify")
-  --timeout <seconds> boot probe timeout (default 120)
+  --timeout <seconds> boot probe timeout (default 120; the web-host probe is
+                      capped at 90s regardless)
   --json              machine-readable result on stdout
   --keep-workspace    keep the temp DSH_HOME for inspection
   -h, --help          show this help
 
-Exit codes: 0=pass  1=fail  2=inconclusive  3=skipped`
+Exit codes: 0=pass  1=fail  2=inconclusive  3=skipped
+
+SECURITY: this is NOT a sandbox. The plugin under verification runs with your
+full user permissions and your inherited environment (only DSH_HOME and the
+working directory are pointed at temp locations, and the model endpoint is a
+dead port). npm/git install lifecycle scripts execute BEFORE any probe. Only
+verify plugin code you would be willing to install anyway. POSIX only — the
+probe relies on signals and shims not available on Windows.
+
+Verdict semantics: pass requires either a transport-only signature (pass-boot-
+probe), a clean exit 0 (pass-exit-0), or a genuine probe timeout with no
+failure signature (pass-timeout-alive — on DSH 0.1.2 the agent retries a dead
+model endpoint silently, so liveness through the window is the pass signal).
+Service waits other than webServer and mixed error signatures are reported as
+inconclusive on purpose: they need human judgement.`
 
 // --- Pure helpers (exported for verify-runtime.check.mjs) -------------------
 
 /** Diagnose a full boot log against the signature priority chain:
- * host service wait > module resolve crash > activation failure > transport
- * signature (= tree loaded, PASS). Returns null when nothing matches. */
+ * webServer wait > module resolve crash > activation failure > other service
+ * wait (inconclusive) > non-transport Error veto (inconclusive) > transport
+ * signature (= tree loaded, PASS). The activation ASSERTION outranks a plain
+ * service wait because the host's own "entry did not activate" text is the
+ * authoritative migration signal (#5120: waiting for a removed service IS an
+ * activation failure). Returns null when nothing matches. */
 export function diagnoseBootLog(log) {
   if (HOST_WAIT_RE.test(log)) return { verdict: 'env-needs-service-host', attribution: 'profile-config' }
   if (MODULE_RESOLVE_RE.test(log)) return { verdict: 'load-crash-module-resolve', attribution: 'dependency-resolution' }
   if (ACTIVATION_RE.test(log)) return { verdict: 'activation-failed', attribution: 'plugin-code' }
-  if (TRANSPORT_RE.test(log)) return { verdict: 'pass-boot-probe', attribution: null }
+  if (GENERIC_WAIT_RE.test(log)) return { verdict: 'service-wait-unresolved', attribution: null }
+  // Transport signature is only trustworthy when no OTHER error line exists:
+  // the log comes from the plugin's own stdout/stderr, and a plugin printing
+  // "ECONNREFUSED" itself would otherwise forge a pass.
+  if (TRANSPORT_RE.test(log)) {
+    for (const match of log.match(ERROR_LINE_RE) ?? []) {
+      if (!TRANSPORT_RE.test(match)) return { verdict: 'ambiguous-error-signature', attribution: null }
+    }
+    return { verdict: 'pass-boot-probe', attribution: null }
+  }
   return null
 }
 
@@ -104,22 +131,34 @@ export function isWebPlugin(srcDir) {
 }
 
 /** Classify a plugin spec into an install route. Anything that exists as a
- * local directory wins first: bare relative paths ("examples/legacy-plugin"
- * or a plain "demo-old") must not be mistaken for npm names. */
+ * local DIRECTORY wins first: bare relative paths ("examples/legacy-plugin"
+ * or a plain "demo-old") must not be mistaken for npm names — and a same-named
+ * plain FILE must not hijack an npm spec. */
 export function classifySpec(spec) {
   if (/^https?:\/\/./.test(spec) || /^git@.+\.git$/.test(spec)) return 'git-url'
   if (spec.startsWith('.') || spec.startsWith('/') || spec.startsWith('~/')) return 'directory'
-  if (existsSync(spec)) return 'directory'
+  try {
+    if (existsSync(spec) && statSync(spec).isDirectory()) return 'directory'
+  } catch {
+    /* unreadable path falls through to the name forms */
+  }
   if (/^@[a-z0-9][a-z0-9._-]*\/[a-z0-9][a-z0-9._-]*$/i.test(spec)) return 'npm-name'
   if (/^[a-z0-9][a-z0-9._-]*$/i.test(spec)) return 'npm-name'
   return 'unknown'
 }
 
-/** The key expected to appear in `dsh plugin list` output after install:
- * the package name, or for structure-shaped directories the directory name. */
-export function listKeyFor(spec, route) {
-  if (route !== 'directory') return spec
-  const pkgPath = join(spec, 'package.json')
+/** The key expected to appear in `dsh plugin list` output after install.
+ * npm-name: the package name itself. git-url: the repo name without ".git"
+ * (the list never shows the full URL). directory: the package name from
+ * package.json, or the ORIGINAL directory name (not the temp copy — the copy
+ * is always named plugin-src, which would collide across runs). */
+export function listKeyFor(spec, route, originalSpec = spec) {
+  if (route === 'npm-name') return spec
+  if (route === 'git-url') {
+    const pathPart = spec.replace(/^[a-z]+:\/\/[^/]+\//i, '').replace(/^git@[^:]+:/, '')
+    return pathPart.replace(/\.git$/, '').split('/').pop() || spec
+  }
+  const pkgPath = join(originalSpec, 'package.json')
   if (existsSync(pkgPath)) {
     try {
       const name = JSON.parse(readFileSync(pkgPath, 'utf8'))?.name
@@ -128,7 +167,7 @@ export function listKeyFor(spec, route) {
       /* fall through to basename */
     }
   }
-  return basename(spec)
+  return basename(originalSpec)
 }
 
 // --- Process helpers ---------------------------------------------------------
@@ -154,7 +193,9 @@ function toolMissing(cmd) {
 }
 
 function tail(text, maxBytes = 500) {
-  const flat = String(text ?? '').replaceAll('\n', ' ')
+  // Strip ANSI/OSC escape sequences first: evidence is echoed into terminals
+  // and reports, and plugin-controlled bytes must not reach the clipboard.
+  const flat = String(text ?? '').replaceAll(ANSI_RE, '').replaceAll('\n', ' ')
   return flat.length > maxBytes ? `…${flat.slice(-maxBytes)}` : flat
 }
 
@@ -193,49 +234,56 @@ function pinNpmSpec(pkgName) {
   return view.status === 0 && latest ? `${pkgName}@${latest}` : pkgName
 }
 
-function probeHeadless(dshHome, profile, cwd, timeoutSeconds) {
-  const probe = run('dsh', ['--profile', profile, 'ok'], {
-    timeoutSeconds,
-    // Placeholder key: without one the agent stalls waiting for credentials
-    // (fleet-proven). Full-access mode: headless permission prompts can never
-    // be approved and stall the agent — the write surface is anchored to the
-    // temp cwd and temp DSH_HOME, not the user environment.
-    env: {
-      DSH_HOME: dshHome,
-      DEEPSEEK_BASE_URL: DEAD_MODEL_BASE_URL,
-      DEEPSEEK_API_KEY: 'sk-verify-local-0000000000000000000000000',
-      DSH_PERMISSION_MODE: 'danger-full-access',
-    },
-    cwd,
-  })
+/** Shared probe environment. Placeholder key: without one the agent stalls
+ * waiting for credentials (fleet-proven). Full-access mode: headless
+ * permission prompts can never be approved and stall the agent.
+ * SECURITY BOUNDARY (honest): this is NOT a sandbox — the child inherits the
+ * caller's user, environment and filesystem permissions. Only run this
+ * against plugin code you would install anyway. */
+function probeEnv(dshHome) {
   return {
-    status: probe.status,
-    timedOut: probe.error?.code === 'ETIMEDOUT' || probe.signal === 'SIGKILL',
-    log: `${probe.stdout ?? ''}\n${probe.stderr ?? ''}`,
+    DSH_HOME: dshHome,
+    DEEPSEEK_BASE_URL: DEAD_MODEL_BASE_URL,
+    DEEPSEEK_API_KEY: 'sk-verify-local-0000000000000000000000000',
+    DSH_PERMISSION_MODE: 'danger-full-access',
   }
 }
 
-/** Web-plane plugins need the web host: headless profiles expose no webServer
- * service, so the plugin would wait forever. Boot `dsh web` for a bounded
- * window, then scan the full log (the process is expected to be killed by the
- * timeout — the verdict comes from the log, not the exit code). */
-function probeWebHost(dshHome, profile, cwd, timeoutSeconds) {
-  const port = 18080 + Math.floor(Math.random() * 1000)
-  const child = run('dsh', ['web', '--no-open', '--port', String(port)], {
-    timeoutSeconds: Math.min(timeoutSeconds, 90),
-    env: {
-      DSH_HOME: dshHome,
-      DEEPSEEK_BASE_URL: DEAD_MODEL_BASE_URL,
-      DEEPSEEK_API_KEY: 'sk-verify-local-0000000000000000000000000',
-      DSH_PERMISSION_MODE: 'danger-full-access',
-    },
-    cwd,
-  })
+/** Shape a finished probe child into {status, timedOut, logOverflow, log}.
+ * Only a spawnSync ETIMEDOUT counts as "alive through the window": a SIGKILL
+ * may equally be maxBuffer truncation (ENOBUFS) or an external/OOM kill, and
+ * must not be read as liveness. */
+function shapeProbe(child) {
   return {
     status: child.status,
-    timedOut: child.error?.code === 'ETIMEDOUT' || child.signal === 'SIGKILL',
+    timedOut: child.error?.code === 'ETIMEDOUT',
+    logOverflow: child.error?.code === 'ENOBUFS',
     log: `${child.stdout ?? ''}\n${child.stderr ?? ''}`,
   }
+}
+
+function probeHeadless(dshHome, profile, cwd, timeoutSeconds) {
+  return shapeProbe(
+    run('dsh', ['--profile', profile, 'ok'], { timeoutSeconds, env: probeEnv(dshHome), cwd }),
+  )
+}
+
+/** Web-plane plugins need the web host: headless profiles expose no webServer
+ * service, so the plugin would wait forever. Boot `dsh --profile <p> web` for
+ * a bounded window (hard cap 90s — a web host that needs longer to boot is
+ * not verifiable this way), then scan the full log (the process is expected
+ * to be killed by the timeout — the verdict comes from the log, not the exit
+ * code). The PROFILE must be passed: without it the default profile boots and
+ * the probe would verify a tree that never contained the plugin. */
+function probeWebHost(dshHome, profile, cwd, timeoutSeconds) {
+  const port = 18080 + Math.floor(Math.random() * 1000)
+  return shapeProbe(
+    run('dsh', ['--profile', profile, 'web', '--no-open', '--port', String(port)], {
+      timeoutSeconds: Math.min(timeoutSeconds, 90),
+      env: probeEnv(dshHome),
+      cwd,
+    }),
+  )
 }
 
 // --- Verification pipeline ---------------------------------------------------
@@ -246,16 +294,16 @@ export async function verifyRuntime(rawSpec, options = {}) {
   const result = { spec: rawSpec, status: 'inconclusive', verdict: '', attribution: null, stages, startedAt: new Date().toISOString() }
   const stage = (name, ok, durationMs, error = '') => stages.push({ stage: name, ok, durationMs, error })
 
-  const missing = ['dsh', ...(classifySpec(rawSpec) === 'git-url' ? ['git'] : []), ...(classifySpec(rawSpec) === 'npm-name' ? ['npm'] : [])].filter(toolMissing)
-  if (missing.length > 0) {
-    result.verdict = `missing-tools:${missing.join(',')}`
-    return result
-  }
-
   const route = classifySpec(rawSpec)
   if (route === 'unknown') {
     result.status = 'skipped'
     result.verdict = `unrecognized-spec:${rawSpec}`
+    return result
+  }
+
+  const missing = ['dsh', ...(route === 'git-url' ? ['git'] : []), ...(route === 'npm-name' ? ['npm'] : [])].filter(toolMissing)
+  if (missing.length > 0) {
+    result.verdict = `missing-tools:${missing.join(',')}`
     return result
   }
 
@@ -300,12 +348,18 @@ export async function verifyRuntime(rawSpec, options = {}) {
       return result
     }
 
-    // ---- L2: listed ----------------------------------------------------
+    // ---- L2: listed (key computed from the ORIGINAL spec — the temp copy
+    // is always named plugin-src and would collide across runs) ------------
     t0 = Date.now()
     const list = run('dsh', ['plugin', '--profile', profile, 'list'], { timeoutSeconds: 60, env: dshEnv, cwd: home })
     const l2Ms = Date.now() - t0
     const l2Log = `${list.stdout ?? ''}\n${list.stderr ?? ''}`
-    const listed = list.status === 0 && list.stdout.includes(listKeyFor(spec, route))
+    // npm-installed web plugins declare their plane in the installed copy —
+    // read it now that node_modules exists (directory route already probed).
+    if (route === 'npm-name' && !webPlugin) {
+      webPlugin = isWebPlugin(join(dshHome, 'profiles', profile, 'node_modules', spec))
+    }
+    const listed = list.status === 0 && list.stdout.includes(listKeyFor(spec, route, rawSpec))
     stage('l2-listed', listed, l2Ms, listed ? '' : tail(l2Log))
     if (!listed) {
       result.status = 'fail'
@@ -315,84 +369,106 @@ export async function verifyRuntime(rawSpec, options = {}) {
       return result
     }
 
-    // ---- L3: deterministic boot probe ----------------------------------
+    // ---- L3: boot probe — decide the verdict FIRST, then record the stage,
+    // so the human output never labels a skip as FAIL --------------------------
     t0 = Date.now()
     const boot = webPlugin ? probeWebHost(dshHome, profile, home, timeoutSeconds) : probeHeadless(dshHome, profile, home, timeoutSeconds)
     const l3Ms = Date.now() - t0
     // Diagnose against the FULL log: scanning only a short tail once let long
     // activation stack traces push the error headline out of the window.
     const diagnosis = diagnoseBootLog(boot.log)
-    const l3Pass = diagnosis?.verdict === 'pass-boot-probe' || (!diagnosis && (boot.timedOut || boot.status === 0))
-    stage('l3-boot-probe', l3Pass, l3Ms, l3Pass ? '' : tail(boot.log))
 
+    let outcome
     if (diagnosis?.verdict === 'pass-boot-probe') {
-      result.status = 'pass'
-      result.verdict = 'pass-boot-probe'
-      return result
-    }
-    if (diagnosis?.verdict === 'env-needs-service-host') {
-      result.status = 'skipped'
-      result.verdict = 'env-needs-service-host'
-      result.attribution = diagnosis.attribution
-      return result
-    }
-    if (diagnosis) {
-      result.status = 'fail'
-      result.verdict = diagnosis.verdict
-      result.attribution = diagnosis.attribution
-      result.evidence = tail(boot.log)
-      return result
-    }
-    if (!boot.timedOut && boot.status === 0) {
-      result.status = 'pass'
-      result.verdict = 'pass-exit-0'
-      return result
-    }
-    if (boot.timedOut) {
-      // A timeout WITHOUT any failure signature means the host booted, the
-      // activation assertion passed (broken plugins fail it loudly in ~1s —
-      // see diagnoseBootLog) and the session stayed alive until the probe
+      outcome = { status: 'pass', verdict: 'pass-boot-probe' }
+    } else if (diagnosis?.verdict === 'env-needs-service-host') {
+      outcome = { status: 'skipped', verdict: 'env-needs-service-host', attribution: diagnosis.attribution }
+    } else if (diagnosis && (diagnosis.verdict === 'service-wait-unresolved' || diagnosis.verdict === 'ambiguous-error-signature')) {
+      // Honest inconclusives: a non-webServer service wait or a mixed error
+      // signature cannot be attributed automatically — do NOT let these fall
+      // through to the liveness pass.
+      outcome = { status: 'inconclusive', verdict: diagnosis.verdict, attribution: null }
+    } else if (diagnosis) {
+      outcome = { status: 'fail', verdict: diagnosis.verdict, attribution: diagnosis.attribution }
+    } else if (boot.logOverflow) {
+      // Output exceeded maxBuffer: the head of the log survived and the tail
+      // (where signatures live) was truncated — nothing can be concluded, and
+      // it must never be read as liveness.
+      outcome = { status: 'inconclusive', verdict: 'log-overflow' }
+    } else if (!boot.timedOut && boot.status === 0) {
+      outcome = { status: 'pass', verdict: 'pass-exit-0' }
+    } else if (boot.timedOut) {
+      // A spawnSync ETIMEDOUT without any failure signature: the host booted,
+      // the activation assertion passed (broken plugins fail it loudly in ~1s
+      // — see diagnoseBootLog) and the session stayed alive until the probe
       // window closed. On 0.1.2 the agent retries a dead model endpoint
       // silently instead of printing TRANSPORT (error-stream contract
       // change), so liveness-through-the-window IS the pass signal.
-      result.status = 'pass'
-      result.verdict = 'pass-timeout-alive'
-      result.evidence = tail(boot.log)
-      return result
+      outcome = { status: 'pass', verdict: 'pass-timeout-alive' }
+    } else {
+      outcome = { status: 'inconclusive', verdict: 'boot-probe-no-signature' }
     }
-    result.status = 'inconclusive'
-    result.verdict = 'boot-probe-no-signature'
-    result.evidence = tail(boot.log)
+
+    const l3Ok = outcome.status === 'pass' || outcome.status === 'skipped'
+    stage('l3-boot-probe', l3Ok, l3Ms, l3Ok ? '' : tail(boot.log))
+    Object.assign(result, outcome)
+    if (outcome.status !== 'pass') result.evidence = tail(boot.log)
     return result
   } finally {
     if (keep) result.workspace = home
-    else rmSync(home, { recursive: true, force: true })
+    else {
+      try {
+        rmSync(home, { recursive: true, force: true })
+      } catch {
+        /* cleanup must never mask the verdict with an exception */
+      }
+    }
   }
 }
 
 // --- CLI ---------------------------------------------------------------------
 
+const PROFILE_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9._-]*$/ // no separators, no ".."
+
+function optionValue(argv, i, name) {
+  const value = argv[i + 1]
+  if (value === undefined || value.startsWith('--')) {
+    throw new Error(`missing value for ${name}`)
+  }
+  return value
+}
+
 function parseArgs(argv) {
   const options = { positional: [] }
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i]
-    if (arg === '--profile') options.profile = argv[++i]
-    else if (arg === '--timeout') options.timeoutSeconds = Number(argv[++i])
+    if (arg === '--profile') options.profile = optionValue(argv, i++, '--profile')
+    else if (arg === '--timeout') options.timeoutSeconds = Number(optionValue(argv, i++, '--timeout'))
     else if (arg === '--json') options.json = true
     else if (arg === '--keep-workspace') options.keepWorkspace = true
     else if (arg === '-h' || arg === '--help') options.help = true
+    else if (arg.startsWith('--')) throw new Error(`unknown option: ${arg}`)
     else options.positional.push(arg)
   }
+  if (options.timeoutSeconds !== undefined && (!Number.isFinite(options.timeoutSeconds) || options.timeoutSeconds <= 0)) {
+    throw new Error(`invalid value for --timeout: ${argv.includes('--timeout') ? 'must be a positive number of seconds' : options.timeoutSeconds}`)
+  }
+  if (options.profile !== undefined && !PROFILE_NAME_RE.test(options.profile)) {
+    throw new Error(`invalid value for --profile: ${options.profile} (letters, digits, dots, dashes, underscores only)`)
+  }
+  if (options.positional.length > 1) throw new Error(`unexpected extra argument: ${options.positional[1]}`)
   return options
 }
 
 function renderHuman(result) {
   const lines = [`verify-runtime: ${result.spec}`]
   for (const s of result.stages) {
-    lines.push(`  ${s.ok ? 'PASS' : 'FAIL'}  ${s.stage}  ${(s.durationMs / 1000).toFixed(1)}s${s.error ? `  ${s.error.slice(0, 200)}` : ''}`)
+    // Keep the TAIL of error strings: the newest, most relevant lines are at
+    // the end (slice from the front once showed stale mid-log content).
+    lines.push(`  ${s.ok ? 'PASS' : 'FAIL'}  ${s.stage}  ${(s.durationMs / 1000).toFixed(1)}s${s.error ? `  ${s.error.slice(-200)}` : ''}`)
   }
   lines.push(`verdict: ${result.verdict}  status: ${result.status}${result.attribution ? `  attribution: ${result.attribution}` : ''}`)
-  if (result.evidence) lines.push(`evidence: ${result.evidence.slice(0, 300)}`)
+  if (result.evidence) lines.push(`evidence: ${result.evidence.slice(-300)}`)
   if (result.workspace) lines.push(`workspace kept: ${result.workspace}`)
   return lines.join('\n')
 }
@@ -406,7 +482,14 @@ const isMain = (() => {
 })()
 
 if (isMain) {
-  const options = parseArgs(process.argv.slice(2))
+  let options
+  try {
+    options = parseArgs(process.argv.slice(2))
+  } catch (err) {
+    console.error(`verify-runtime: ${err.message}\n`)
+    console.error(USAGE)
+    process.exit(2) // usage errors are inconclusive, never conflated with FAIL
+  }
   if (options.help) {
     console.log(USAGE)
     process.exit(0)
@@ -415,9 +498,17 @@ if (isMain) {
     console.error(USAGE)
     process.exit(2)
   }
-  verifyRuntime(options.positional[0], options).then((result) => {
-    if (options.json) console.log(JSON.stringify(result, null, 2))
-    else console.log(renderHuman(result))
-    process.exit(EXIT_CODES[result.status] ?? 2)
-  })
+  verifyRuntime(options.positional[0], options)
+    .then((result) => {
+      if (options.json) console.log(JSON.stringify(result, null, 2))
+      else console.log(renderHuman(result))
+      process.exit(EXIT_CODES[result.status] ?? 2)
+    })
+    .catch((err) => {
+      // Internal errors must surface as structured inconclusive (exit 2), not
+      // as an unhandled rejection that CI would misread as FAIL (exit 1).
+      if (options.json) console.log(JSON.stringify({ spec: options.positional[0], status: 'inconclusive', verdict: 'internal-error', error: String(err?.message ?? err) }, null, 2))
+      else console.error(`verify-runtime: internal error: ${err?.message ?? err}`)
+      process.exit(2)
+    })
 }
