@@ -2,7 +2,7 @@
 
 通过实现 `LlmAdapter` 并在 `ctx.llm` 上注册，连接新的模型供应商。如果目标版本包含 `packages/llm/llm-deepseek` 和 `packages/llm/llm-pi-ai`，可将它们作为参考实现。
 
-> 目标版本守卫：本文档是形态参考，不是版本迁移权威。必须根据精确的目标 Harness 检出版本验证适配器接口、流式语汇、请求字段、源码路径和供应商钩子。升级时，以 `plugin-upgrade` 的版本卡片和实际观测到的目标行为为准。
+> 目标版本守卫：本文档是形态参考，不是版本迁移权威。必须根据精确的目标 Harness 检出版本验证适配器接口、流式语汇、请求字段、源码路径和供应商钩子。升级时，先按 [`version-adaptation.md`](version-adaptation.md) 建立迁移账本，再以实际观测到的目标行为为准。
 
 ## 形态
 

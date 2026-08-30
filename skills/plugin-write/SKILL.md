@@ -1,6 +1,6 @@
 ---
 name: plugin-write
-description: 当需要创建 DeepSeek Harness 插件、外部 DSH 插件包，或 deepseek-harness 仓库内的工作区包时使用，覆盖从形态选择到验证的全流程。将工具、LLM 适配器、钩子、服务和配置等形态路由到对应参考文件，并区分上游单仓规则与外部包规则。对跨 Harness 版本的现有插件，先运行 plugin-upgrade，再按精确的目标合约实施。
+description: 当需要创建 DeepSeek Harness 插件、外部 DSH 插件包，或 deepseek-harness 仓库内的工作区包时使用，覆盖从形态选择到验证的全流程。将工具、LLM 适配器、钩子、服务和配置等形态路由到对应参考文件，并区分上游单仓规则与外部包规则。对跨 Harness 版本的现有插件，使用本 Skill 内置的版本适配流程，再按精确的目标合约实施。
 ---
 
 # 编写 DeepSeek Harness 插件
@@ -13,7 +13,7 @@ description: 当需要创建 DeepSeek Harness 插件、外部 DSH 插件包，�
 |---|---|
 | 官方 `deepseek-harness` 单仓内的包 | 使用下文的仓内包、tsconfig、文档和根门槛规则。 |
 | 外部可安装 DSH 插件 | 保留该仓库的包布局和脚本。只使用精确目标 DSH 版本公开的包和导出；不要复制 `private`、workspace 版本、根 tsconfig 注册或单仓专用 README 门槛。 |
-| 适配新 DSH 宿主的现有插件 | 阅读 `../plugin-upgrade/SKILL.md`，确定完整版本走廊，并执行六类触点的预检（pre-flight）。如果适用卡片的类型为 `breaking`，按 `plugin-upgrade` 要求停下并等待用户确认；确认后先应用相关卡片，再使用本 Skill 的形态参考。形态示例绝不能覆盖目标源码、类型声明、发行说明或迁移卡片。 |
+| 适配新 DSH 宿主的现有插件 | 阅读 [`references/version-adaptation.md`](references/version-adaptation.md)，确定完整版本走廊，并执行七类触点预检。如果变更类型为 `breaking`，而用户尚未明确授权实施，先展示迁移计划并等待确认；获得授权后先完成版本适配，再使用本 Skill 的形态参考。形态示例绝不能覆盖目标源码、类型声明或发行说明。 |
 
 从精确目标版本的清单（manifest）中确定 Cordis、Schemastery 和 DSH 的包名与版本范围。当前示例使用带作用域的 `@deepseek-ai/*` 标识；旧版目标可能不同，必须遵循其自身的发布合约。
 
@@ -110,6 +110,8 @@ pnpm run constraints && pnpm run typecheck && pnpm run lint
 pnpm run build && pnpm run hygiene
 ```
 
-对外部插件，使用其自身的安装、类型检查、测试、静态检查和构建命令；打包可发布产物，检查内容，并将该产物加载到运行精确目标 DSH 的隔离 Profile 中。当任务是升级时，完成 `plugin-upgrade` 要求的冷启动和完整轮次验证，并报告所有无法覆盖的供应商、操作系统、UI 或凭据边界。
+对外部插件，使用其自身的安装、类型检查、测试、静态检查和构建命令；打包可发布产物，检查内容，并将该产物加载到运行精确目标 DSH 的隔离 Profile 中。当任务是升级时，完成冷启动和一次完整的消息→工具→回复或等价核心流程，并报告所有无法覆盖的供应商、操作系统、UI 或凭据边界。
 
-根据变更触面选择测试：逻辑使用单元测试；执行所属仓库的覆盖率门槛；当供应商密钥已可用且在授权范围内时，执行真实 API 端到端测试；对模型、协议或用户可见行为使用无密钥快照；对用户可见插件使用真实组合测试。包的 `bin` 入口还需要在原生 Node 下运行的构建产物烟雾测试。完整的测试决策流程见 `plugin-test`。
+根据变更触面选择测试：逻辑使用单元测试；执行所属仓库的覆盖率门槛；当供应商密钥已可用且在授权范围内时，执行真实 API 端到端测试；对模型、协议或用户可见行为使用无密钥快照；对用户可见插件使用真实组合测试。包的 `bin` 入口还需要在原生 Node 下运行的构建产物烟雾测试。按上述规则完成最小充分测试集合，不要为此加载其他 Skill。
+
+参考文件入口见 [`references/README.md`](references/README.md)。
