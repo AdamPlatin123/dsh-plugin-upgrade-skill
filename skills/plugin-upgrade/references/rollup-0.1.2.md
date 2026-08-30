@@ -145,10 +145,56 @@ try {
 - **验证**: 盘点清单与实际迁移结果一致，无中途新增退役项。
 - **来源**: [#5120](https://github.com/deepseek-ai/deepseek-harness/discussions/5120) 第 10 条。
 
+### R-06 · 迁移前 baseline 归因——先立豁免清单，再动迁移
+
+- **类型**: process
+- **症状**: 插件仓库在迁移前就存在失败（旧 cohort 上测试/typecheck 已挂）。迁移后跑
+  机械套件一片红，无法区分「迁移引入」与「本来就有」：顺手把预存失败修掉，会污染
+  迁移 diff、掩盖真实回归；不修不报，则会把预存失败误报为迁移破坏。两个方向都真实
+  发生过：干净树 + 红套件被当回归上报；脏树 + 绿门禁掩盖运行时断链（本文件分层验证
+  清单针对后者，本条针对前者）。
+- **配方**:
+  1. 迁移动手前，在仓库**自身**依赖状态（不 pin 目标 cohort、不设目标 env 变量）跑
+     一次机械套件（build / typecheck / tests），记录失败清单与**错误行集合**——此即
+     baseline。baseline 报告应带时间戳、生成于迁移首次提交之前。
+  2. baseline 失败进入**不修豁免清单**：迁移过程绝不顺手修复预存失败——那是另一个
+     PR 的事。
+  3. 迁移后对比错误行集合：只有相对 baseline **新增**的错误行计入迁移失败。
+  4. 修复循环（若进入）：每轮输入 = 差异报告 + 新增错误行（不是全量日志）+ 历史修复
+     报告 + baseline 豁免清单；最小变更，新增错误行清零即停——预存失败按定义出局。
+  5. 最终报告分栏：**pre-existing**（出自 baseline，未触碰）/ **migration-introduced**
+     （逐表面列出）/ **残留宿主 patch**（附上游沟通链接，见卡片「来源」规范）/
+     运行时清单结果。
+- **验证**: baseline 报告时间戳早于迁移首次提交；终局 diff 不含对 baseline 失败文件
+  的顺手修复；报告能对每条失败回答「迁移前是否已存在」。
+- **来源**: [dsh-migrate-bot](https://github.com/royenheart/dsh-migrate-bot) 无人值守
+  管线的 pre-migration baseline 阶段（机械 pin → A/B 审查 → 修复循环 → 补丁报告，
+  baseline 阶段专管失败归因）。[#5120](https://github.com/deepseek-ai/deepseek-harness/discussions/5120)
+  未覆盖此做法；互补关系：#5120 证明「静态门禁全绿 ≠ 运行时绿」，本条解决另一半
+  ——「静态红 ≠ 迁移的错」。
+
+### R-07 · 启动服务竞态：有界重试，不延迟、不加 inject wait
+
+- **类型**: behavior
+- **症状**: 插件启动即轮询依赖服务，与宿主服务就绪窗口竞态；冷启动出现
+  `service-unavailable` 循环。分层验证清单第 4 层要求观察此症状，但未给处置配方——
+  本条补齐。
+- **配方**: 对 `code: 'service-unavailable'` 做**有界重试**：约 5 次、2 秒退避，重试
+  参数可注入覆盖（便于测试）。两条否决项：
+  - 不要盲目延迟首次轮询——那是掩盖竞态，不是解决；
+  - 不要把服务加回 inject wait——旧 cohort 上入口永久 `pending`（见 R-02）。
+- **验证**: 冷启动日志无 `service-unavailable` 循环；注入的重试策略在测试中生效。
+- **来源**: [#5120](https://github.com/deepseek-ai/deepseek-harness/discussions/5120)
+  第 6 条（dsh-web 迁移记录，boot race 处置）及决策笔记
+  [2026-08-28-task-board-roster-poll-boot-race.md](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.1.2-alpha.2/.agents/notes/implemented/architecture/2026-08-28-task-board-roster-poll-boot-race.md)。
+  配方出自原帖作者 zhu1090093659，此处仅按 rollup 格式收录并致谢。
+
 ## 分层验证清单
 
 按顺序跑，前一层不过不进下一层：
 
+0. **baseline（迁移动手前）**: 在仓库自身依赖状态跑机械套件，记录错误行集合与豁免
+   清单（见 R-06）。此后每一层的失败判定都以「相对 baseline 新增」为准。
 1. **依赖解析**: `pnpm list --depth 0 | grep @deepseek-ai` 版本一致；lockfile 无混合 cohort。
 2. **静态**: typecheck + build。注意静态全绿证明不了 wire 契约正确——描述符层的参数漂移在这一层是静默的（[ALPHA1-01](v0.1.2-alpha.1.md)）。
 3. **卡片级单测**: 每个命中触点至少一条断言。Remote 调用点覆盖 `ok: false` 的已知业务码、未知码兜底，以及 gateway 层 catch 分支；测试替身编码同一套描述符表，多/缺 key 就 fail，让漂移变成测试失败事件。
