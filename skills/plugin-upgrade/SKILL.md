@@ -62,6 +62,7 @@ description: 升级 DSH（DeepSeek Harness）插件的 skill。当用户想检�
 - 上游生态：[oh-my-dsh](https://github.com/LaplaceYoung/oh-my-dsh) —— DSH 的能力插件库
 - DSH 插件约定：ESM 包，经 `cordis.yml` 挂载，遵循 interface / implementation / consumer 三段式接缝
 - 插件规范：[dsh-community-standard](https://github.com/oh-my-dsh/dsh-community-standard) —— manifest / 契约坐标 / 协商；本 skill 的触点分类与其迁移指南对齐，引用其概念、不重复定义
+- 官方征集与出处：[deepseek-ai/deepseek-harness discussions/5120](https://github.com/deepseek-ai/deepseek-harness/discussions/5120) —— 0.1.1 → 0.1.2 定点升级 skill 的征集帖
 
 ## references/
 

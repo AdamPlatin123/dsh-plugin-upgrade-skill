@@ -2,7 +2,7 @@
 
 DSH 插件生态的 **skill 合集仓库**，社区共建。
 
-[DSH（DeepSeek Harness）](https://github.com/LaplaceYoung/oh-my-dsh) 是"一切皆插件"的 agent harness。本仓库收集与 DSH 插件相关的各种 agent skill——升级、审计、迁移、开发脚手架……欢迎贡献。
+[DSH（DeepSeek Harness）](https://github.com/LaplaceYoung/oh-my-dsh) 是"一切皆插件"的 agent harness。本仓库收集与 DSH 插件相关的各种 agent skill——升级、审计、迁移、开发脚手架……欢迎贡献。官方也在 [deepseek-ai/deepseek-harness discussions/5120](https://github.com/deepseek-ai/deepseek-harness/discussions/5120) 征集定点升级类 skill（如 0.1.1 → 0.1.2）。
 
 ## 目录结构
 
