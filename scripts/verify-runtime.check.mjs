@@ -124,6 +124,12 @@ try {
   mkdirSync(emptyDir)
   assert.equal(detectPluginStructure(emptyDir), null)
   assert.equal(detectPluginStructure(join(root, 'no-such-dir')), null)
+
+  // A bare directory name with no slash must also resolve as a directory
+  // (fleet-caught: "demo-old" was once mistaken for an npm name and 404'd).
+  const bareDir = join(root, 'demo-old')
+  mkdirSync(bareDir)
+  assert.equal(classifySpec(bareDir), 'directory')
 } finally {
   rmSync(root, { recursive: true, force: true })
 }
