@@ -1,0 +1,27 @@
+{
+  "name": "dsh-plugin-upgrade-skill",
+  "version": "0.2.0",
+  "description": "DeepSeek Harness plugin upgrade assistant with migration guides and examples from community practice",
+  "author": {
+    "name": "oh-my-dsh contributors",
+    "url": "https://github.com/oh-my-dsh"
+  },
+  "homepage": "https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill",
+  "repository": "https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill",
+  "license": "MIT",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "DSH Plugin Upgrade",
+    "shortDescription": "DeepSeek Harness plugin migration assistant with breaking change guides",
+    "longDescription": "Upgrade DeepSeek Harness plugins safely with version-specific migration guides, code examples, and real-world patterns from community contributions. Covers breaking changes, common pitfalls, and verification strategies.",
+    "developerName": "oh-my-dsh",
+    "category": "Productivity",
+    "capabilities": [
+      "Read"
+    ],
+    "defaultPrompt": [
+      "Help me upgrade my DSH plugin to version X",
+      "What breaking changes exist between DSH 0.1.1 and 0.1.2?"
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "dsh-plugin-upgrade-skill",
+  "description": "DeepSeek Harness plugin upgrade assistant with version-agnostic migration guides and community-driven examples",
+  "owner": {
+    "name": "oh-my-dsh",
+    "url": "https://github.com/oh-my-dsh"
+  },
+  "plugins": [
+    {
+      "name": "dsh-plugin-upgrade-skill",
+      "version": "0.2.0",
+      "source": {
+        "source": "github",
+        "repo": "oh-my-dsh/dsh-plugin-upgrade-skill"
+      },
+      "description": "Safely upgrade DeepSeek Harness plugins with breaking change guides, migration recipes, and real-world examples from community practice",
+      "homepage": "https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill",
+      "license": "MIT",
+      "keywords": ["deepseek-harness", "dsh", "plugin", "migration", "upgrade", "breaking-changes"]
+    }
+  ]
+}
