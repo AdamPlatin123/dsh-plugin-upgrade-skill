@@ -1,11 +1,12 @@
 # Rollup · 0.1.1 → 0.1.2 走廊
 
 > **状态**: 基于 `dsh-v0.1.2-alpha.2`。**0.1.2 正式版尚未发布**——npm dist-tags 实测 `latest`/`next` = `0.1.1-rc.2`，`alpha` = `0.1.2-alpha.2`。正式发版后本文件需按 final tag 复核转正（[issue #1](https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill/issues/1) 的原始 caveat）。
-> **定位**: 本文件不重复版本卡片。逐条变更以卡片为准，这里只写走廊层的增量——跨 cohort 共存、未发布 cohort 安装、CI/发布连带、分层验证清单。
+> **定位**: 本文件不重复版本卡片。逐条变更以卡片为准，这里只写走廊层的增量——跨 cohort 共存、未发布 cohort 安装、CI/发布连带、迁移前盘点与 baseline 归因、boot race 处置、分层验证清单。
 > 卡片格式见 [README.md](README.md)。触点编号对应 [pre-flight 清单](pre-flight.md)。
 
 ## 怎么用这份 rollup
 
+0. 迁移动手前，先按 R-06 采集 baseline（即分层验证清单第 0 层）；
 1. 先按 [pre-flight.md](pre-flight.md) 测出命中的触点类；
 2. 按序读卡片，只应用命中触点的条目：[v0.1.2-alpha.1.md](v0.1.2-alpha.1.md)（12 张）→ [v0.1.2-alpha.2.md](v0.1.2-alpha.2.md)（4 张）；
 3. 回到本文件处理走廊层问题——这些跨越单版本，卡片里没有；
@@ -163,26 +164,26 @@ try {
   4. 修复循环（若进入）：每轮输入 = 差异报告 + 新增错误行（不是全量日志）+ 历史修复
      报告 + baseline 豁免清单；最小变更，新增错误行清零即停——预存失败按定义出局。
   5. 最终报告分栏：**pre-existing**（出自 baseline，未触碰）/ **migration-introduced**
-     （逐表面列出）/ **残留宿主 patch**（附上游沟通链接，见卡片「来源」规范）/
-     运行时清单结果。
+     （逐表面列出）/ **残留宿主 patch**（附上游 issue/PR 链接，来源格式同
+     [README.md](README.md) 卡片规范）/ 运行时清单结果。
 - **验证**: baseline 报告时间戳早于迁移首次提交；终局 diff 不含对 baseline 失败文件
   的顺手修复；报告能对每条失败回答「迁移前是否已存在」。
-- **来源**: [dsh-migrate-bot](https://github.com/royenheart/dsh-migrate-bot) 无人值守
-  管线的 pre-migration baseline 阶段（机械 pin → A/B 审查 → 修复循环 → 补丁报告，
-  baseline 阶段专管失败归因）。[#5120](https://github.com/deepseek-ai/deepseek-harness/discussions/5120)
+- **来源**: dsh-migrate-bot 无人值守管线的 pre-migration baseline 阶段（机械 pin →
+  A/B 审查 → 修复循环 → 补丁报告之上的本地扩展，专管失败归因；撰写时该阶段尚未
+  公开推送，公开后请复核此说明——见文末「待确认」）。[#5120](https://github.com/deepseek-ai/deepseek-harness/discussions/5120)
   未覆盖此做法；互补关系：#5120 证明「静态门禁全绿 ≠ 运行时绿」，本条解决另一半
   ——「静态红 ≠ 迁移的错」。
 
 ### R-07 · 启动服务竞态：有界重试，不延迟、不加 inject wait
 
-- **类型**: behavior
+- **类型**: process
 - **症状**: 插件启动即轮询依赖服务，与宿主服务就绪窗口竞态；冷启动出现
   `service-unavailable` 循环。分层验证清单第 4 层要求观察此症状，但未给处置配方——
   本条补齐。
 - **配方**: 对 `code: 'service-unavailable'` 做**有界重试**：约 5 次、2 秒退避，重试
-  参数可注入覆盖（便于测试）。两条否决项：
-  - 不要盲目延迟首次轮询——那是掩盖竞态，不是解决；
-  - 不要把服务加回 inject wait——旧 cohort 上入口永久 `pending`（见 R-02）。
+  参数可注入覆盖（便于测试）。
+- **被否决的替代**: 盲目延迟首次轮询（掩盖竞态而非解决）；把服务加回 inject wait
+  （旧 cohort 上入口永久 `pending`，见 R-02）。
 - **验证**: 冷启动日志无 `service-unavailable` 循环；注入的重试策略在测试中生效。
 - **来源**: [#5120](https://github.com/deepseek-ai/deepseek-harness/discussions/5120)
   第 6 条（dsh-web 迁移记录，boot race 处置）及决策笔记
@@ -191,7 +192,7 @@ try {
 
 ## 分层验证清单
 
-按顺序跑，前一层不过不进下一层：
+按顺序跑（第 0 层仅采集基线，不设通过门槛）；此后前一层不过不进下一层：
 
 0. **baseline（迁移动手前）**: 在仓库自身依赖状态跑机械套件，记录错误行集合与豁免
    清单（见 R-06）。此后每一层的失败判定都以「相对 baseline 新增」为准。
@@ -212,4 +213,5 @@ try {
 ## 待确认
 
 - 0.1.2 正式版的 dist-tag、final tag 名与 alpha.2 的差异，需在发版后复核本文件全部条目；
-- R-01/R-02 的 pnpm 版本敏感性来自单一实战报告，未在其他仓库复现验证。
+- R-01/R-02 的 pnpm 版本敏感性与 R-07 的重试参数（约 5 次 / 2 秒退避）均来自单一实战报告，未在其他仓库复现验证；
+- R-06 的 baseline 阶段实现尚未公开推送，公开后复核其来源说明。
