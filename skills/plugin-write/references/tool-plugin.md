@@ -2,7 +2,7 @@
 
 工具是注册在 `ctx.tools` 上的模型可调用能力。在提供该合约的目标版本中，其 Schema 会自动加入系统提示词组装。如果目标版本包含 `packages/bash/tool-bash`，可将它作为参考实现。
 
-> 目标版本守卫：本文档是形态参考，不是版本迁移权威。必须根据精确的目标 Harness 检出版本验证工具注册表、Schema、事件、渲染器和代码模式（Code Mode）桥接。升级时，以 `plugin-upgrade` 的版本卡片和实际观测到的目标行为为准。
+> 目标版本守卫：本文档是形态参考，不是版本迁移权威。必须根据精确的目标 Harness 检出版本验证工具注册表、Schema、事件、渲染器和代码模式（Code Mode）桥接。升级时，先按 [`version-adaptation.md`](version-adaptation.md) 建立迁移账本，再以实际观测到的目标行为为准。
 
 ## 形态
 

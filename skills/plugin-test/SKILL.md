@@ -1,19 +1,19 @@
 ---
 name: plugin-test
-description: 当需要为 DeepSeek Harness 插件、外部 DSH 插件包或 deepseek-harness 仓库内的包变更编写或审查测试时使用。在单元测试、覆盖率、真实 API 端到端测试、快照、Web、真实组合和构建产物烟雾测试中选择最小充分层级。对 Harness 版本迁移，使用 plugin-upgrade 的触点与版本卡片计划，并验证精确的目标版本运行时。
+description: 当需要为 DeepSeek Harness 插件、外部 DSH 插件包或 deepseek-harness 仓库内的包变更编写或审查测试时使用。在单元测试、覆盖率、真实 API 端到端测试、快照、Web、真实组合和构建产物烟雾测试中选择最小充分层级。对 Harness 版本迁移，使用本 Skill 内置的七类触点测试流程，并验证精确的目标版本运行时。
 ---
 
 # 测试 DeepSeek Harness 插件
 
 选择能够证明变更正确的最小测试层级集合；不要默认运行全量测试，也不要重复已通过的检查。
 
-## 与 plugin-upgrade 协同
+## 测试 Harness 版本迁移
 
 当任务是将现有插件适配到新的 DSH 宿主版本时：
 
-1. 阅读 `../plugin-upgrade/SKILL.md`，锁定完整的起止版本走廊，并在选择测试前执行六类触点的预检（pre-flight）。
-2. 为每张适用的 `breaking` 或 `behavior` 卡片添加针对性回归测试。卡片级测试只证明对应的迁移映射，不代表整个插件已通过验证。
-3. 最后按 `plugin-upgrade` 要求，在真实产品入口上完成精确目标版本的冷启动和完整用户轮次。类型检查、配置解析、Loader 烟雾测试和模拟 Context 都不能替代这项运行时证明。
+1. 阅读 [`references/version-migration-testing.md`](references/version-migration-testing.md)，用精确的 from/to 版本建立迁移账本，并扫描七类触点。
+2. 为每条适用的 `breaking` 或 `behavior` 变更添加针对性回归测试。变更级测试只证明对应的迁移映射，不代表整个插件已通过验证。
+3. 在真实产品入口上完成精确目标版本的冷启动和完整用户轮次。类型检查、配置解析、Loader 烟雾测试和模拟 Context 都不能替代这项运行时证明。
 4. 如实报告无法获取的密钥、供应商、操作系统、浏览器、PTY 和破坏性迁移边界，不要声称已实现全面兼容。
 
 下文命令和仓库路径使用官方 Harness 单仓的测试层级名称。对外部插件，使用所属仓库中等价的脚本和路径；不要添加不存在的 Harness 根命令，也不要强加其单仓布局。
@@ -61,4 +61,6 @@ description: 当需要为 DeepSeek Harness 插件、外部 DSH 插件包或 deep
 
 ## 命令
 
-在 Harness 单仓中，使用目标检出版本实际提供的命令，例如 `pnpm run test`、`test:coverage`、`test:e2e`、`test:snapshot` 和 `test:web`；先确认脚本存在，不要假设历史命令列表仍然有效。在外部插件中，使用其自身脚本，打包产物，安装到隔离的精确目标版本 Profile 中，并执行 `plugin-upgrade` 要求的产品入口烟雾测试。对覆盖变更触面的最小测试集合只运行一次；CI 只负责其实际定义的门槛。
+在 Harness 单仓中，使用目标检出版本实际提供的命令，例如 `pnpm run test`、`test:coverage`、`test:e2e`、`test:snapshot` 和 `test:web`；先确认脚本存在，不要假设历史命令列表仍然有效。在外部插件中，使用其自身脚本，打包产物，安装到隔离的精确目标版本 Profile 中，并执行产品入口冷启动和核心路径烟雾测试。对覆盖变更触面的最小测试集合只运行一次；CI 只负责其实际定义的门槛。
+
+参考文件入口见 [`references/README.md`](references/README.md)。
