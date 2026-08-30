@@ -181,8 +181,8 @@ return result.value
   （旧 cohort 上入口永久 `pending`，见 R-02）。
 - **验证**: 冷启动日志无 `service-unavailable` 循环；注入的重试策略在测试中生效。
 - **来源**: [#5120](https://github.com/deepseek-ai/deepseek-harness/discussions/5120)
-  第 6 条（dsh-web 迁移记录，boot race 处置）及决策笔记
-  [2026-08-28-task-board-roster-poll-boot-race.md](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.1.2-alpha.2/.agents/notes/implemented/architecture/2026-08-28-task-board-roster-poll-boot-race.md)。
+  第 6 条（dsh-web 迁移记录，boot race 处置；帖内提及决策笔记
+  `2026-08-28-task-board-roster-poll-boot-race.md`，未在仓库中定位到公开副本，故不附直链）。
   配方出自原帖作者 zhu1090093659，此处仅按 rollup 格式收录并致谢。
 
 ## 分层验证清单
