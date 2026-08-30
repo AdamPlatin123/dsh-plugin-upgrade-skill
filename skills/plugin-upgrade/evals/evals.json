@@ -1,0 +1,23 @@
+{
+  "skill_name": "plugin-upgrade",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "以只读模式扫描 examples/legacy-plugin/ 这个夹具，输出七类触点体检表和命中的版本卡片。",
+      "expected_output": "七类触点（源码 patch、内部事件、服务/Remote、宿主目录、UI/命令、自建 HTTP 通道、子进程输出）全部命中；对应卡片映射到 A1-01/A1-02/A1-03/A1-04/A1-08（含 A2-01 回滚对）等；输出包含「未命中说明」与「必须验证」清单；全程不改文件。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "插件在 rc.2 上生产第三方 informational 持久事件（带 ignorable: true），现在要迁到 0.1.2-alpha.2。给出该触点的迁移步骤。",
+      "expected_output": "先读完整走廊折叠净状态：alpha.1 移除 ignorable、alpha.2 恢复（A1-02 → A2-01），因此不要“删了再加”；最终目标为 alpha.2 时保留/恢复 producer marker 并删除 alpha.1 时代的防御性删除；指出公开 Session.append 没有 ignorable 参数的能力缺口，不做 cast 假装已有公开入口；给出 reload/未知事件 fail-closed 的验证步骤。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "插件用 connection.rpc.handle('/x', handler, { authority: 'loopback' }) 注册自建通道，devDependencies 是 npm 0.1.1-rc.2，宿主将升到 0.1.2-alpha.2。怎么改？",
+      "expected_output": "识别签名漂移：alpha.1 起 handle() 移除第三参数且运行时忽略多余参数；由于 devDependencies 声明基线是 rc.2，采用双兼容写法保留第三参数（typecheck 对 rc.2 通过、alpha 运行时不变），并注明原因；同时提示自建通道必须经 connection 注册以获得统一认证（A1-08），不绕过 token；验证含真实冷启动与无认证 401。",
+      "files": []
+    }
+  ]
+}
