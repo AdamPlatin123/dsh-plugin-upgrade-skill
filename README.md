@@ -1,115 +1,159 @@
-# dsh-plugin-upgrade-skill
+# DSH Plugin Upgrade Skill
 
-DSH 插件生态的 **skill 合集仓库**，社区共建。
+**DeepSeek Harness 插件生态的 agent skill**，社区共建。提供版本无关的迁移指南、破坏性变更配方和真实迁移示例。
 
-[DSH（DeepSeek Harness）](https://github.com/LaplaceYoung/oh-my-dsh) 是"一切皆插件"的 agent harness。本仓库收集与 DSH 插件相关的各种 agent skill——升级、审计、迁移、开发脚手架……欢迎贡献。
+[DSH（DeepSeek Harness）](https://github.com/deepseek-ai/deepseek-harness) 是"一切皆插件"的 agent harness。本仓库提供 DSH 插件升级的 agent skill——从检查更新、阅读 changelog，到迁移配置、源码适配、验证结果。
 
 ## 特色
 
-- **持续更新**: 支持 DSH 所有版本的升级迁移指导
-- **社区共建**: 基于真实迁移实践，不断完善
-- **结构化数据**: 版本卡片 + 触点检查清单 + 典型示例
-- **即用即走**: 按需加载版本数据，不必一次读完整个文档
-
-## 目录结构
+- **持续更新** — 每个 DSH 版本对应一张独立的迁移卡片，按序应用即可跨版本升级
+- **社区共建** — 基于真实迁移实践（如 [dsh-web #5120](https://github.com/deepseek-ai/deepseek-harness/discussions/5120)），持续补充痛点与配方
+- **结构化数据** — 版本卡片格式统一，支持工具化（未来可自动生成迁移 diff）
+- **多 agent 支持** — 兼容 Claude Code、Codex、Gemini CLI、Cursor 等主流 AI 编程工具
 
 ## 快速开始
 
-### 1. 使用 skill（推荐）
+### 使用 skills CLI（推荐）
 
-如果你的 agent 支持 skills：
+最快路径——一条命令安装到 70+ 种 agent：
 
 ```bash
-# 使用 Vercel skills CLI
 npx skills add oh-my-dsh/dsh-plugin-upgrade-skill
-
-# 或直接在你的 agent 中引用
-# 例如在 Claude Code 中："/skill plugin-upgrade"
 ```
 
-### 2. 手动使用
+### Claude Code
 
-1. 浏览 [skills/plugin-upgrade/](skills/plugin-upgrade/) 目录
-2. 阅读 [SKILL.md](skills/plugin-upgrade/SKILL.md) 了解通用升级流程
-3. 根据你的版本区间查看 [references/](skills/plugin-upgrade/references/) 中的版本卡片
-4. 参考 [examples/](skills/plugin-upgrade/examples/) 中的典型示例
+**Marketplace 安装**：
 
-### 3. 升级流程示例
+```bash
+/plugin marketplace add oh-my-dsh/dsh-plugin-upgrade-skill
+/plugin install dsh-plugin-upgrade-skill
+```
 
-**场景**: 从 DSH 0.1.1 升级到 0.1.2
+> **SSH 错误？**如果没有配置 GitHub SSH 密钥，使用 HTTPS URL：
+> ```bash
+> /plugin marketplace add https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill.git
+> /plugin install dsh-plugin-upgrade-skill
+> ```
+> 或全局配置 Git 重写 SSH 为 HTTPS：
+> ```bash
+> git config --global url."https://github.com/".insteadOf git@github.com:
+> ```
 
-1. **检查触点**: 运行 [pre-flight 检查清单](skills/plugin-upgrade/references/pre-flight.md)
-   ```sh
-   rg -n "APIProxy|apiProxy" .
-   rg -n "dsh-client-runtime" .
-   # ... 其他检查
-   ```
+**本地/开发模式**：
 
-2. **加载版本卡片**: 阅读 [v0.1.2.md](skills/plugin-upgrade/references/v0.1.2.md)
-   - 8 个破坏性变更
-   - 4 个行为变更
-   - 4 个新能力
+```bash
+git clone https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill.git
+claude --plugin-dir /path/to/dsh-plugin-upgrade-skill
+```
 
-3. **执行迁移**: 按卡片中的迁移配方修改代码
-   - SDK 包迁移
-   - APIProxy → Gateway
-   - 错误处理更新
-   - ...
+### Codex
 
-4. **验证**: 运行测试和构建
-   ```sh
-   pnpm run build
-   pnpm run test
-   pnpm dsh --profile test
-   ```
+通过 marketplace 或本地目录安装：
 
-5. **参考示例**: 如遇问题，查看 [examples/](skills/plugin-upgrade/examples/)
-   - [简单客户端插件](skills/plugin-upgrade/examples/01-simple-client-plugin.md)
-   - [宿主侧插件](skills/plugin-upgrade/examples/02-host-side-plugin.md)
-   - ...
+```bash
+# Marketplace
+codex plugin add oh-my-dsh/dsh-plugin-upgrade-skill
+
+# 本地
+git clone https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill.git
+codex plugin add ./dsh-plugin-upgrade-skill
+```
+
+### Gemini CLI
+
+直接从仓库或本地克隆安装：
+
+```bash
+# 从仓库
+gemini skills install https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill.git --path skills
+
+# 本地
+git clone https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill.git
+gemini skills install ./dsh-plugin-upgrade-skill/skills/
+```
+
+### Cursor
+
+将 `skills/` 复制到 `.cursor/skills/`：
+
+```bash
+git clone https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill.git
+cp -r dsh-plugin-upgrade-skill/skills/* .cursor/skills/
+```
+
+## 使用
+
+### 斜杠命令（Claude / Gemini）
+
+安装后可使用 `/dsh-upgrade` 命令：
+
+```bash
+/dsh-upgrade 0.1.2
+```
+
+或直接在对话中提问：
+
+```
+我需要把插件从 0.1.1 升级到 0.1.2，有哪些破坏性变更？
+```
+
+### Skill 调用（任意 agent）
+
+对于没有斜杠命令的 agent，直接引用 skill：
+
+```
+使用 plugin-upgrade skill 帮我升级 DSH 插件到 0.1.2
+```
 
 ## Skill 索引
 
-| Skill | 版本覆盖 | 说明 |
+| Skill | 说明 | 版本覆盖 |
 | --- | --- | --- |
-| [plugin-upgrade](skills/plugin-upgrade/) | 0.1.1 → 0.1.2 | 升级 DSH 插件：盘点版本 → 评估 changelog → 迁移 cordis.yml → 执行升级 → 验证；含宿主版本迁移分支（触点自查 + 版本数据卡片 + 典型示例） |
-
-## 如何贡献
-
-我们欢迎社区贡献新版本的迁移数据！
-
-### 添加新版本迁移指南
-
-1. 查看 [CONTRIBUTING.md](CONTRIBUTING.md) 了解格式规范
-2. 在 [Issues](https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill/issues) 中认领版本
-3. 在 `skills/plugin-upgrade/references/` 下创建新版本卡片
-4. 提交 PR，格式：`feat: add DSH vX.Y.Z migration guide`
-
-### 添加新 skill
-
-1. 在 `skills/` 下新建文件夹，kebab-case 命名（如 `plugin-audit`）
-2. 按 [skills/README.md](skills/README.md) 的规范编写 `SKILL.md`
-3. 在 `skills/README.md` 的清单表格里登记你的 skill
-4. 提 PR
+| [plugin-upgrade](skills/plugin-upgrade/) | 升级 DSH 插件：盘点版本 → 评估 changelog → 迁移配置 → 源码适配 → 验证；含宿主版本迁移（触点自查 + 版本变更卡片） | 0.1.1 → 0.1.2 |
 
 ## 版本数据现状
 
-| DSH 版本 | 状态 | 卡片数 | 贡献者 |
+| 版本区间 | 状态 | 卡片文件 | 说明 |
 | --- | --- | --- | --- |
-| 0.1.1 → 0.1.2-alpha.1 | ✅ 完成 | 12 张 | [@ccch1mneyyy](https://github.com/ccch1mneyyy) |
-| 0.1.2-alpha.1 → 0.1.2-alpha.2 | ✅ 完成 | 4 张 | [@ccch1mneyyy](https://github.com/ccch1mneyyy) |
-| 0.1.1 → 0.1.2 整合指南 | ✅ 完成 | 8 BC + 实战经验 | 社区贡献 |
-| 0.1.2 正式版 | 🔄 待官方发布 tag | - | - |
-| 0.1.2 → 0.1.3 | 🔄 待认领 | - | - |
-
-[认领新版本跟踪 →](https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill/issues/new)
+| 0.1.1 → 0.1.2 alpha.1 | ✅ 完成 | [v0.1.2-alpha.1.md](skills/plugin-upgrade/references/v0.1.2-alpha.1.md) | Alpha 1 破坏性变更 |
+| 0.1.1 → 0.1.2 alpha.2 | ✅ 完成 | [v0.1.2-alpha.2.md](skills/plugin-upgrade/references/v0.1.2-alpha.2.md) | Alpha 2 增量变更 |
+| 0.1.1 → 0.1.2 走廊 | ✅ 完成（基于 alpha.2） | [v0.1.2.md](skills/plugin-upgrade/references/v0.1.2.md) | Rollup 层增量：跨 cohort 共存、未发布 cohort 安装、`RemoteResult` 错误流、分层验证 |
+| 0.1.1 → 0.1.2 | 🔄 待官方发布 tag | — | 0.1.2 正式版尚未发布（当前最新：alpha.2） |
+| 0.1.2 → 0.1.3+ | 📝 待认领 | — | 等待社区贡献（[贡献指南](CONTRIBUTING.md)） |
 
 ## 参考资源
 
-- [DSH 官方仓库](https://github.com/deepseek-ai/deepseek-harness)
-- [Oh My DSH 插件库](https://github.com/LaplaceYoung/oh-my-dsh)
-- [DSH 社区标准](https://github.com/oh-my-dsh/dsh-community-standard)
-- [GitHub Discussion #5120](https://github.com/deepseek-ai/deepseek-harness/discussions/5120) - 社区迁移实践
+- [官方仓库](https://github.com/deepseek-ai/deepseek-harness) — DSH 主仓库
+- [Discussion #5120](https://github.com/deepseek-ai/deepseek-harness/discussions/5120) — 社区迁移实践与痛点征集
+- [dsh-web 迁移实例](https://github.com/zhu1090093659/dsh-web) — @zhu1090093659 的完整迁移案例
+
+## 如何贡献
+
+### 贡献新版本卡片
+
+1. 在 `skills/plugin-upgrade/references/` 下按 [CONTRIBUTING.md](CONTRIBUTING.md) 格式创建版本卡片
+2. 更新 `skills/plugin-upgrade/references/README.md` 索引
+3. 提 PR，标题格式：`feat(plugin-upgrade): add vX.Y.Z migration guide`
+
+### 贡献迁移示例
+
+1. 在 `skills/plugin-upgrade/examples/` 下创建示例文件（参考现有示例）
+2. 更新 `skills/plugin-upgrade/examples/README.md` 索引
+3. 提 PR
+
+### 贡献新 skill
+
+1. 在 `skills/` 下新建文件夹，kebab-case 命名（如 `plugin-audit`）
+2. 按 [skills/README.md](skills/README.md) 规范编写 `SKILL.md`
+3. 在本 README 的 Skill 索引表格里登记
+4. 提 PR
+
+## 致谢
+
+- [@ccch1mneyyy](https://github.com/ccch1mneyyy) — issue #1 提案和 alpha 版本卡片
+- [@zhu1090093659](https://github.com/zhu1090093659) — [dsh-web](https://github.com/zhu1090093659/dsh-web) 迁移实践与详细痛点记录
+- [@tianyicui](https://github.com/tianyicui) — discussion #5120 发起和官方征集
 
 ## License
 

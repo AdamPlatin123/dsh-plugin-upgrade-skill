@@ -1,8 +1,8 @@
-# 示例 02：宿主侧插件
+# 示例 02：宿主侧插件（已更新为 RemoteResult）
 
 **场景**: 插件需要调用宿主的 session 管理 API。
 
-**影响触点**: #3 内部服务探测（APIProxy 调用）
+**影响触点**: #3 内部服务探测（APIProxy 调用 → Remote）
 
 **复杂度**: ⭐⭐
 
@@ -19,72 +19,47 @@ export class MyService {
     return executeRemote('session', 'list', { limit: 10 })
   }
   
-  async getSessions(id: string) {
+  async getSession(id: string) {
     return executeRemote('session', 'get', { id })
-  }
-  
-  async archiveSession(id: string) {
-    return executeRemote('workspace', 'archiveSession', { sessionId: id })
-  }
-}
-
-// package.json
-{
-  "dependencies": {
-    "@deepseek-ai/dsh-host-apiproxy": "^0.1.1",
-    "@deepseek-ai/cordis": "^0.1.1"
   }
 }
 ```
 
 ---
 
-## 升级后
+## 升级后（alpha.2 RemoteResult 契约）
 
 ```typescript
 // src/service.ts
 import type { Context } from '@deepseek-ai/cordis'
 
 export class MyService {
-  private gateway: any
-
-  constructor(ctx: Context) {
-    // 注入 TypertGateway
-    this.gateway = ctx.inject('typert.gateway')
-  }
+  constructor(private ctx: Context) {}
 
   async listSessions() {
-    // 注意：参数名为 _request，不是 request
-    return this.gateway.invoke('session', 'list', {
-      _request: { limit: 10 }
-    })
+    // Consumer 侧 Remote 方法返回 RemoteResult<T>，永不 reject
+    const result = await this.ctx.remote.session.list({ limit: 10 })
+    
+    // 业务失败走 ok === false 分支
+    if (!result.ok) {
+      // result.error 是 typed RemoteFailure，code 直接可读
+      if (result.error.code === 'session/permission-denied') {
+        return []
+      }
+      throw result.error  // 真 Error，带 stack
+    }
+    return result.value
   }
   
   async getSession(id: string) {
-    try {
-      return await this.gateway.invoke('session', 'get', {
-        _request: { id }
-      })
-    } catch (error) {
-      // RemoteError 直接携带 code
-      if (error.code === 'session/not-found') {
+    const result = await this.ctx.remote.session.get({ id })
+    if (!result.ok) {
+      if (result.error.code === 'session/not-found') {
         return null
       }
-      throw error
+      throw result.error
     }
-  }
-  
-  async archiveSession(id: string) {
-    return this.gateway.invoke('workspace', 'archiveSession', {
-      _request: { sessionId: id }
-    })
-  }
-}
-
-// package.json
-{
-  "dependencies": {
-    "@deepseek-ai/cordis": "^0.1.2"
+    return result.value
   }
 }
 ```
@@ -99,40 +74,28 @@ export class MyService {
    import { executeRemote } from '@deepseek-ai/dsh-host-apiproxy'
    ```
 
-2. **注入 Gateway**:
+2. **注入 Context**:
    ```typescript
-   export class MyService {
-     private gateway: any
-     
-     constructor(ctx: Context) {
-       this.gateway = ctx.inject('typert.gateway')
-     }
-   }
+   constructor(private ctx: Context) {}
    ```
 
-3. **迁移所有 API 调用**:
+3. **改写所有调用为 RemoteResult 流**:
    
-   参考映射表（见 references/v0.1.2.md BC-02）：
-   
-   | 旧调用 | 新调用 | 参数变化 |
+   | 旧调用 | 新调用 | 错误处理 |
    |---|---|---|
-   | `executeRemote('session', 'list', args)` | `gateway.invoke('session', 'list', { _request: args })` | 包装为 `{ _request }` |
-   | `executeRemote('workspace', 'archiveSession', args)` | `gateway.invoke('workspace', 'archiveSession', { _request: args })` | 包装为 `{ _request }` |
+   | `executeRemote('session', 'list', args)` | `ctx.remote.session.list(args)` | `if (!result.ok)` 分支 |
+   | `executeRemote('session', 'get', args)` | `ctx.remote.session.get(args)` | 读 `result.error.code` |
 
-4. **更新错误处理**:
-   ```typescript
-   catch (error) {
-     // RemoteError 直接携带 code；gateway/internal 只在未分类错误时出现
-     if (error.code === 'session/not-found') {
-       // 处理
-     }
-   }
-   ```
+   参考 [ALPHA1-01](../references/v0.1.2-alpha.1.md) 的 17 条操作映射表。
+
+4. **错误处理三原则**:
+   - Consumer 侧 Remote 方法**永不 reject**，返回 `RemoteResult<T>`
+   - 业务失败 `result.ok === false`，读 `result.error.code`
+   - catch 只用于 Gateway client 层（`gateway/internal` 等传输故障）
 
 5. **更新 package.json**:
    ```sh
    pnpm remove @deepseek-ai/dsh-host-apiproxy
-   pnpm add @deepseek-ai/cordis@^0.1.2
    ```
 
 ---
@@ -147,73 +110,51 @@ grep -r "dsh-host-apiproxy\|executeRemote" src/
 # 2. 构建
 pnpm run build
 
-# 3. 在测试环境启动
-pnpm dsh --profile test
+# 3. 静态通过不等于运行时契约正确——Remote 描述符漂移在静态层是静默的
+# 必须真实冷启动 + 完整对话
 
-# 4. 调用 API 验证
-# 在插件中调用 listSessions()，观察：
-# - 无 arguments-invalid 错误
-# - 返回结果正确
-# - 错误处理正常（如 session/not-found）
+# 4. 观察日志
+# - 无 service-unavailable 循环
+# - 业务失败走 ok:false 分支
+# - 错误码能读到且 typed
 ```
 
 ---
 
 ## 常见错误
 
-### 错误 1: `arguments-invalid`
+### 错误 1: 仍用 try/catch 包 Remote 调用
 
-**原因**: 参数格式错误。
+**症状**: 业务失败被当异常处理。
 
-**常见错误场景**:
+**原因**: alpha.2 重构为 `RemoteResult`，Consumer 侧永不 reject。
 
-| 错误写法 | 正确写法 |
-|---|---|
-| `gateway.invoke('session', 'list', { request: {} })` | `{ _request: {} }` |
-| `gateway.invoke('session', 'list', { limit: 10 })` | `{ _request: { limit: 10 } }` |
-
-**排查**:
-```typescript
-// 检查描述符定义
-import descriptors from '@deepseek-ai/dsh-sdk/descriptors.json'
-console.log(descriptors['session/list'])
-```
-
-### 错误 2: 错误码读取不到
-
-**原因**: RemoteError 直接携带 code。
-
-**解决**:
-```typescript
-// 正确访问
-if (error.code === 'session/not-found') {
-  // 处理
-}
-```
-
-### 错误 3: `typert.gateway` 服务未找到
-
-**原因**: Gateway 未注入或宿主版本不匹配。
-
-**排查**:
-```sh
-# 检查宿主版本
-pnpm list @deepseek-ai/dsh-agent
-# 必须是 0.1.2+
-```
-
-### 错误 4: Stream 方法报错
-
-**原因**: Stream 方法应该用 `gateway.stream()`，不是 `invoke()`。
-
-**解决**:
+**修正**:
 ```typescript
 // 错误
-await gateway.invoke('session', 'follow', { sessionId })
+try {
+  const data = await ctx.remote.session.list({})
+} catch (error) {
+  // 永远不会进这里（业务失败不是异常）
+}
 
 // 正确
-const stream = await gateway.stream('session', 'follow', { sessionId })
-for await (const event of stream) {
-  // 处理事件
+const result = await ctx.remote.session.list({})
+if (!result.ok) {
+  // 业务失败在这处理
 }
 ```
+
+### 错误 2: 读 `error.failure.code`
+
+**原因**: alpha.1 时代 `TypertRemoteFailure` 的形状，alpha.2 已删除。
+
+**修正**: `result.error.code`（直接访问）。
+
+### 错误 3: Gateway client 层误用 RemoteResult
+
+**场景**: 直接调 `gateway.invoke()` 而非 `ctx.remote.*`。
+
+**说明**: Gateway client 层仍可能 reject（`gateway/cancelled`、`gateway/internal`），需 catch + `isRemoteFailure` 判别；但其返回值也是 `RemoteResult`，业务失败仍走 `ok: false`。两层都要处理。
+
+**来源**: [ctx-remote-failure-vocabulary](https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.1.2-alpha.2/.agents/notes/implemented/architecture/2026-08-28-ctx-remote-failure-vocabulary.md)（status: implemented）。

@@ -32,11 +32,37 @@ description: 升级 DSH（DeepSeek Harness）插件的 skill。当用户想检�
 - 诚实优先：未知标「待确认」，不编造迁移配方；卡片与实际行为冲突时信实际行为，并把差异回馈到卡片的「实战批注」
 - 在独立分支上迁移，不把迁移改动和功能改动混在一个提交里
 
+## 安全边界
+
+- 修改插件前先检查 Git working tree；如果存在用户未提交的修改，不得覆盖或改动无关内容
+- 升级前记录当前版本和目标版本
+- 能先 dry-run、生成 diff 或预览修改时，优先不要直接做破坏性修改
+- 不允许通过修改 DSH core 来掩盖插件本身的兼容性问题
+- 如果某个 breaking change 的迁移方式不能高置信确定，就停止自动修改，并明确标记需要人工检查
+
+## 运行时验证
+
+仅仅 npm/pnpm install 成功、build 通过、typecheck 通过，并不能证明插件升级成功。完整的插件迁移至少应验证：
+
+1. 依赖安装成功
+2. build / typecheck / 插件自身测试通过
+3. 使用真实 DSH profile 启动
+4. 插件 entry 成功 activate
+5. 插件依赖或提供的 Cordis service 没有停留在 pending 状态
+
+如果真实 DSH 启动失败，保留原始报错，并尽量区分问题属于：
+
+- 插件代码兼容问题
+- dependency / package resolution 问题
+- profile 配置问题
+- DSH runtime 问题
+
 ## 背景
 
 - 上游生态：[oh-my-dsh](https://github.com/LaplaceYoung/oh-my-dsh) —— DSH 的能力插件库
 - DSH 插件约定：ESM 包，经 `cordis.yml` 挂载，遵循 interface / implementation / consumer 三段式接缝
 - 插件规范：[dsh-community-standard](https://github.com/oh-my-dsh/dsh-community-standard) —— manifest / 契约坐标 / 协商；本 skill 的触点分类与其迁移指南对齐，引用其概念、不重复定义
+- 官方征集与出处：[deepseek-ai/deepseek-harness discussions/5120](https://github.com/deepseek-ai/deepseek-harness/discussions/5120) —— 0.1.1 → 0.1.2 定点升级 skill 的征集帖
 
 ## references/
 
@@ -46,14 +72,7 @@ description: 升级 DSH（DeepSeek Harness）插件的 skill。当用户想检�
 | [pre-flight.md](references/pre-flight.md) | 六类触点自查清单（含 ripgrep 检出模式与汇总模板） |
 | [v0.1.2-alpha.1.md](references/v0.1.2-alpha.1.md) | 0.1.1 → alpha.1：12 张卡（含 APIProxy→`@Remote` 17 条操作映射表） |
 | [v0.1.2-alpha.2.md](references/v0.1.2-alpha.2.md) | alpha.1 → alpha.2：4 张卡（`ignorable` 恢复、`RemoteError` 封装等） |
-| [v0.1.2.md](references/v0.1.2.md) | **0.1.1 → 0.1.2 整合指南**：8 个破坏性变更 + 跨 cohort 共存 + preview 安装（整合 alpha + 实战经验） |
-
-## examples/
-
-| 示例 | 场景 | 复杂度 |
-| --- | --- | --- |
-| [01-simple-client-plugin.md](examples/01-simple-client-plugin.md) | 简单客户端插件（SDK 迁移） | ⭐ |
-| [02-host-side-plugin.md](examples/02-host-side-plugin.md) | 宿主侧插件（Gateway 迁移） | ⭐⭐ |
+| **[v0.1.2.md](references/v0.1.2.md)** | **0.1.1 → 0.1.2 走廊（rollup）**：走廊层增量（跨 cohort、未发布 cohort、`RemoteResult` 错误流、分层验证），**基于 alpha.2，正式版需复核** |
 
 自测夹具：[examples/legacy-plugin/](examples/legacy-plugin/) —— 一个停留在 0.1.1 写法的
 最小插件，覆盖六类触点；在上面跑 pre-flight 检出应六类全命中，再走一遍
