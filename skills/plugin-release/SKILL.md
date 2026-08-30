@@ -36,11 +36,18 @@ description: 打包、发布与分发 DeepSeek Harness（DSH）插件——包�
 
 1. 依赖解析：lockfile 只发生预期变化；无混合 cohort；
 2. 静态：typecheck + 插件测试 + build；
-3. 真实挂载：目标版本真实 DSH profile 冷启动，entry active、服务不停 pending；
+3. 真实挂载：在**锁定精确 DSH tag**（禁止用可变的 master/main 冒名验收）的隔离 profile 上冷启动目标宿主，entry active、服务不停 pending。Web Client 插件还要验证：宿主公告资源（启动图/boot 名单中的 bundle 入口）可访问、bundle 注册成功、DOM 挂载完成、无 page error——只看 `--dump-config` 不算完成本层；
 4. 行为：一条核心路径真实执行（工具插件=一次消息→工具→回复；或等价专用流程）；
 5. 包装器：核对退出码与 stdout/stderr 归属。
 
-## 第 4 步：发布与回滚
+## 第 4 步：发布语义门禁（任一不满足即停止发布）
+
+1. GitHub Release tag 必须等于 `v${package.json.version}`；
+2. 版本号是否含 prerelease 后缀（`-` 之后、`+` build metadata 之前的段），必须与 GitHub Release 的 prerelease 状态一致；
+3. prerelease 只能发布到**项目声明的非 latest dist-tag**（名称由项目自定，如 `next`、`alpha`——不写死具体名字）；无后缀的 stable 版本才进入 `latest`；
+4. stable 发布前查询现有 `latest`（`npm view <pkg> dist-tags.latest`），semver 低于现有 latest 时拒绝发布，防止把 latest 回退到更低版本。
+
+## 第 5 步：发布与回滚
 
 - 发布前：干净提交 + 打 tag；记录 lockfile 与 composition 基线 hash；
 - 发布后：以消费者身份重装一次并冒烟；

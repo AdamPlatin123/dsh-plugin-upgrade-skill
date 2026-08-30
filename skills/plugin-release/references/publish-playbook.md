@@ -53,6 +53,36 @@ const dispose = connection.rpc.handle(
 - 发布 workflow 加 `NPM_PUBLISH_ENABLED` 开关：tag 触发仍跑全部门禁与 smoke，但跳过
   npm publish，直到 cohort 正式发布。
 
+## 发布语义门禁配方（release workflow）
+
+发布前按序跑以下检查，任一失败即停（SKILL 第 4 步的四条不变量）：
+
+```sh
+VERSION="$(node -p "require('./package.json').version")"
+# 1) GitHub Release tag 必须等于 v${VERSION}
+[ "$RELEASE_TAG" = "v$VERSION" ] || { echo "tag mismatch"; exit 1; }
+# 2) prerelease 状态一致（'-' 在 '+' build metadata 之前）
+V_PRERELEASE="$(node -e 'console.log(process.argv[1].split("+")[0].includes("-") ? "true" : "false")' "$VERSION")"
+[ "$RELEASE_PRERELEASE" = "$V_PRERELEASE" ] || { echo "prerelease state mismatch"; exit 1; }
+# 3) 分流 dist-tag：prerelease 只进项目声明的非 latest tag（NEXT_TAG 由项目自定），stable 才进 latest
+if [ "$RELEASE_PRERELEASE" = "true" ]; then NPM_TAG="$NEXT_TAG"; else NPM_TAG="latest"; fi
+# 4) stable 发布前拒绝把 latest 回退到更低版本（semver 比较）
+if [ "$NPM_TAG" = "latest" ]; then
+  CURRENT="$(npm view "$PKG" dist-tags.latest 2>/dev/null || echo 0.0.0)"
+  node -e "const semver=require('semver'); if (semver.lt(process.argv[1], process.argv[2])) { console.error('refusing to move latest backwards'); process.exit(1) }" "$VERSION" "$CURRENT"
+fi
+npm publish --access public --tag "$NPM_TAG"
+```
+
+- 宿主验收矩阵与发布通道一致：prerelease 通道锁 alpha 系 tag、stable 通道锁 rc 系 tag，
+  **绝不跟随 master/main 冒名验收**；
+- Web Client 插件的 publish 前 smoke 必须覆盖：宿主启动图（`window.__DSH_BOOT__`）公告的
+  bundle 入口可访问、bundle 注册成功、DOM 挂载完成、无 page error；`--dump-config` 只证明
+  row 存在，不代替本项；
+- 可复核实现参考：[dsh-genui#86](https://github.com/omdsh-dev/dsh-genui/pull/86)、
+  [dsh-annotation#40](https://github.com/omdsh-dev/dsh-annotation/pull/40)（两者实现了
+  第 1–3 条与双宿主 smoke；第 4 条 latest 回退防护为社区补充建议，参考实现中尚无）。
+
 ## 真实坑位清单（两轮实践）
 
 | 坑 | 症状 | 处置 |
