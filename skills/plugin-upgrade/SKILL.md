@@ -32,6 +32,31 @@ description: 升级 DSH（DeepSeek Harness）插件的 skill。当用户想检�
 - 诚实优先：未知标「待确认」，不编造迁移配方；卡片与实际行为冲突时信实际行为，并把差异回馈到卡片的「实战批注」
 - 在独立分支上迁移，不把迁移改动和功能改动混在一个提交里
 
+## 安全边界
+
+- 修改插件前先检查 Git working tree；如果存在用户未提交的修改，不得覆盖或改动无关内容
+- 升级前记录当前版本和目标版本
+- 能先 dry-run、生成 diff 或预览修改时，优先不要直接做破坏性修改
+- 不允许通过修改 DSH core 来掩盖插件本身的兼容性问题
+- 如果某个 breaking change 的迁移方式不能高置信确定，就停止自动修改，并明确标记需要人工检查
+
+## 运行时验证
+
+仅仅 npm/pnpm install 成功、build 通过、typecheck 通过，并不能证明插件升级成功。完整的插件迁移至少应验证：
+
+1. 依赖安装成功
+2. build / typecheck / 插件自身测试通过
+3. 使用真实 DSH profile 启动
+4. 插件 entry 成功 activate
+5. 插件依赖或提供的 Cordis service 没有停留在 pending 状态
+
+如果真实 DSH 启动失败，保留原始报错，并尽量区分问题属于：
+
+- 插件代码兼容问题
+- dependency / package resolution 问题
+- profile 配置问题
+- DSH runtime 问题
+
 ## 背景
 
 - 上游生态：[oh-my-dsh](https://github.com/LaplaceYoung/oh-my-dsh) —— DSH 的能力插件库
