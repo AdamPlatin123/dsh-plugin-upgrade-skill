@@ -9,6 +9,7 @@
 |---|---|---|---|
 | [v0.1.2-alpha.1.md](v0.1.2-alpha.1.md) | 0.1.1(-rc.2) → alpha.1 | 12 | APIProxy→`@Remote`（17 条操作映射表）、`SessionEvent.ignorable` 移除、会话视图拆分、headless 输出语义、Profile 统一启动、WebFetch 默认开、4 张新能力卡 |
 | [v0.1.2-alpha.2.md](v0.1.2-alpha.2.md) | alpha.1 → alpha.2 | 4 | `ignorable` 恢复（与 alpha.1 卡交叉引用）、`RemoteError` 统一封装、peer deps 裁剪、Node 24 修复 |
+| **[v0.1.2.md](v0.1.2.md)** | **0.1.1 → 0.1.2 整合** | **8 BC + 4 行为 + 4 能力** | **完整迁移指南**：整合 alpha.1/2 + 社区实战（跨 cohort 共存、preview cohort 安装、完整验证清单） |
 
 配套：[pre-flight.md](pre-flight.md)（升级前六类触点自查，含 ripgrep 检出模式）。
 

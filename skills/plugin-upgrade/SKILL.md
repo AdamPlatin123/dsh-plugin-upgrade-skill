@@ -46,6 +46,14 @@ description: 升级 DSH（DeepSeek Harness）插件的 skill。当用户想检�
 | [pre-flight.md](references/pre-flight.md) | 六类触点自查清单（含 ripgrep 检出模式与汇总模板） |
 | [v0.1.2-alpha.1.md](references/v0.1.2-alpha.1.md) | 0.1.1 → alpha.1：12 张卡（含 APIProxy→`@Remote` 17 条操作映射表） |
 | [v0.1.2-alpha.2.md](references/v0.1.2-alpha.2.md) | alpha.1 → alpha.2：4 张卡（`ignorable` 恢复、`RemoteError` 封装等） |
+| [v0.1.2.md](references/v0.1.2.md) | **0.1.1 → 0.1.2 整合指南**：8 个破坏性变更 + 跨 cohort 共存 + preview 安装（整合 alpha + 实战经验） |
+
+## examples/
+
+| 示例 | 场景 | 复杂度 |
+| --- | --- | --- |
+| [01-simple-client-plugin.md](examples/01-simple-client-plugin.md) | 简单客户端插件（SDK 迁移） | ⭐ |
+| [02-host-side-plugin.md](examples/02-host-side-plugin.md) | 宿主侧插件（Gateway 迁移） | ⭐⭐ |
 
 自测夹具：[examples/legacy-plugin/](examples/legacy-plugin/) —— 一个停留在 0.1.1 写法的
 最小插件，覆盖六类触点；在上面跑 pre-flight 检出应六类全命中，再走一遍
