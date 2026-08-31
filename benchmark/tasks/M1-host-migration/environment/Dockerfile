@@ -11,4 +11,4 @@ WORKDIR /app
 COPY fixture /app/fixture
 
 # 基线提交：judge 用 `git status --porcelain -- fixture` 判定 agent 是否真的改了 fixture
-RUN git init -q && git add -A && git commit -q -m "baseline"
+RUN git init -q && git add -A && git -c user.email=bench@local -c user.name=bench commit -q -m "baseline"
