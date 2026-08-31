@@ -75,11 +75,12 @@ verify plugin code you would be willing to install anyway. POSIX only — the
 probe relies on signals and shims not available on Windows.
 
 Verdict semantics: pass requires either a transport-only signature (pass-boot-
-probe), a clean exit 0 (pass-exit-0), or a genuine probe timeout with no
-failure signature (pass-timeout-alive — on DSH 0.1.2 the agent retries a dead
-model endpoint silently, so liveness through the window is the pass signal).
-Service waits other than webServer and mixed error signatures are reported as
-inconclusive on purpose: they need human judgement.`
+probe), a clean exit 0 (pass-exit-0), or a genuine probe timeout with neither
+a failure signature nor any non-transport error line (pass-timeout-alive — on
+DSH 0.1.2 the agent retries a dead model endpoint silently, so liveness
+through the window is the pass signal; error noise downgrades to
+inconclusive). Service waits other than webServer and mixed error signatures
+are reported as inconclusive on purpose: they need human judgement.`
 
 // --- Pure helpers (exported for verify-runtime.check.mjs) -------------------
 
