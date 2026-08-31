@@ -9,7 +9,7 @@ import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { classifySpec, detectPluginStructure, diagnoseBootLog, isWebPlugin, listKeyFor } from './verify-runtime.mjs'
+import { classifySpec, detectPluginStructure, diagnoseBootLog, hasNonTransportError, isWebPlugin, listKeyFor } from './verify-runtime.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 
@@ -118,6 +118,12 @@ export function runVerifyRuntimeChecks() {
   )
   // No signature at all -> null (caller falls back to timeout / exit code).
   assert.equal(diagnoseBootLog('dsh booted fine, quiet log'), null, 'quiet log -> no diagnosis')
+
+  // Timeout-alive veto cross (user decision after three independent reviews):
+  // a fully silent hang stays a timeout-pass candidate; error noise disqualifies.
+  assert.equal(hasNonTransportError('[mig] routes: 0'), false, 'silent log has no non-transport error')
+  assert.equal(hasNonTransportError('[mig] routes: 0\nTypeError: boom'), true, 'subclass error disqualifies timeout-pass')
+  assert.equal(hasNonTransportError('Error: fetch failed (retrying)'), false, 'transport-only error does not disqualify')
 
   // --- classifySpec -----------------------------------------------------------
 

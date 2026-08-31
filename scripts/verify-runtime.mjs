@@ -83,6 +83,17 @@ inconclusive on purpose: they need human judgement.`
 
 // --- Pure helpers (exported for verify-runtime.check.mjs) -------------------
 
+/** True when the log contains an error line that is NOT itself a transport
+ * failure — the shared veto for both pass paths. The log comes from the
+ * plugin's own stdout/stderr, so a plugin printing "ECONNREFUSED" (or a
+ * silent hang WITH error noise) must not be readable as success. */
+export function hasNonTransportError(log) {
+  for (const match of log.match(ERROR_LINE_RE) ?? []) {
+    if (!TRANSPORT_RE.test(match)) return true
+  }
+  return false
+}
+
 /** Diagnose a full boot log against the signature priority chain:
  * webServer wait > module resolve crash > activation failure > other service
  * wait (inconclusive) > non-transport Error veto (inconclusive) > transport
@@ -95,13 +106,8 @@ export function diagnoseBootLog(log) {
   if (MODULE_RESOLVE_RE.test(log)) return { verdict: 'load-crash-module-resolve', attribution: 'dependency-resolution' }
   if (ACTIVATION_RE.test(log)) return { verdict: 'activation-failed', attribution: 'plugin-code' }
   if (GENERIC_WAIT_RE.test(log)) return { verdict: 'service-wait-unresolved', attribution: null }
-  // Transport signature is only trustworthy when no OTHER error line exists:
-  // the log comes from the plugin's own stdout/stderr, and a plugin printing
-  // "ECONNREFUSED" itself would otherwise forge a pass.
   if (TRANSPORT_RE.test(log)) {
-    for (const match of log.match(ERROR_LINE_RE) ?? []) {
-      if (!TRANSPORT_RE.test(match)) return { verdict: 'ambiguous-error-signature', attribution: null }
-    }
+    if (hasNonTransportError(log)) return { verdict: 'ambiguous-error-signature', attribution: null }
     return { verdict: 'pass-boot-probe', attribution: null }
   }
   return null
@@ -408,14 +414,19 @@ export async function verifyRuntime(rawSpec, options = {}) {
       outcome = { status: 'fail', verdict: diagnosis.verdict, attribution: diagnosis.attribution }
     } else if (!boot.timedOut && boot.status === 0) {
       outcome = { status: 'pass', verdict: 'pass-exit-0' }
-    } else if (boot.timedOut) {
-      // A spawnSync ETIMEDOUT without any failure signature: the host booted,
-      // the activation assertion passed (broken plugins fail it loudly in ~1s
-      // — see diagnoseBootLog) and the session stayed alive until the probe
-      // window closed. On 0.1.2 the agent retries a dead model endpoint
+    } else if (boot.timedOut && !hasNonTransportError(boot.log)) {
+      // A spawnSync ETIMEDOUT with no failure signature AND no non-transport
+      // error line: the host booted, the activation assertion passed (broken
+      // plugins fail it loudly in ~1s) and the session stayed alive until the
+      // probe window closed. On 0.1.2 the agent retries a dead model endpoint
       // silently instead of printing TRANSPORT (error-stream contract
-      // change), so liveness-through-the-window IS the pass signal.
+      // change), so liveness-through-the-window IS the pass signal. A timeout
+      // WITH unrelated error noise is inconclusive, not a pass (cross-model
+      // review decision: three independent reviewers flagged the noise-free
+      // requirement).
       outcome = { status: 'pass', verdict: 'pass-timeout-alive' }
+    } else if (boot.timedOut) {
+      outcome = { status: 'inconclusive', verdict: 'timeout-with-error-signature' }
     } else {
       outcome = { status: 'inconclusive', verdict: 'boot-probe-no-signature' }
     }
