@@ -6,6 +6,8 @@
 
 [DSH (DeepSeek Harness)](https://github.com/deepseek-ai/deepseek-harness) is an "everything is a plugin" agent harness. This repository provides an agent skill for upgrading DSH plugins — from checking for updates and reading the changelog, to migrating configuration, adapting source code, and verifying results.
 
+> 🗣️ First time here? The repo uses a lot of jargon (corridor, card, touchpoint, fixture, recipe…). Read the plain-language **[Glossary](GLOSSARY.md)** (in Chinese) — it takes one minute.
+
 ## Features
 
 - **Continuously updated** — each DSH version has its own dedicated migration card; apply them in order to upgrade across versions
