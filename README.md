@@ -145,11 +145,10 @@ Claude Code 中按名字调用 skill（插件安装后带命名空间）：
 skills/<skill-name>/
 ├── SKILL.md        # skill 的说明书（怎么触发、怎么干活）
 ├── references/     # 升级说明卡和详细资料
-├── scripts/        # 可执行的小工具
+├── scripts/        # 可执行的小工具（plugin-upgrade 内含只读迁移规划器和运行时验证器）
 └── examples/       # 示例代码（只读，不要运行）
 scripts/validate.mjs            # 仓库自检
 scripts/validate-manifests.mjs  # 多 agent 清单自检
-scripts/verify-runtime.mjs      # 插件运行时结构化签名验证（安装→加载→启动探测→失败归因；无内建沙箱，验证不可信插件请在 Docker 一次性容器中运行；仅 POSIX）
 benchmark/                      # 6 道考题 + 判分 + 验证报告
 ```
 
