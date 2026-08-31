@@ -78,8 +78,12 @@ node benchmark/run.mjs --task M1-host-migration --agent-output benchmark/agent-o
 - **错误容忍**：缺 `--agent-output`、容器不在、git 异常都按 0 分处理并在
   reasons 里说明，judge 自身永远 exit 0。
 
-## 维护注意
+## 给维护者的注意事项（不改题不用看）
 
-- `fixture/` 一律 `"private": true`，README 注明「测试夹具，不得发布」。
-- 新增 Markdown 里的卡片引用必须用完整 ID（如 `DSH-0.1.2-A1-01`），仓库
-  `node scripts/validate.mjs` 会校验引用真实存在与相对链接有效性。
+- 每道题 `fixture/` 里的假插件，package.json 都写着 `"private": true`，
+  它的 README 也注明了"只是考题素材，不许发布"。**新增题目时保持这两条**，
+  目的是防止有人不小心把这些假插件发到 npm 上——它们运行不了，发出去只会
+  污染环境。
+- 在 benchmark 的 Markdown 里引用升级卡时，要写完整编号（如
+  `DSH-0.1.2-A1-01`，不能简写成"A1-01"）。仓库自检会查两件事：这个编号
+  真实存在、链接点得开；写错的话 `node scripts/validate.mjs` 会直接报错。
