@@ -70,9 +70,12 @@ Exit codes: 0=pass  1=fail  2=inconclusive  3=skipped
 SECURITY: this is NOT a sandbox. The plugin under verification runs with your
 full user permissions and your inherited environment (only DSH_HOME and the
 working directory are pointed at temp locations, and the model endpoint is a
-dead port). npm/git install lifecycle scripts execute BEFORE any probe. Only
-verify plugin code you would be willing to install anyway. POSIX only — the
-probe relies on signals and shims not available on Windows.
+dead port). npm/git install lifecycle scripts execute BEFORE any probe. Run
+it inside a throwaway Docker container (e.g. docker run --rm -it -v
+"$PWD":/w -w /w node:24-bookworm sh) when verifying third-party plugins you
+do not fully trust — that is the only way to get real filesystem/network/
+process isolation. POSIX only — the probe relies on signals and shims not
+available on Windows.
 
 Verdict semantics: pass requires either a transport-only signature (pass-boot-
 probe), a clean exit 0 (pass-exit-0), or a genuine probe timeout with neither
