@@ -23,7 +23,7 @@
 
 - Docker 容器 `dsh-verify`（`node:24-bookworm`，dsh 0.1.2-alpha.2 全局安装）
   处于运行状态——M1/H1/H2/H3 的 judge 会真实进去装插件、冷启动、读日志。
-  复现方式见 `docs/validation-report-2026-08-30.md` 第六节。
+  复现方式见 `validation-report-2026-08-30.md` 第六节。
 - 本机有 `git`、`node`（judge 零 npm 依赖）。
 
 ## 怎么跑

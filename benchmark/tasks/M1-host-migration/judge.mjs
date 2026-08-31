@@ -3,7 +3,7 @@
 //    40 —— fixture 改了但仍有 pending / 插件树加载失败；
 //    30 —— dsh plugin add 本身失败；
 //     0 —— fixture 未改动。
-// 判定思路与 docs/validation-report-2026-08-30.md 一致：无 API key 时 headless 冷启动
+// 判定思路与 ../../validation-report-2026-08-30.md 一致：无 API key 时 headless 冷启动
 // 必输出 MISSING_CREDENTIAL —— 出现该输出即证明插件树已激活、启动越过插件层。
 // 注意：结果在 try/finally 之后输出 —— emit() 里的 process.exit 会跳过 finally 清理。
 import { addPlugin, bootHeadless, cleanupProfile, containerAlive, createProfile, emit, fixtureChanges, HEADLESS_ACTIVATED_SIGNAL, NEGATIVE_SIGNAL, PROFILE, pushDirToContainer } from '../../lib/judge-utils.mjs'
