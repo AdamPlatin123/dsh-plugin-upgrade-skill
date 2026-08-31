@@ -14,7 +14,7 @@
 - `index.js`：`inject: ["apiProxy"]` → `inject: ["llm"]`（宿主平面直连领域服务，
   DSH-0.1.2-A1-01）；`ctx.apiProxy.llm.providers()` → `ctx.llm.listProviders()`。
 - `package.json`：移除随 alpha.1 删除的死依赖 `@deepseek-ai/dsh-host-apiproxy`。
-- 验证：容器 dsh-verify 隔离 profile 冷启动，插件树激活成功（无 pending），
+- 验证：隔离 profile 冷启动（dsh 0.1.2-alpha.2），插件树激活成功（无 pending），
   `llm.listProviders()` 调用走通（无 API key 路由数 0 属预期，属 profile 配置
   问题，不计为插件故障）。
 

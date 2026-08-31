@@ -1,7 +1,9 @@
 # 评分细则与考点对照
 
-总分 600（6 题 × 100）。所有 judge：exit 0，stdout 末行
-`{"score": 0-100, "max": 100, "reasons": [...]}`。
+总分 600（6 题 × 100，harbor reward 为 0~1，由 score/100 归一化）。
+所有 judge：exit 0，stdout 末行
+`{"score": 0-100, "max": 100, "reasons": [...]}`；`tests/test.sh` 解析末行 JSON，
+把 score/100 写入 `/logs/verifier/reward.txt`。
 
 ## 题号 → 卡片/R 配方 → 分值构成
 
@@ -33,9 +35,11 @@ exit code 不作为判据：无 API key 时激活成功也是 exit 1，与激活
 - M1/H1/H2：只验证「激活 + 服务调用可达」，不跑完整一轮真实对话（无 API key）；
   路由数 0 是预期，不算失败。
 - 容器题 judge 只创建 `bench-*` profile 与 `/tmp/bench-*` 目录，运行结束即清理；
-  不触碰容器既有资产（`/tmp/demo-plugin`、`/tmp/demo-plugin-v2-migrated`）。
+  不触碰环境中其他资产。
 
 ## 已知噪声
 
-- pnpm link 安装偶尔 10s+，judge 超时已放宽（add 180s、boot 60s、web 150s）。
-- 连续跑容器题之间 profile 互不影响；同一题反复跑前先 `git checkout -- benchmark/tasks/`。
+- pnpm link 安装偶尔 10s+，judge 超时已放宽（add 180s、boot 60s、web 150s），
+  task.toml 里 verifier 超时统一 600s。
+- 每个 harbor trial 都是全新容器，题间天然隔离，无需手工恢复 fixture；
+  同一题反复跑之间 profile 互不影响。

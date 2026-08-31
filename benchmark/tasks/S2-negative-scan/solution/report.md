@@ -1,6 +1,6 @@
 # 触点体检（dsh-minimal-llm，dsh-v0.1.1-rc.2 → dsh-v0.1.2-alpha.2）
 
-扫描范围：`benchmark/tasks/S2-negative-scan/fixture/` 全部文件（package.json、
+扫描范围：`/app/fixture/` 全部文件（package.json、
 index.js、cordis.patch.yml、src/session-notes.js），只读，未修改任何文件。
 
 | 触点 | 命中 | 文件/行 | 适用卡 | 说明 |

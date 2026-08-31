@@ -116,7 +116,7 @@ Upgrade the dsh-ads plugin to dsh-v0.1.2-alpha.2
 
 ## The exam (benchmark)
 
-The [benchmark/](benchmark/) folder has 6 upgrade exam questions with auto-grading. How to use it: let an AI take the exam, put its answers into `benchmark/agent-output/`, then run `node benchmark/run.mjs --all` for a scorecard. Run the same AI twice — once with this skill installed, once without — and the score difference is the skill's real effect. The validation report sits in the same folder: `validation-report-2026-08-30.md`.
+The [benchmark/](benchmark/) folder has 6 upgrade exam questions with auto-grading, in [Harbor](https://github.com/harbor-framework/harbor) task format: each question is a self-contained task (its own container with dsh preinstalled, plus an automatic verifier). Run `harbor run -p benchmark/tasks/<task-id> -a <agent>` to get a 0–1 score. Run the same AI twice — once with this skill installed, once without — and the score difference is the skill's real effect. See [benchmark/README.md](benchmark/README.md) for details; the validation report sits in the same folder: `validation-report-2026-08-30.md`.
 
 ## References
 
