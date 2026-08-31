@@ -44,10 +44,13 @@ const HOST_WAIT_RE = /waiting for services?:.*webServer/i
 // inject a service the host simply does not provide (plugin-code) or the
 // environment may lack it (profile-config) — that distinction needs a human.
 const GENERIC_WAIT_RE = /waiting for services?:/i
-// Veto for the transport signature: an Error line that is NOT itself a
+// Veto for the transport signature: an error line that is NOT itself a
 // transport failure means the log cannot prove "tree loaded and only the
-// model call failed" — a plugin can print a transport word itself.
-const ERROR_LINE_RE = /^\s*.*\bError\b.*$/gm
+// model call failed" — a plugin can print a transport word itself. Matches
+// Error AND its subclasses (TypeError, ReferenceError, …) plus bare ERROR:
+// a word-boundary /\bError\b/ alone misses "TypeError: …" (fleet-caught by
+// cross-model review with a working forge).
+const ERROR_LINE_RE = /(?:^|\s)(?:[A-Za-z]*Error|ERROR)\b.*$/gm
 const ANSI_RE = /\x1b\[[0-9;]*[A-Za-z]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)/g
 
 const DEAD_MODEL_BASE_URL = 'http://127.0.0.1:9/v1' // port 9 (discard): nothing listens -> immediate ECONNREFUSED
@@ -227,11 +230,13 @@ function writeProfilePatches(profileDir) {
 }
 
 /** Resolve the authoritative dist-tag latest from the official registry and
- * install pinned. Registry mirrors can lag behind on dist-tags metadata. */
+ * install pinned. Registry mirrors can lag behind on dist-tags metadata.
+ * The `pinned` flag is surfaced in the result: a silent fallback to the
+ * caller's mirror means the verdict was reached on a possibly-stale version. */
 function pinNpmSpec(pkgName) {
   const view = run('npm', ['view', pkgName, 'dist-tags.latest', '--registry=https://registry.npmjs.org'], { timeoutSeconds: 60 })
   const latest = (view.stdout ?? '').trim().replace(/^["']|["']$/g, '')
-  return view.status === 0 && latest ? `${pkgName}@${latest}` : pkgName
+  return view.status === 0 && latest ? { installSpec: `${pkgName}@${latest}`, pinned: true } : { installSpec: pkgName, pinned: false }
 }
 
 /** Shared probe environment. Placeholder key: without one the agent stalls
@@ -317,26 +322,30 @@ export async function verifyRuntime(rawSpec, options = {}) {
     const dshEnv = { DSH_HOME: dshHome }
 
     let spec = rawSpec
+    let originalSpec = rawSpec // for list keys: the temp copy is always plugin-src
     let webPlugin = false
     if (route === 'directory') {
-      const resolved = rawSpec.startsWith('~/') ? join(process.env.HOME ?? '', rawSpec.slice(2)) : rawSpec
-      const structure = detectPluginStructure(resolved)
+      // Expand ~ BEFORE using the path for package.json reads — an unexpanded
+      // "~/..." makes listKeyFor fall back to the wrong basename.
+      originalSpec = rawSpec.startsWith('~/') ? join(process.env.HOME ?? '', rawSpec.slice(2)) : rawSpec
+      const structure = detectPluginStructure(originalSpec)
       if (!structure) {
         result.status = 'skipped'
         result.verdict = 'no-plugin-structure'
         return result
       }
-      webPlugin = isWebPlugin(resolved)
+      webPlugin = isWebPlugin(originalSpec)
       // Install from a copy: verification must not mutate the original tree.
       const srcCopy = join(home, 'plugin-src')
-      cpSync(resolved, srcCopy, { recursive: true })
+      cpSync(originalSpec, srcCopy, { recursive: true })
       spec = srcCopy
     }
 
     // ---- L1: install (npm specs pin the authoritative latest first) ----
     let t0 = Date.now()
-    const installSpec = route === 'npm-name' ? pinNpmSpec(spec) : spec
-    const add = run('dsh', ['plugin', '--profile', profile, 'add', installSpec], { timeoutSeconds: 300, env: dshEnv, cwd: home })
+    const pin = route === 'npm-name' ? pinNpmSpec(spec) : { installSpec: spec, pinned: false }
+    result.npmPinned = pin.pinned // surfaced even on later failure: provenance of the verdict
+    const add = run('dsh', ['plugin', '--profile', profile, 'add', pin.installSpec], { timeoutSeconds: 300, env: dshEnv, cwd: home })
     const l1Ms = Date.now() - t0 // real elapsed time (fleet bug this fixes: was always 0)
     const l1Log = `${add.stdout ?? ''}\n${add.stderr ?? ''}`
     stage('l1-install', add.status === 0, l1Ms, add.status === 0 ? '' : tail(l1Log))
@@ -354,12 +363,14 @@ export async function verifyRuntime(rawSpec, options = {}) {
     const list = run('dsh', ['plugin', '--profile', profile, 'list'], { timeoutSeconds: 60, env: dshEnv, cwd: home })
     const l2Ms = Date.now() - t0
     const l2Log = `${list.stdout ?? ''}\n${list.stderr ?? ''}`
-    // npm-installed web plugins declare their plane in the installed copy —
+    // npm/git-installed plugins declare their plane in the installed copy —
     // read it now that node_modules exists (directory route already probed).
-    if (route === 'npm-name' && !webPlugin) {
-      webPlugin = isWebPlugin(join(dshHome, 'profiles', profile, 'node_modules', spec))
+    // Git installs land under the repo name, npm installs under the spec.
+    if ((route === 'npm-name' || route === 'git-url') && !webPlugin) {
+      const installedName = route === 'git-url' ? listKeyFor(spec, 'git-url') : spec
+      webPlugin = isWebPlugin(join(dshHome, 'profiles', profile, 'node_modules', installedName))
     }
-    const listed = list.status === 0 && list.stdout.includes(listKeyFor(spec, route, rawSpec))
+    const listed = list.status === 0 && list.stdout.includes(listKeyFor(spec, route, originalSpec))
     stage('l2-listed', listed, l2Ms, listed ? '' : tail(l2Log))
     if (!listed) {
       result.status = 'fail'
@@ -379,7 +390,12 @@ export async function verifyRuntime(rawSpec, options = {}) {
     const diagnosis = diagnoseBootLog(boot.log)
 
     let outcome
-    if (diagnosis?.verdict === 'pass-boot-probe') {
+    if (boot.logOverflow) {
+      // Checked BEFORE any signature: when output exceeded maxBuffer only the
+      // head survives — a forged transport line up front plus 16 MiB of noise
+      // would otherwise hide the truncated failure tail and pass.
+      outcome = { status: 'inconclusive', verdict: 'log-overflow' }
+    } else if (diagnosis?.verdict === 'pass-boot-probe') {
       outcome = { status: 'pass', verdict: 'pass-boot-probe' }
     } else if (diagnosis?.verdict === 'env-needs-service-host') {
       outcome = { status: 'skipped', verdict: 'env-needs-service-host', attribution: diagnosis.attribution }
@@ -390,11 +406,6 @@ export async function verifyRuntime(rawSpec, options = {}) {
       outcome = { status: 'inconclusive', verdict: diagnosis.verdict, attribution: null }
     } else if (diagnosis) {
       outcome = { status: 'fail', verdict: diagnosis.verdict, attribution: diagnosis.attribution }
-    } else if (boot.logOverflow) {
-      // Output exceeded maxBuffer: the head of the log survived and the tail
-      // (where signatures live) was truncated — nothing can be concluded, and
-      // it must never be read as liveness.
-      outcome = { status: 'inconclusive', verdict: 'log-overflow' }
     } else if (!boot.timedOut && boot.status === 0) {
       outcome = { status: 'pass', verdict: 'pass-exit-0' }
     } else if (boot.timedOut) {
@@ -420,7 +431,10 @@ export async function verifyRuntime(rawSpec, options = {}) {
       try {
         rmSync(home, { recursive: true, force: true })
       } catch {
-        /* cleanup must never mask the verdict with an exception */
+        // Cleanup must never mask the verdict with an exception — but a
+        // residue must be REPORTED (path surfaced), never silently dropped.
+        result.workspace = home
+        console.error(`verify-runtime: workspace cleanup failed, residue left at ${home}`)
       }
     }
   }

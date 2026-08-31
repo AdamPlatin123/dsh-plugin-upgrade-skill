@@ -71,6 +71,18 @@ export function runVerifyRuntimeChecks() {
       verdict: 'ambiguous-error-signature',
       attribution: null,
     },
+    {
+      name: 'Error SUBCLASSES also veto (TypeError forge — cross-model caught)',
+      log: 'TRANSPORT ECONNREFUSED 127.0.0.1:9\nTypeError: plugin activation exploded',
+      verdict: 'ambiguous-error-signature',
+      attribution: null,
+    },
+    {
+      name: 'bare ERROR marker also vetoes (uppercase form)',
+      log: 'fetch failed somewhere\nERROR plugin crashed during init',
+      verdict: 'ambiguous-error-signature',
+      attribution: null,
+    },
   ]
 
   for (const fx of BOOT_FIXTURES) {
