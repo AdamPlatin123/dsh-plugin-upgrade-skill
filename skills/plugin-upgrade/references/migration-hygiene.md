@@ -4,9 +4,9 @@
 
 ## 1. 增量 tsbuildinfo 假阳性
 
-症状：改完源码后 typecheck 报与本次改动无关的老错误（如 `MISSING_EXPORT resolveSessionPreset`），或增量检查直接骗过、clean 后才暴露真实错误链。
+症状：改完源码后 typecheck 报与本次改动无关的老错误（如 TS2305），或构建期 oxc/rolldown 报 `MISSING_EXPORT` 类导出缺失（那是构建缓存假阳性，不是 tsc 的报错），或增量检查直接骗过、clean 后才暴露真实错误链。
 
-解法：迁移验证前一律 `pnpm run clean` 再 build。看到可疑 TS2305/TS2305 类导出缺失，先 clean 排除缓存，再 grep 真实引用（见 [A1-21 实战批注](v0.1.2-alpha.1.md)）。
+解法：迁移验证前一律 `pnpm run clean` 再 build。看到可疑 TS2305/TS2614 类导出缺失，先 clean 排除缓存，再 grep 真实引用（见 [A1-21 实战批注](v0.1.2-alpha.1.md)）。
 
 ## 2. oxc / vite 解析器比 tsc 严格
 
@@ -20,7 +20,7 @@
 
 规则：改动落进 `lib/client.js`（client 半段）→ 浏览器硬刷新即生效；落进 `lib/index.js`（host 半段）→ 必须重启 dsh。与 [host-plane-probes.md](host-plane-probes.md) 的平面视角对应：先判断插件形态与改动落点，再决定验证动作。
 
-## 4. pnpm 11 拦截依赖构建脚本
+## 4. pnpm 拦截依赖构建脚本（10.0 起默认）
 
 症状：新环境安装插件报 node-pty 等构建被拒。
 
