@@ -284,21 +284,68 @@ function probeHeadless(dshHome, profile, cwd, timeoutSeconds) {
 }
 
 /** Web-plane plugins need the web host: headless profiles expose no webServer
- * service, so the plugin would wait forever. Boot `dsh --profile <p> web` for
- * a bounded window (hard cap 90s — a web host that needs longer to boot is
- * not verifiable this way), then scan the full log (the process is expected
- * to be killed by the timeout — the verdict comes from the log, not the exit
- * code). The PROFILE must be passed: without it the default profile boots and
- * the probe would verify a tree that never contained the plugin. */
-function probeWebHost(dshHome, profile, cwd, timeoutSeconds) {
+ * service, so the plugin would wait forever. `dsh web` is a FIXED alias for
+ * --profile web (it rejects --profile itself), so the caller must install the
+ * plugin into the 'web' profile first (see ensureWebProfileInstall). Boot for
+ * a bounded window (hard cap 90s — a web host needing longer to boot is not
+ * verifiable this way), then scan the full log (the process is expected to be
+ * killed by the timeout — the verdict comes from the log, not the exit
+ * code). */
+function probeWebHost(dshHome, cwd, timeoutSeconds) {
   const port = 18080 + Math.floor(Math.random() * 1000)
   return shapeProbe(
-    run('dsh', ['--profile', profile, 'web', '--no-open', '--port', String(port)], {
+    run('dsh', ['web', '--no-open', '--port', String(port)], {
       timeoutSeconds: Math.min(timeoutSeconds, 90),
       env: probeEnv(dshHome),
       cwd,
     }),
   )
+}
+
+/** Install the plugin into the fixed 'web' profile so `dsh web` boots it.
+ * Same allow-build retry as the primary install. Returns true on success. */
+function ensureWebProfileInstall(dshHome, installSpec, cwd) {
+  const env = { DSH_HOME: dshHome }
+  let add = run('dsh', ['plugin', '--profile', 'web', 'add', installSpec], { timeoutSeconds: 300, env, cwd })
+  if (add.status !== 0) {
+    const blocked = parseBlockedBuilds(`${add.stdout ?? ''}\n${add.stderr ?? ''}`)
+    if (blocked.length > 0) {
+      add = run('dsh', ['plugin', '--profile', 'web', 'add', installSpec, ...blocked.map((name) => `--allow-build=${name}`)], { timeoutSeconds: 300, env, cwd })
+    }
+  }
+  return add.status === 0
+}
+
+/** pnpm v10+ blocks dependency build scripts headlessly ("Ignored build
+ * scripts: node-pty@1.1.0 ... Run pnpm approve-builds"). A real user approves
+ * them interactively; headless we retry once with --allow-build for exactly
+ * the blocked packages, parsed from the failure log. */
+function parseBlockedBuilds(log) {
+  const match = /Ignored build scripts:\s*(.+)/.exec(log)
+  if (!match) return []
+  return [...new Set(
+    match[1]
+      .split(/,\s*/)
+      .map((entry) => entry.trim().split('@').slice(0, -1).join('@') || entry.trim())
+      .filter((name) => /^[^@\s]/.test(name) || name.startsWith('@')),
+  )]
+}
+
+/** Git-hosted plugins build via their prepare script, which pnpm gates behind
+ * an "allowBuilds" map in the profile's pnpm-workspace.yaml (the error prints
+ * the exact key). Parse that key and hand it back for the retry write. */
+function parseGitAllowBuildsKey(log) {
+  const match = /allowBuilds:\s*\n\s+(\S+@\S+?):\s*true/.exec(log)
+  return match ? match[1] : null
+}
+
+function writeAllowBuilds(profileDir, key) {
+  const yamlPath = join(profileDir, 'pnpm-workspace.yaml')
+  const existing = existsSync(yamlPath) ? readFileSync(yamlPath, 'utf8') : ''
+  if (existing.includes(key)) return
+  // Quoted: a leading @ is reserved in YAML and an unquoted key silently
+  // fails to match the allowlist (fleet-verified).
+  writeFileSync(yamlPath, `${existing}allowBuilds:\n  "${key}": true\n`)
 }
 
 // --- Verification pipeline ---------------------------------------------------
@@ -355,9 +402,29 @@ export async function verifyRuntime(rawSpec, options = {}) {
     let t0 = Date.now()
     const pin = route === 'npm-name' ? pinNpmSpec(spec) : { installSpec: spec, pinned: false }
     result.npmPinned = pin.pinned // surfaced even on later failure: provenance of the verdict
-    const add = run('dsh', ['plugin', '--profile', profile, 'add', pin.installSpec], { timeoutSeconds: 300, env: dshEnv, cwd: home })
+    let add = run('dsh', ['plugin', '--profile', profile, 'add', pin.installSpec], { timeoutSeconds: 300, env: dshEnv, cwd: home })
+    let l1Log = `${add.stdout ?? ''}\n${add.stderr ?? ''}`
+    if (add.status !== 0) {
+      // pnpm v10+ build-script gates. Registry deps: retry with --allow-build
+      // for exactly the blocked packages (the headless equivalent of
+      // `pnpm approve-builds`). Note the = form: dsh's pnpm forwarder drops a
+      // detached flag value (fleet-verified).
+      const blocked = parseBlockedBuilds(l1Log)
+      if (blocked.length > 0) {
+        add = run('dsh', ['plugin', '--profile', profile, 'add', pin.installSpec, ...blocked.map((name) => `--allow-build=${name}`)], { timeoutSeconds: 300, env: dshEnv, cwd: home })
+        l1Log = `${add.stdout ?? ''}\n${add.stderr ?? ''}`
+      } else {
+        // Git-hosted deps: the gate is an allowBuilds map key in the profile
+        // pnpm-workspace.yaml (the error prints the exact key).
+        const gitKey = parseGitAllowBuildsKey(l1Log)
+        if (gitKey) {
+          writeAllowBuilds(join(dshHome, 'profiles', profile), gitKey)
+          add = run('dsh', ['plugin', '--profile', profile, 'add', pin.installSpec], { timeoutSeconds: 300, env: dshEnv, cwd: home })
+          l1Log = `${add.stdout ?? ''}\n${add.stderr ?? ''}`
+        }
+      }
+    }
     const l1Ms = Date.now() - t0 // real elapsed time (fleet bug this fixes: was always 0)
-    const l1Log = `${add.stdout ?? ''}\n${add.stderr ?? ''}`
     stage('l1-install', add.status === 0, l1Ms, add.status === 0 ? '' : tail(l1Log))
     if (add.status !== 0) {
       result.status = 'fail'
@@ -393,7 +460,18 @@ export async function verifyRuntime(rawSpec, options = {}) {
     // ---- L3: boot probe — decide the verdict FIRST, then record the stage,
     // so the human output never labels a skip as FAIL --------------------------
     t0 = Date.now()
-    const boot = webPlugin ? probeWebHost(dshHome, profile, home, timeoutSeconds) : probeHeadless(dshHome, profile, home, timeoutSeconds)
+    let boot
+    if (webPlugin) {
+      if (!ensureWebProfileInstall(dshHome, pin.installSpec, home)) {
+        result.status = 'fail'
+        result.verdict = 'web-profile-install-failed'
+        result.attribution = 'dependency-resolution'
+        return result
+      }
+      boot = probeWebHost(dshHome, home, timeoutSeconds)
+    } else {
+      boot = probeHeadless(dshHome, profile, home, timeoutSeconds)
+    }
     const l3Ms = Date.now() - t0
     // Diagnose against the FULL log: scanning only a short tail once let long
     // activation stack traces push the error headline out of the window.
