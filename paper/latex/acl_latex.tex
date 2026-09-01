@@ -37,9 +37,7 @@
 %
 % and set <dim> to something 5cm or larger.
 
-% We anonymize the name of the framework studied in this paper.
-% Replace \framework with the real name upon de-anonymization.
-\newcommand{\framework}{\textsc{Heron}}
+\newcommand{\framework}{\textsc{dsh}}
 
 \title{Do Migration Skills Actually Help? A Community-Grounded Benchmark for Skill-Guided Framework Migration}
 
@@ -59,16 +57,9 @@
 %         Author 2 \\ Address line \\ ... \\ Address line \And
 %         Author 3 \\ Address line \\ ... \\ Address line}
 
-\author{First Author \\
-  Affiliation / Address line 1 \\
-  Affiliation / Address line 2 \\
-  Affiliation / Address line 3 \\
-  \texttt{email@domain} \\\And
-  Second Author \\
-  Affiliation / Address line 1 \\
-  Affiliation / Address line 2 \\
-  Affiliation / Address line 3 \\
-  \texttt{email@domain} \\}
+\author{Beiming Liu \\
+  Tsinghua University \\
+  \texttt{lbm21@tsinghua.org.cn} \\}
 
 \begin{document}
 \maketitle
@@ -160,12 +151,12 @@ Second, the framework ships a host CLI that can cold-boot a plugin in an isolate
 The unit of field knowledge in our setting is the \emph{upgrade card}: a short, structured document contributed by practitioners after a migration incident.
 A card records five fields: \emph{symptom} (the observable failure), \emph{root cause} (the framework change responsible), \emph{fix} (the minimal required change to the plugin), \emph{affected versions} (source and target), and \emph{provenance} (a link to the community incident: issue, discussion, or pull request).
 Every card must pass containerized reproduction---a fresh plugin fixture must exhibit the recorded symptom against the recorded version pair---before it enters the corpus.
-Cards, rather than raw issues, are the validated ground truth from which both the skill corpus and the benchmark tasks are derived (\S\ref{sec:construction}); Table~\ref{tab:card} shows one card (anonymized).
+Cards, rather than raw issues, are the validated ground truth from which both the skill corpus and the benchmark tasks are derived (\S\ref{sec:construction}); Table~\ref{tab:card} shows one card from the corpus.
 
 \begin{table}[t]
 \centering
 \fbox{\parbox{0.92\columnwidth}{\centering\vspace{1.6cm}
-Placeholder: one upgrade card instance (symptom / root cause / fix / affected versions / provenance link), anonymized.
+Placeholder: one upgrade card instance (symptom / root cause / fix / affected versions / provenance link).
 \vspace{1.6cm}}}
 \caption{An example upgrade card. Cards are practitioner-contributed, container-verified, and serve as the single ground truth for both skill distillation and task construction.}
 \label{tab:card}
