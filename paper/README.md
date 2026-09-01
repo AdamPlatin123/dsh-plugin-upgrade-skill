@@ -1,6 +1,6 @@
 # Do Migration Skills Actually Help? A Community-Grounded Benchmark for Skill-Guided Framework Migration
 
-本文投稿仓库（目标：ACL 2027 / ARR）。论文研究 skill（推理时加载的程序性知识文档）在框架迁移场景中的真实效用：基于 dsh 插件生态中社区上报的 22 个经核实的迁移失败案例，构建配对评测 benchmark，测量 skill 的收益分布、对误导性上下文的鲁棒性、temporal holdout 泛化与 over-trust 失败模式。
+本目录是 dsh plugin-upgrade skill 有效性的技术报告。报告研究 skill（推理时加载的程序性知识文档）在框架迁移场景中的真实效用：基于 dsh 插件生态中社区上报的 22 个经核实的迁移失败案例，构建配对评测 benchmark，测量 skill 的收益分布、对误导性上下文的鲁棒性、temporal holdout 泛化与 over-trust 失败模式。
 
 ## 目录结构
 
@@ -19,7 +19,7 @@ cd latex
 pdflatex acl_latex && bibtex acl_latex && pdflatex acl_latex && pdflatex acl_latex
 ```
 
-或直接上传 `latex/` 目录到 [Overleaf](https://www.overleaf.com/) 编译。当前使用 `review` 模式（行号 + 匿名审稿格式）。
+或直接上传 `latex/` 目录到 [Overleaf](https://www.overleaf.com/) 编译。当前使用 `review` 模式（带行号）。
 
 ## 写作状态
 
