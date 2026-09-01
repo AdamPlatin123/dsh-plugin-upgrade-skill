@@ -53,8 +53,8 @@ added later and therefore have no scores in these reports.
 
 | Configuration | Scope | reward | mean | perfect tasks | Detailed report |
 |---|---:|---:|---:|---:|---|
-| With `skills/plugin-upgrade` | 19-task 2026-09-01 snapshot | 15.95/19 | 0.8395 | 13 | [18-task batch](validation-report-2026-09-01-codex-gpt-5.6-luna-other-18.md) · [real-repository task](validation-report-2026-09-01.md) |
-| No Harbor-injected skill | 19-task 2026-09-01 snapshot | 13.09/19 | 0.6889 | 10 | [18-task batch](validation-report-2026-09-01-codex-gpt-5.6-luna-other-18-no-injected-skill.md) · [real-repository task](validation-report-2026-09-01-h8-dsh-web-alpha2-no-skill.md) |
+| With `skills/plugin-upgrade` | 19-task 2026-09-01 snapshot | 15.95/19 | 0.8395 | 13 | [18-task batch](results/validation-report-2026-09-01-codex-gpt-5.6-luna-other-18.md) · [real-repository task](results/validation-report-2026-09-01.md) |
+| No Harbor-injected skill | 19-task 2026-09-01 snapshot | 13.09/19 | 0.6889 | 10 | [18-task batch](results/validation-report-2026-09-01-codex-gpt-5.6-luna-other-18-no-injected-skill.md) · [real-repository task](results/validation-report-2026-09-01-h8-dsh-web-alpha2-no-skill.md) |
 
 Per-task comparison (`delta = with-skill - no-Harbor-skill`):
 
@@ -239,7 +239,10 @@ environment, and it does not leak migration answers to either round.
 
 ## Historical documents
 
-- `validation-report-2026-08-30.md`: the skill-effectiveness validation report (v1
+All validation and result reports live in [`results/`](results/). When opening a PR
+that adds a benchmark result or validation report, put the file there.
+
+- `results/validation-report-2026-08-30.md`: the skill-effectiveness validation report (v1
   era). The manual `dsh-verify` container reproduction in its section 6 has been
   replaced by the self-contained environment — each task image is now built with the
   same steps as that section (node:24-bookworm + globally installed pnpm/dsh

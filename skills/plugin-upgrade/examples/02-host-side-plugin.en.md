@@ -44,9 +44,9 @@ node skills/plugin-upgrade/examples/face-contracts/check.mjs
 
 This zero-dependency fixture only prevents the Host/Client planes from being written backwards again; it cannot replace a build from the pinned tag or a real DSH
 profile. For production-grade validation and positive controls, see
-[`benchmark/validation-report-2026-08-30.md`](https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill/blob/main/benchmark/validation-report-2026-08-30.md).
+[`benchmark/validation-report-2026-08-30.md`](https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill/blob/main/benchmark/results/validation-report-2026-08-30.md).
 
 ## Sources
 
 - [DSH-0.1.2-A1-01](../references/v0.1.2-alpha.1.md)
-- [Full container-chain validation](https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill/blob/main/benchmark/validation-report-2026-08-30.md)
+- [Full container-chain validation](https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill/blob/main/benchmark/results/validation-report-2026-08-30.md)
