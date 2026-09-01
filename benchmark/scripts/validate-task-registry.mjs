@@ -17,7 +17,9 @@
 //   G. written/hands-on   — the canonical "The first N are written exams ... the last
 //                           M are hands-on" sentence against the README table's
 //                           Static/Hands-on Type column (not task-ID prefixes: H4/H6
-//                           are Static despite the H prefix).
+//                           are Static despite the H prefix);
+//   H. results location   — validation/result reports (validation-report-*.md) must
+//                           live in benchmark/results/, not the benchmark/ root.
 //
 // This intentionally does NOT duplicate benchmark/scripts/validate-execution-contract.mjs,
 // which owns per-task contract semantics (execution modes, authorization clauses,
@@ -227,6 +229,15 @@ export function validateRegistry(root) {
     const expectedTotal = actual * POINTS_PER_TASK
     if (total.total !== expectedTotal) {
       failures.push(`${FAILURE_PREFIX} scoring total mismatch:\n  declared: ${total.total}\n  expected: ${expectedTotal}`)
+    }
+  }
+
+  // H. result reports must live in benchmark/results/, not the benchmark/ root
+  const benchmarkDir = join(root, 'benchmark')
+  if (existsSync(benchmarkDir)) {
+    const strayReports = readdirSync(benchmarkDir).filter((name) => /^validation-report-.+\.md$/.test(name))
+    if (strayReports.length > 0) {
+      failures.push(`${FAILURE_PREFIX} result reports must live in benchmark/results/ (move these files):\n  - ${strayReports.join('\n  - ')}`)
     }
   }
 

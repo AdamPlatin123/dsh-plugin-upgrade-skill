@@ -63,6 +63,24 @@ test('clean registry passes', () => {
   assert.equal(result.taskCount, 2)
 })
 
+test('stray validation report in benchmark/ root fails', () => {
+  const root = buildTree(ROWS)
+  writeFileSync(join(root, 'benchmark', 'validation-report-2026-09-02.md'), '# report\n')
+  const result = validateRegistry(root)
+  rmSync(root, { recursive: true, force: true })
+  assert.equal(result.ok, false)
+  assert.match(failuresOf(result), /result reports must live in benchmark\/results\//)
+})
+
+test('validation report inside benchmark/results/ is accepted', () => {
+  const root = buildTree(ROWS)
+  mkdirSync(join(root, 'benchmark', 'results'), { recursive: true })
+  writeFileSync(join(root, 'benchmark', 'results', 'validation-report-2026-09-02.md'), '# report\n')
+  const result = validateRegistry(root)
+  rmSync(root, { recursive: true, force: true })
+  assert.equal(result.ok, true, failuresOf(result))
+})
+
 test('stale README top task count fails with declared/actual', () => {
   const root = buildTree(ROWS, { top: 1 })
   const result = validateRegistry(root)
