@@ -1,38 +1,40 @@
 # Do Migration Skills Actually Help? A Community-Grounded Benchmark for Skill-Guided Framework Migration
 
-本目录是 dsh plugin-upgrade skill 有效性的技术报告。报告研究 skill（推理时加载的程序性知识文档）在框架迁移场景中的真实效用：基于 dsh 插件生态中社区上报的 22 个经核实的迁移失败案例，构建配对评测 benchmark，测量 skill 的收益分布、对误导性上下文的鲁棒性、temporal holdout 泛化与 over-trust 失败模式。
+[中文说明](README.zh.md)
 
-## 目录结构
+This directory holds the technical report on the effectiveness of the dsh plugin-upgrade skills. The report studies whether skills---procedural-knowledge documents loaded at inference time---actually help in framework migration: we build a paired-evaluation benchmark from 22 community-reported, verified plugin-migration failures in the dsh plugin ecosystem, and measure the distribution of skill gains, robustness to misleading context, temporal-holdout generalization, and over-trust failure modes.
 
-- `latex/` — 论文 LaTeX 源码
-  - `acl_latex.tex` — 主文件（标题、作者、摘要、全文骨架；基于官方最新模板）
-  - `acl.sty` / `acl_natbib.bst` — ACL 官方样式（acl-org/acl-style-files master，2026-06 版）
-  - `custom.bib` — 参考文献（含待核实的 stub 条目，见文件内 TODO）
-  - `formatting.md` — 官方格式说明
-  - `acl_lualatex.tex` — XeLaTeX / LuaLaTeX 模板（未使用）
-- `word/`、`archive/` — 官方 Word 模板与历史模板（本文未使用，随官方样式包保留）
+## Directory structure
 
-## 编译
+- `latex/` — LaTeX source of the report
+  - `acl_latex.tex` — main file (title, authors, abstract, full section skeleton; based on the latest official template)
+  - `acl.sty` / `acl_natbib.bst` — official ACL style (acl-org/acl-style-files master, 2026-06)
+  - `custom.bib` — bibliography (contains stub entries to be verified; see TODOs in the file)
+  - `formatting.md` — official formatting guidelines
+  - `acl_lualatex.tex` — XeLaTeX / LuaLaTeX template (unused)
+- `word/`, `archive/` — official Word template and legacy templates (unused, kept as shipped with the style package)
+
+## Build
 
 ```bash
 cd latex
 pdflatex acl_latex && bibtex acl_latex && pdflatex acl_latex && pdflatex acl_latex
 ```
 
-或直接上传 `latex/` 目录到 [Overleaf](https://www.overleaf.com/) 编译。当前使用 `review` 模式（带行号）。
+Or upload the `latex/` directory to [Overleaf](https://www.overleaf.com/). The document currently uses `review` mode (with line numbers).
 
-## 写作状态
+## Writing status
 
-- [x] 标题 / 作者 / 摘要
-- [x] 章节骨架（§1–§8 + Limitations + Ethics + 附录）
-- [x] Introduction 初稿（community-grounded 四段式）
-- [ ] 实验数字回填（正文 `[N]` / `[X]` 占位，搜索 `% TODO`）
-- [ ] Figure 1–3、Table 1–5 占位替换为正式图表
-- [ ] `custom.bib` stub 条目逐条核实替换
-- [ ] §3–§5、§6–§7 正式文字
+- [x] Title / authors / abstract
+- [x] Section skeleton (§1–§8 + Limitations + Ethics + appendices)
+- [x] Introduction draft (community-grounded, four paragraphs)
+- [ ] Fill in experimental numbers (`[N]` / `[X]` placeholders in the text; search `% TODO`)
+- [ ] Replace Figure 1–3 and Table 1–5 placeholders with final figures/tables
+- [ ] Verify and replace stub entries in `custom.bib`
+- [ ] Draft §3–§5 and §6–§7
 
-## 相关资源
+## Related resources
 
-- Benchmark 任务与判分：`../benchmark/`
-- Skill 语料：`../skills/`
-- 官方样式来源：[acl-org/acl-style-files](https://github.com/acl-org/acl-style-files)
+- Benchmark tasks and graders: `../benchmark/`
+- Skill corpus: `../skills/`
+- Official style source: [acl-org/acl-style-files](https://github.com/acl-org/acl-style-files)
