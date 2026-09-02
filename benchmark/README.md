@@ -151,6 +151,10 @@ it is alive.
 
 ## How to run
 
+For formal/reproducible runs, pin an evaluation snapshot under
+[`benchmark/snapshots/`](snapshots/README.md) instead of describing the object
+as "the current benchmark".
+
 ```sh
 # oracle self-check (no API cost): the reference answer must score a perfect 1.0
 harbor run -p benchmark/tasks/S1-static-scan -a oracle
