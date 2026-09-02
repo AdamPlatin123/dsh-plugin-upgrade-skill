@@ -88,6 +88,29 @@ band tree could not express:
 Both are declared here and in the scoring table, so cross-run comparisons stay
 explicit.
 
+## Export to DeepSWE-style reports
+
+`benchmark/scripts/export-deepswe-report.mjs` converts a checkpoint-graded judge
+result (the `/logs/verifier/reward.json` ledger) into the report fields DeepSWE
+writes ([reward.json/ctrf.json](https://github.com/datacurve-ai/deep-swe)), so the
+two benchmarks can be compared side by side:
+
+```sh
+node benchmark/scripts/export-deepswe-report.mjs /logs/verifier/reward.json --task M5-token-auth-smoke
+```
+
+Mapping (verified against DeepSWE's `grader.py` output schema):
+
+- f2p bucket = checkpoints of type `fail-to-pass` / `pass` / `report` (must pass);
+- p2p bucket = checkpoints of type `pass-to-pass` (must keep passing);
+- `reward` = DeepSWE's binary reward (1 iff every f2p passed and no p2p failed);
+- `score` = this benchmark's graded 0-100 result, kept alongside as a 0-1 value;
+- `ctrf` = one test row per checkpoint, named `[f2p] <id>` / `[p2p] <id>`.
+
+Differences kept explicit: DeepSWE's `apply_failed` field has no equivalent here
+(our judges have environment gates instead) and is not invented; an empty p2p
+bucket defaults its ratio to 1.0, matching DeepSWE's own edge behavior.
+
 ## Maintenance notes
 
 - `evaluateCheckpoints` / `restorePristine` live in each task's own copy of
@@ -108,8 +131,8 @@ explicit.
    trap description), becoming the single source of truth that
    `validate-task-registry.mjs` cross-checks the prose tables against.
 3. **Publish the ledger** — `reward.json` already carries the structured
-   checkpoints; a follow-up can map it onto DeepSWE-style report formats
-   (reward/ctrf) for cross-benchmark comparison.
+   checkpoints; `export-deepswe-report.mjs` maps it onto DeepSWE-style report
+   fields (reward/ctrf) for cross-benchmark comparison.
 4. **Pin the trap states** — the baseline-mismatch verdict turns fixture drift into
    a hard failure; run it occasionally against main's tasks to keep every trap
    honest.
