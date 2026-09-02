@@ -1,8 +1,8 @@
-# dsh plugin upgrade tasks (benchmark v2.3 · Harbor format)
+# dsh plugin upgrade tasks (benchmark v2.4 · Harbor format)
 
-The 26 plugin-upgrade tasks measure one thing: **once an AI has our upgrade skill
+The 27 plugin-upgrade tasks measure one thing: **once an AI has our upgrade skill
 installed, will it actually upgrade the plugin**. The first 12 are written exams (read
-the code, produce the answer); the last 14 are hands-on (actually install dsh and run
+the code, produce the answer); the last 15 are hands-on (actually install dsh and run
 the plugin — whether it is alive is obvious at a glance). Every task ships with
 auto-grading, so no human marking is involved.
 
@@ -33,6 +33,7 @@ honestly instead of quietly fixing it and pretending nothing happened).
 | H9-dsh-web-alpha2 | Hands-on | Can it migrate the real dsh-web v0.3.8 source slice to v0.3.9 on alpha.2, covering all 13 settings consumers, the dependency cohort, aggregate entrypoints, workflow, and retry protocol |
 | H10-browser-activation-trap | Hands-on | A renamed Web plugin appears in the browser boot manifest and its bundle returns 200, but the client entry never activates: does it repair the registration identity and prove execution in Chromium |
 | H13-ghost-host-trap | Hands-on | The disk says dsh 0.1.2-alpha.2 but the web host has been running since before the in-place upgrade and still answers the pre-0.1.2 wire: does the pre-flight pin the migration FROM to the running process's real generation (probe + start-time, host left untouched) instead of trusting the version on disk |
+| H11-dual-cohort-rpc | Hands-on | An alpha-style two-argument RPC registration passes its mocks and the newer real Host but crashes on rc.2: can it find one branch-free call shape that preserves the legacy per-channel authority policy in both real cohorts |
 | S4-legacy-client-imports | Static | A 0.1.1-era Web Client plugin: can it find all four breaking client-runtime touchpoints, cite the four cards, and not fabricate extra "cards" |
 | S5-negative-naming | Static | A naming manifest that looks fine: does it keep the four-state judgment restrained (official short names are valid, warnings are not errors, unqueried registry is unknown) instead of claiming "all good, can publish" |
 | H6-remote-error-trap | Static | An alpha.2 plugin still on 0.1.1 error handling with a comment saying "do not change the error codes": does it migrate the error flow (namespaced codes, cancel propagation, no blind retry, no silent swallow) by evidence instead of the comment |
@@ -57,7 +58,8 @@ supplied by Harbor, although native Codex skills remained available in the
 latter condition. These rows belong to the same benchmark family but are not a
 direct model comparison: `S8-release-routing-trap`, `M5-token-auth-smoke`, and
 `H8-fire-drill` were added after the Luna snapshot, while
-`H10-browser-activation-trap` was added after the Terra runs.
+`H10-browser-activation-trap` was added after the Terra runs, and
+`H11-dual-cohort-rpc` is added by this PR.
 
 | Model | Skill condition | Scope | reward | mean | perfect tasks | Summed job duration | Tokens (input / cache / output) | Cost | Detailed report |
 |---|---|---|---:|---:|---:|---:|---:|---:|---|
@@ -196,7 +198,7 @@ harbor run -p benchmark/tasks/S1-static-scan -a oracle
 # evaluate a single task with an agent
 harbor run -p benchmark/tasks/M1-host-migration -a claude-code -m anthropic/claude-opus-4-1
 
-# all 26 tasks: pointing -p at the tasks/ directory runs them as a dataset batch
+# all 27 tasks: pointing -p at the tasks/ directory runs them as a dataset batch
 harbor run -p benchmark/tasks -a claude-code -m anthropic/claude-opus-4-1
 ```
 
@@ -208,7 +210,7 @@ the judge's per-item reasons are in the verifier log.
 
 ### Unattended authorization
 
-All 26 `instruction.md` files carry the `BENCHMARK-AUTH-v1` marker: the task prompt
+All 27 `instruction.md` files carry the `BENCHMARK-AUTH-v1` marker: the task prompt
 itself is the user's confirmation of the plan and the execution within the stated
 scope. The agent should complete the necessary analysis/planning and then proceed — it
 must not stop just because Harbor will not send a second round of "confirmation". The
@@ -259,6 +261,13 @@ needed between rounds. `BENCHMARK-AUTH-v1` is identical in both rounds: it only
 removes the false zeros caused by the missing confirmation round in an unattended
 environment, and it does not leak migration answers to either round.
 
+Tasks carrying `metadata.skill_snapshot_commit` are an exception to attaching the
+current skill tree. Their provenance document identifies the exact pre-answer skill
+snapshot that must be materialized for the with-skill condition. In particular, H11
+must use `7d33bf4c492da250c94f48aebd29bb16877d7a36`: the current Example 04 contains
+its answer and would turn a transfer test into retrieval. No-skill and generic-skill
+runs keep the same task image and prompt.
+
 ## Grading design notes
 
 - **Real activation counts**: for hands-on tasks the judge installs the agent's
@@ -274,6 +283,9 @@ environment, and it does not leak migration answers to either round.
   parse the JSON it falls back to a 0 score.
 - **Browser execution where required**: H10 includes Chromium and requires a DOM
   activation marker; a boot-manifest entry or HTTP 200 alone earns only partial credit.
+- **Real dual-cohort contracts where required**: H11 invokes two independently locked
+  published `HostConnectionService` implementations and records the supplied legacy
+  authority object; a mock-only green result cannot earn the cohort points.
 
 ## Historical documents
 
@@ -303,7 +315,7 @@ numbers cannot be compared across models or against later runs.
   adding ordinary fixture tasks** — the point is to stop anyone from accidentally
   publishing fake plugins to npm.
 - When adding a task, scaffold it with `harbor task init`, then fill in
-  judge / solve.sh following the layout of the existing 26 tasks, and verify the
+  judge / solve.sh following the layout of the existing 27 tasks, and verify the
   reference answer scores 1.0 with `harbor run -p <task> -a oracle`.
 - After adding or modifying prompts, run
   `node benchmark/scripts/validate-execution-contract.mjs` to make sure the
