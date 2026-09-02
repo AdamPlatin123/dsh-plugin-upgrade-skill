@@ -68,7 +68,7 @@ Two checks, before any touchpoint scan:
 
    ```sh
    ps -o lstart= -p <hostPid>
-   git -C <checkout> log -1 --format=%ci
+   git -C <checkout> log -1 --format=%cI
    ```
 
 2. **Probe, don't read version numbers** — send the target host one request whose
@@ -76,6 +76,11 @@ Two checks, before any touchpoint scan:
    unauthenticated `agentPreset.list` `ok`/401 fork above is a ready-made probe
    (loopback is not exempt, see [DSH-0.1.2-A1-08](v0.1.2-alpha.1.md)); for the
    composition-layer equivalent see [host-plane-probes.md](host-plane-probes.md).
+
+Both checks plus the probe are packaged as
+[`scripts/ghost-host-check.mjs`](../scripts/ghost-host-check.mjs)
+(`node skills/plugin-upgrade/scripts/ghost-host-check.mjs <hostPid> <checkoutDir> [port]`;
+exit 1 = ghost, so shell gates can consume the verdict directly).
 
 When a ghost is confirmed: restart the host and re-run the checkup, or explicitly pin
 the corridor's `from` to the process's actual generation and record it in the report.
