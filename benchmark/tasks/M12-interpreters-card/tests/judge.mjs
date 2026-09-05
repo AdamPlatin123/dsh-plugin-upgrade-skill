@@ -235,7 +235,7 @@ function scoreStatic() {
 
   // (e) the peer cohort.
   const peers = pkg.peerDependencies ?? {}
-  const dshPeers = Object.entries(peers).filter(([k]) => k.startsWith('@deepseek-ai/'))
+  const dshPeers = Object.entries(peers).filter(([k]) => k.startsWith('@deepseek-ai/dsh-'))
   const offCohort = dshPeers.filter(([, v]) => !ALPHA_COHORT.test(String(v)))
   if (dshPeers.length > 0 && offCohort.length === 0) {
     score += 10
