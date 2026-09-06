@@ -1,0 +1,36 @@
+{
+  "task_name": "dsh-plugin-upgrade/s3-snapshot-migration-llm-pilot",
+  "trial_name": "S3-snapshot-migration__UufQyn9",
+  "task_checksum": "e0b5a3561e9d7aa1f8a6e5b5404d4d318db7c7b8d1d6160368350b9d2652d4f4",
+  "agent_info": {
+    "name": "codex",
+    "version": "0.153.3",
+    "model_info": {
+      "name": "gpt-5.6-luna",
+      "provider": "openai"
+    }
+  },
+  "agent_result": {
+    "n_input_tokens": 951222,
+    "n_cache_tokens": 861440,
+    "n_output_tokens": 11097,
+    "cost_usd": 0.0485016,
+    "rollout_details": null,
+    "metadata": null
+  },
+  "exception_info": null,
+  "started_at": "2026-09-06T02:34:37.549275Z",
+  "finished_at": "2026-09-06T02:41:48.362619Z",
+  "environment_setup": {
+    "started_at": "2026-09-06T02:34:37.866939Z",
+    "finished_at": "2026-09-06T02:34:39.902696Z"
+  },
+  "agent_setup": {
+    "started_at": "2026-09-06T02:34:39.902777Z",
+    "finished_at": "2026-09-06T02:34:40.113888Z"
+  },
+  "agent_execution": {
+    "started_at": "2026-09-06T02:37:39.858404Z",
+    "finished_at": "2026-09-06T02:41:44.251369Z"
+  }
+}

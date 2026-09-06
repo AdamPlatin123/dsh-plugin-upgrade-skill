@@ -1,0 +1,36 @@
+{
+  "task_name": "dsh-plugin-upgrade/s1-static-scan-llm-pilot",
+  "trial_name": "S1-static-scan__hKUUwxw",
+  "task_checksum": "55b79383eed1a3677e76596b2dfdd7149327ce37e66b564c2630435473489fa7",
+  "agent_info": {
+    "name": "codex",
+    "version": "0.153.3",
+    "model_info": {
+      "name": "gpt-5.6-luna",
+      "provider": "openai"
+    }
+  },
+  "agent_result": {
+    "n_input_tokens": 171372,
+    "n_cache_tokens": 141568,
+    "n_output_tokens": 7901,
+    "cost_usd": 0.01827336,
+    "rollout_details": null,
+    "metadata": null
+  },
+  "exception_info": null,
+  "started_at": "2026-09-06T02:34:37.519262Z",
+  "finished_at": "2026-09-06T02:37:45.091985Z",
+  "environment_setup": {
+    "started_at": "2026-09-06T02:34:37.717414Z",
+    "finished_at": "2026-09-06T02:34:39.753991Z"
+  },
+  "agent_setup": {
+    "started_at": "2026-09-06T02:34:39.754110Z",
+    "finished_at": "2026-09-06T02:34:39.971054Z"
+  },
+  "agent_execution": {
+    "started_at": "2026-09-06T02:34:39.971369Z",
+    "finished_at": "2026-09-06T02:37:39.855485Z"
+  }
+}

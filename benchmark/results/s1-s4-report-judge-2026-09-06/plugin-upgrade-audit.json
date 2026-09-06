@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "trials": [
+    {
+      "schemaVersion": 1,
+      "trial": {
+        "id": "S1-static-scan__hKUUwxw",
+        "task": "S1-static-scan",
+        "condition": "no-target-skill"
+      },
+      "targetSkill": {
+        "name": "plugin-upgrade",
+        "supplied": false,
+        "discovered": true,
+        "opened": false,
+        "openCount": 0,
+        "firstOpenEvent": null,
+        "openedFiles": [],
+        "referencesOpened": [],
+        "anyTargetSkillContentAccess": false,
+        "contentAuditable": true
+      },
+      "otherSkills": {
+        "opened": false,
+        "skills": [],
+        "files": []
+      },
+      "baselineHasOtherSkillAccess": false,
+      "evidence": [],
+      "warnings": []
+    },
+    {
+      "schemaVersion": 1,
+      "trial": {
+        "id": "S2-negative-scan__WzgXFqi",
+        "task": "S2-negative-scan",
+        "condition": "no-target-skill"
+      },
+      "targetSkill": {
+        "name": "plugin-upgrade",
+        "supplied": false,
+        "discovered": false,
+        "opened": false,
+        "openCount": 0,
+        "firstOpenEvent": null,
+        "openedFiles": [],
+        "referencesOpened": [],
+        "anyTargetSkillContentAccess": false,
+        "contentAuditable": true
+      },
+      "otherSkills": {
+        "opened": false,
+        "skills": [],
+        "files": []
+      },
+      "baselineHasOtherSkillAccess": false,
+      "evidence": [],
+      "warnings": []
+    },
+    {
+      "schemaVersion": 1,
+      "trial": {
+        "id": "S3-snapshot-migration__UufQyn9",
+        "task": "S3-snapshot-migration",
+        "condition": "no-target-skill"
+      },
+      "targetSkill": {
+        "name": "plugin-upgrade",
+        "supplied": false,
+        "discovered": false,
+        "opened": false,
+        "openCount": 0,
+        "firstOpenEvent": null,
+        "openedFiles": [],
+        "referencesOpened": [],
+        "anyTargetSkillContentAccess": false,
+        "contentAuditable": true
+      },
+      "otherSkills": {
+        "opened": false,
+        "skills": [],
+        "files": []
+      },
+      "baselineHasOtherSkillAccess": false,
+      "evidence": [],
+      "warnings": []
+    },
+    {
+      "schemaVersion": 1,
+      "trial": {
+        "id": "S4-legacy-client-imports__M66n4Gk",
+        "task": "S4-legacy-client-imports",
+        "condition": "no-target-skill"
+      },
+      "targetSkill": {
+        "name": "plugin-upgrade",
+        "supplied": false,
+        "discovered": false,
+        "opened": false,
+        "openCount": 0,
+        "firstOpenEvent": null,
+        "openedFiles": [],
+        "referencesOpened": [],
+        "anyTargetSkillContentAccess": false,
+        "contentAuditable": true
+      },
+      "otherSkills": {
+        "opened": false,
+        "skills": [],
+        "files": []
+      },
+      "baselineHasOtherSkillAccess": false,
+      "evidence": [],
+      "warnings": [
+        "exec-call-pairing-mismatch:event-19"
+      ]
+    }
+  ],
+  "aggregate": {
+    "trials": 4,
+    "targetSupplied": "0/4",
+    "targetSkillOpened": "0/4",
+    "activationRateEligible": null,
+    "eligibilityDefinition": "trials where the trajectory declares the target skill (supplied)",
+    "anyTargetSkillContentAccess": "0/4",
+    "byCondition": {
+      "no-target-skill": {
+        "trials": 4,
+        "supplied": "0/4",
+        "opened": "0/4",
+        "otherSkillAccess": "0/4"
+      }
+    },
+    "baselineHasOtherSkillAccess": "0/4",
+    "baselineCondition": "no-target-skill"
+  }
+}

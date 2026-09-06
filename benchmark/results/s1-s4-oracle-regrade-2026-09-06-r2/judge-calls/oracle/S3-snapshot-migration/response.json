@@ -1,0 +1,146 @@
+{
+  "decisions": [
+    {
+      "id": "chat-projection",
+      "verdict": "pass",
+      "reason": "Locates all three chat-derived reads, explains the temporary projection and missing-chat handling, and distinguishes subsequent target-owned reads from permanent legacy use.",
+      "evidence": [
+        {
+          "report": "report.md",
+          "quote": "**Flat snapshot reads (src/client/Pet.tsx:14,21-23: isThinking / toolRunning / lastTurnEnd)**: `partial`, `runningCalls` and `turnEnds` are chat-derived state. For the staged compatibility path, read these three fields through `views.get('chat')?.legacy`, preserving their field semantics and handling a missing chat projection. Then migrate them to the target-owned Chat/views/timeline surfaces; preserve turn ordering rather than assuming every new collection keeps the old array shape. This temporary projection is a migration step, not the preferred permanent alpha.2-only data surface."
+        }
+      ],
+      "sources": [
+        {
+          "path": "src/client/Pet.tsx",
+          "quote": "  return snapshot.partial?.blocks.some(block => block.kind === 'reasoning') ?? false"
+        },
+        {
+          "path": "src/client/Pet.tsx",
+          "quote": "  const toolRunning = useSession(s => s.runningCalls.length > 0)"
+        },
+        {
+          "path": "src/client/Pet.tsx",
+          "quote": "  const lastTurnEnd = useSession(s => s.turnEnds[s.turnEnds.length - 1]?.reason)"
+        }
+      ],
+      "references": [
+        "DSH-0.1.2-A1-03",
+        "API-10"
+      ]
+    },
+    {
+      "id": "session-lifecycle",
+      "verdict": "pass",
+      "reason": "Correctly locates running, keeps it on the existing Session hook, and excludes it from chat legacy without demanding a hook rename.",
+      "evidence": [
+        {
+          "report": "report.md",
+          "quote": "**Lifecycle field (src/client/Pet.tsx:19: running)**: `running` remains Session lifecycle state, outside chat legacy. Keep `useSession(s => s.running)` on the Session seat. Its existing hook need not be renamed; separate the three chat reads from it instead of moving every field into chat legacy or changing every useSession call into a Chat hook."
+        }
+      ],
+      "sources": [
+        {
+          "path": "src/client/Pet.tsx",
+          "quote": "  const running = useSession(s => s.running)"
+        }
+      ],
+      "references": [
+        "DSH-0.1.2-A1-03"
+      ]
+    },
+    {
+      "id": "type-and-inject",
+      "verdict": "pass",
+      "reason": "Identifies both removed imports and the actual manifest entry, gives the scoped Cordis Context mapping, and correctly assigns snapshot types to their domain while deferring unknown exports.",
+      "evidence": [
+        {
+          "report": "report.md",
+          "quote": "**Type imports (src/client/index.ts:6, src/client/Pet.tsx:8; package.json:8)**: `@deepseek-ai/dsh-client-runtime/client` was removed. Replace the context import with `import type { Context as ClientContext } from '@deepseek-ai/cordis'`, and add type-only Context augmentations from the actual service owners."
+        },
+        {
+          "report": "report.md",
+          "quote": "`ConversationSnapshot` must not also be imported from cordis: snapshot types belong to their target Session/Chat domain. The exact replacement for the old aggregate snapshot type needs checking against the target exports and the chosen read surface; do not invent that export. For a direct Chat migration, the documented `ChatSnapshot` owner is `@deepseek-ai/dsh-client-ui-chat/client`. Remove `dsh-client-runtime` from the actual `client.inject` array in package.json:8, retaining only real target providers."
+        }
+      ],
+      "sources": [
+        {
+          "path": "src/client/index.ts",
+          "quote": "import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'"
+        },
+        {
+          "path": "src/client/Pet.tsx",
+          "quote": "import type { ConversationSnapshot } from '@deepseek-ai/dsh-client-runtime/client'"
+        },
+        {
+          "path": "package.json",
+          "quote": "    \"inject\": [\"dsh-client-runtime\", \"dsh-client-ui-conversation\", \"dsh-client-locale\"]"
+        }
+      ],
+      "references": [
+        "DSH-0.1.2-A1-25",
+        "API-10"
+      ]
+    },
+    {
+      "id": "slot-registration",
+      "verdict": "pass",
+      "reason": "Locates the scoped registration, supplies a slots.inject wrapper and renderer augmentation, and preserves slot identity, dependency scope, and disposal lifetime.",
+      "evidence": [
+        {
+          "report": "report.md",
+          "quote": "**Slot registration (src/client/index.ts:38-43)**: the actual call is `scope.slots.register` inside `ctx.inject(['slots', 'conversation'], ...)`. Wait for the named slot with `scope.slots.inject`, retaining this dependency scope, the slot name `conversation.session.header.actions`, registration id `pet`, order `10` and component `Pet`. Add `import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'` for the slots service's Context augmentation; the existing locale and ui-conversation imports provide different type augmentations. The registration remains owned by the injected scope and slot lifetime, so it is disposed when either goes away and recreated when dependencies return; do not hoist it to the root context."
+        },
+        {
+          "report": "report.md",
+          "quote": "ctx.inject(['slots', 'conversation'], (scope: ClientContext) => {\n  scope.slots.inject('conversation.session.header.actions', () => {\n    return scope.slots.register(\n      { name: 'conversation.session.header.actions', id: 'pet', order: 10 },\n      Pet,\n    )\n  })\n})"
+        }
+      ],
+      "sources": [
+        {
+          "path": "src/client/index.ts",
+          "quote": "  ctx.inject(['slots', 'conversation'], (scope: ClientContext) => {\n    scope.slots.register(\n      { name: 'conversation.session.header.actions', id: 'pet', order: 10 },\n      Pet,\n    )\n  })"
+        }
+      ],
+      "references": [
+        "DSH-0.1.2-A1-03",
+        "API-10"
+      ]
+    },
+    {
+      "id": "mapping-and-plan",
+      "verdict": "pass",
+      "reason": "Explicitly maps the located snapshot, lifecycle, and slot changes to A1-03 and package removal to A1-25. Separates staged projection from immediate changes and proposes verification without claiming execution.",
+      "evidence": [
+        {
+          "report": "report.md",
+          "quote": "- DSH-0.1.2-A1-03 (heavy split of the session-view project): items 2/3/4 above all come from this card.\n- DSH-0.1.2-A1-25 (runtime package removal and domain ownership): item 1, including the phantom client.inject dependency; the API-10 reference supplies the Context and target Chat owner mappings."
+        },
+        {
+          "report": "report.md",
+          "quote": "Can run first through the compatibility projection: partial / runningCalls / turnEnds, then migrate chat state and turn history to the target views/timeline APIs.\nImmediate changes: replace removed type imports, delete the phantom client.inject entry and adapt scoped slot registration. Keep running on its already-existing `useSession` lifecycle seat while separating the chat-derived selectors; running does not enter the compatibility projection."
+        }
+      ],
+      "sources": [
+        {
+          "path": "src/client/Pet.tsx",
+          "quote": "  const running = useSession(s => s.running)\n  const thinking = useSession(isThinking)\n  const toolRunning = useSession(s => s.runningCalls.length > 0)"
+        },
+        {
+          "path": "src/client/index.ts",
+          "quote": "  ctx.inject(['slots', 'conversation'], (scope: ClientContext) => {\n    scope.slots.register(\n      { name: 'conversation.session.header.actions', id: 'pet', order: 10 },\n      Pet,\n    )\n  })"
+        },
+        {
+          "path": "package.json",
+          "quote": "    \"inject\": [\"dsh-client-runtime\", \"dsh-client-ui-conversation\", \"dsh-client-locale\"]"
+        }
+      ],
+      "references": [
+        "DSH-0.1.2-A1-03",
+        "DSH-0.1.2-A1-25",
+        "API-10"
+      ]
+    }
+  ],
+  "caps": []
+}

@@ -1,0 +1,14 @@
+web_search = "disabled"
+model_reasoning_effort = "xhigh"
+developer_instructions = "This is a no-skill benchmark. Do not discover, read, invoke, or create any SKILL.md, skill reference, or skill tool. Complete the supplied task using only its permitted fixture and local tools."
+[skills]
+include_instructions = false
+[skills.bundled]
+enabled = false
+[features]
+multi_agent = false
+memories = false
+skill_search = false
+skip_host_skill_discovery = true
+[apps._default]
+enabled = false

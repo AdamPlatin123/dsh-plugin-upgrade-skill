@@ -1,0 +1,33 @@
+{
+  "task_name": "dsh-plugin-upgrade/s4-legacy-client-imports-llm-pilot",
+  "trial_name": "S4-legacy-client-imports__wgURjJF",
+  "task_checksum": "9c260c9d04333981855bc8822b9d9bb08e583053afd3420d576364f2397788e7",
+  "agent_info": {
+    "name": "oracle",
+    "version": "1.0.0",
+    "model_info": null
+  },
+  "agent_result": {
+    "n_input_tokens": null,
+    "n_cache_tokens": null,
+    "n_output_tokens": null,
+    "cost_usd": null,
+    "rollout_details": null,
+    "metadata": null
+  },
+  "exception_info": null,
+  "started_at": "2026-09-06T02:27:34.344883Z",
+  "finished_at": "2026-09-06T02:27:47.364870Z",
+  "environment_setup": {
+    "started_at": "2026-09-06T02:27:34.346834Z",
+    "finished_at": "2026-09-06T02:27:40.851681Z"
+  },
+  "agent_setup": {
+    "started_at": "2026-09-06T02:27:40.851731Z",
+    "finished_at": "2026-09-06T02:27:40.851789Z"
+  },
+  "agent_execution": {
+    "started_at": "2026-09-06T02:27:40.851871Z",
+    "finished_at": "2026-09-06T02:27:43.197244Z"
+  }
+}

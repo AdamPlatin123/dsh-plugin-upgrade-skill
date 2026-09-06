@@ -1,0 +1,33 @@
+{
+  "files": {
+    "candidates/oracle/S1-static-scan.json": "990a5c9ffcdc431c41140f4a0eb9d8e8b3437b0cf30ce0113993c5d8f900d17c",
+    "candidates/oracle/S2-negative-scan.json": "56d80fbc677a154e9a401a23bc649d57ea4150b1fbae292f418dd1558ff5b404",
+    "candidates/oracle/S3-snapshot-migration.json": "814d215e65656d9f8f6d582d96ba37e1e1feb17ce0bdaa441ff966893731a539",
+    "candidates/oracle/S4-legacy-client-imports.json": "e38b971b3a697ad54c687c7fcd13c97d4b339f9fff55183e1df20276bf0f592f",
+    "checks/npm-test.log": "4d8af9144dc0510098e4b648e54ab8fde8c80533051393e3cf80158aa46139d0",
+    "checks/report-judge-tests.log": "08b2815a631321bf3ff661a004292022300a98774938b98efbc8ba87bbf1add6",
+    "grader/codex-judge.mjs": "8bc544808fc705c35cfc993a2072c57c37b7f398f5fe073fe1ec12a0d439a7f6",
+    "grader/judge.mjs": "3c26bfb2395cd35147f56409d20703a3ff91cbce6ed71e9f045e2a45032e3910",
+    "grader/rubrics.mjs": "2f76fac022ba805b36709c3cedaea7478bfa520e0b534042e7b1c17f3d529ba3",
+    "grades/oracle/S1-static-scan.json": "3a0d63bd9102d48b79dd5c6ac3870e88120bfd31e5f834e9fef0eda333859d91",
+    "grades/oracle/S2-negative-scan.json": "04f2ebc25e656f0d2bf892c033a861a7f9d18887f2f309722ff38f74bd180fe7",
+    "grades/oracle/S3-snapshot-migration.json": "708c4ece5168cf5396fe79955b2029d0535b72c8dc1ea4922d898a730c06dbf2",
+    "grades/oracle/S4-legacy-client-imports.json": "b8880c43281ab6b4a2962e63348133e5ee9c9e6491b0668f4548258bb578390a",
+    "judge-calls/oracle/S1-static-scan/request.json": "ac0fa06bfc45a5a7ddc2a9d1f6ddf24ffab3de4cb4e3d9731182e25bb79f8a8d",
+    "judge-calls/oracle/S1-static-scan/response.json": "ca96b4069f4cb555082c8ec067ddc43efbce44a39a826f1b7e92c9404574e97d",
+    "judge-calls/oracle/S2-negative-scan/request.json": "ad7fef6ee641a8021758764aad804e3e593c51ec290d7e9396ca2f7b4fcaded6",
+    "judge-calls/oracle/S2-negative-scan/response.json": "16b026c95ee88042d46611b18d22882a24bd35aaeba5ea58767c0c8b8f6123ae",
+    "judge-calls/oracle/S3-snapshot-migration/request.json": "229f9fce0378e031dbbb7131b5d9906666baf6cc87482fe4c32980b963b5974a",
+    "judge-calls/oracle/S3-snapshot-migration/response.json": "c2b731cff19fe43073f1b8444c2e5593919e45e9f7a5aea999f1902a9915c2ac",
+    "judge-calls/oracle/S4-legacy-client-imports/request.json": "1789c3ddf753d16edac34f1a3515d3be7fe35d770289c9e4d30d8469fa24fdd2",
+    "judge-calls/oracle/S4-legacy-client-imports/response.json": "57d88e1b2079d2bb054356af7d31fa68df27594a81cc73a22c6a2ee19f302637",
+    "legacy-scores.json": "342628a5d281d97c6578d294f8b52dab41e2893e78d150e6038ac13577f36008",
+    "packets/S1-static-scan.json": "0aca5cb49398ae481767b2076e645430358d598fb5f5e4a13b1bf15d25c14fce",
+    "packets/S2-negative-scan.json": "7c1c1b8acda18b541897e08f99e851333d4adb649ad2bc6e5b6420700ae3e218",
+    "packets/S3-snapshot-migration.json": "f0873ea24e92d924977d4a3006305d4080efde38ae67c8021294c1528bfa1ec8",
+    "packets/S4-legacy-client-imports.json": "a6d5aeb4f778ffcad7372f21d796c819620a223a1a0bd4c0bad066ba8cb7c038",
+    "rubric-changes.json": "65889186584c6b16f05882b90880683f9341ed6026a36c249fe706ba0f405790",
+    "summary.json": "c8b5b61ce8680934eead0b8782eaf1859407a2f2f8309329643318b487f0730f",
+    "verification.json": "2df6c3c1f74772b2a0a19487ea6a9726705ef133a60be9fdaa6fdcc49694943a"
+  }
+}

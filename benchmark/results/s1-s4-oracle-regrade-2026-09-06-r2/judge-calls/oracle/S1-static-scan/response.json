@@ -1,0 +1,254 @@
+{
+  "decisions": [
+    {
+      "id": "source-patch",
+      "verdict": "pass",
+      "reason": "Locates the declaration, target and script; distinguishes source patching from composition and correctly identifies private path and exact-text coupling.",
+      "evidence": [
+        {
+          "report": "report.md",
+          "quote": "`cordis.patch.yml` combines plugin composition with an explicit `patch.yml` source-patch reference. The source patch targets `src/session/view/SessionView.ts` and replaces `export function renderSessionView` with `export function renderSessionViewPatched`. This couples to a private host path and exact source text, unlike ordinary plugin insertion."
+        },
+        {
+          "report": "report.md",
+          "quote": "The script requires `DSH_HARNESS_SOURCE_ROOT` and reads/logs the declaration; this static scan does not claim it applied a patch."
+        }
+      ],
+      "sources": [
+        {
+          "path": "cordis.patch.yml",
+          "quote": "  patch:\n    - patch.yml"
+        },
+        {
+          "path": "patch.yml",
+          "quote": "  - target: src/session/view/SessionView.ts\n    replacements:\n      - find: export function renderSessionView\n        replace: export function renderSessionViewPatched"
+        },
+        {
+          "path": "scripts/apply-patch.mjs",
+          "quote": "const sourceRoot = process.env.DSH_HARNESS_SOURCE_ROOT\nif (!sourceRoot) throw new Error('DSH_HARNESS_SOURCE_ROOT is required')\n\nconst surface = readFileSync('patch.yml', 'utf8')"
+        }
+      ],
+      "references": ["DSH-0.1.2-A1-03"]
+    },
+    {
+      "id": "events",
+      "verdict": "pass",
+      "reason": "Identifies producer, consumer and marker; correctly folds removal/restoration into preservation of omission-safe informational markers, rejects required-event whitelisting and avoids inventing append support.",
+      "evidence": [
+        {
+          "report": "report.md",
+          "quote": "the producer emits `legacy/informational-note` with `ignorable: true`; the consumer subscribes to `session/event` and reads `event.type`. Corridor folding: A1-02 removes the marker in alpha.1, A2-01 restores its producer/persistence contract in alpha.2 — net state = **keep the informational producer and marker**, while checking the consumer/replay behavior described below."
+        },
+        {
+          "report": "report.md",
+          "quote": "The event marker permits consumers/replay to skip unknown **omission-safe informational** events. It is not a whitelist that makes unknown required events acceptable: unknown events without the ignorable contract must still be rejected rather than silently discarded."
+        },
+        {
+          "report": "report.md",
+          "quote": "Do not assume an arbitrary `Session.append` call can attach or persist this marker; verify the actual producer/persistence path at the target version."
+        }
+      ],
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "quote": "  ctx.emit('session/event', {\n    type: 'legacy/informational-note',\n    ignorable: true,\n    payload: { text: 'fixture' },\n  })\n  ctx.on('session/event', (event: any /* SessionEvent */) => {\n    console.log('[legacy] session event:', event.type)\n  })"
+        }
+      ],
+      "references": ["DSH-0.1.2-A1-02", "DSH-0.1.2-A2-01"]
+    },
+    {
+      "id": "host-services",
+      "verdict": "pass",
+      "reason": "Locates both APIProxy operations and its removal, and correctly separates Host domain-service injection from client-plane Remote.",
+      "evidence": [
+        {
+          "report": "report.md",
+          "quote": "`ctx.get('apiProxy')` calls `session.rename` and `llm.providers`; apiProxy is removed entirely in alpha.1, host-plane consumers switch to injected domain services (`llm` → `ctx.llm.listProviders()`), only the client plane uses `ctx.remote.*`"
+        }
+      ],
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "quote": "  ctx.register('rename-session', async ({ id, title }: any) => {\n    const apiProxy = await ctx.get('apiProxy')\n    await apiProxy.invoke('session.rename', { id, title })\n  })\n  ctx.register('list-providers', async () => {\n    const apiProxy = await ctx.get('apiProxy')\n    return apiProxy.invoke('llm.providers')\n  })"
+        }
+      ],
+      "references": ["DSH-0.1.2-A1-01"]
+    },
+    {
+      "id": "host-path",
+      "verdict": "pass",
+      "reason": "Identifies the fixed home/default-profile assumption and recommends runtime home/profile information while correctly dating --profile.",
+      "evidence": [
+        {
+          "report": "report.md",
+          "quote": "hard-coded `~/.dsh/profiles/default`; use the runtime `DSH_HOME` and selected profile information instead of assuming the home directory and default profile. `--profile` already existed before alpha.1."
+        }
+      ],
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "quote": "    const profileDir = join(homedir(), '.dsh', 'profiles', 'default')\n    writeFileSync(join(profileDir, 'legacy-note.txt'), text)"
+        }
+      ],
+      "references": ["DSH-0.1.2-A1-04"]
+    },
+    {
+      "id": "ui",
+      "verdict": "pass",
+      "reason": "Locates the private import and command registration and requires target-owner/public-seam verification without guessing replacement APIs.",
+      "evidence": [
+        {
+          "report": "report.md",
+          "quote": "imports private `SessionView` and registers `legacy.openView` through `contributes.registerCommand`. After the split, verify the target owning modules, actual exports and supported public UI/command registration seam. Prefer those public APIs; if no stable replacement is established, mark that capability pending confirmation rather than guessing a new internal import."
+        }
+      ],
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "quote": "import { SessionView } from '@deepseek-ai/dsh-session-view/internal'"
+        },
+        {
+          "path": "src/index.ts",
+          "quote": "  ctx.contributes.registerCommand('legacy.openView', () => {\n    return new SessionView({ enhanced: true })\n  })"
+        }
+      ],
+      "references": ["DSH-0.1.2-A1-03"]
+    },
+    {
+      "id": "channel",
+      "verdict": "pass",
+      "reason": "Identifies the dormant private loopback server and explicitly distinguishes raw routes from authenticated Host-managed channels; loopback is not treated as an exemption.",
+      "evidence": [
+        {
+          "report": "report.md",
+          "quote": "The loopback bridge at src/index.ts:47-54 is declared but not invoked. Binding to `127.0.0.1` does not remove its authentication requirements. A raw `createServer` route is not automatically a host-managed authenticated Connection/Gateway channel; migrate through the supported authentication boundary and verify it, rather than relying on loopback as an exemption."
+        }
+      ],
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "quote": "  function startLegacyBridge() {\n    const server = createServer((_request, response) => {\n      response.end('legacy')\n    })\n    server.listen(43121, '127.0.0.1') // http://localhost:43121/api/legacy\n    return server\n  }\n  void startLegacyBridge"
+        }
+      ],
+      "references": ["DSH-0.1.2-A1-08"]
+    },
+    {
+      "id": "subprocess",
+      "verdict": "pass",
+      "reason": "Locates both subprocess parsers and correctly identifies JSONL parsing as a pre-existing bug, separating final stdout text from stderr reasoning/progress.",
+      "evidence": [
+        {
+          "report": "report.md",
+          "quote": "both wrappers run `dsh --profile headless` and use `JSON.parse` on stdout. Stdout was already final text in rc.2; this is an existing wrapper bug, not a newly introduced alpha.2 stdout change. Collect stdout as final text, with streaming chunks treated as chunks rather than JSON records. Keep stderr reasoning/progress/diagnostics separate from final stdout."
+        }
+      ],
+      "sources": [
+        {
+          "path": "src/index.ts",
+          "quote": "      const child = spawn('dsh', ['--profile', 'headless', prompt])\n      let result = ''\n      child.stdout.on('data', (line: Buffer) => {\n        const event = JSON.parse(line.toString())\n        if (event.type === 'final') result = event.text\n      })"
+        },
+        {
+          "path": "scripts/apply-patch.mjs",
+          "quote": "const output = execFileSync('dsh', ['--profile', 'headless', 'ping'], {\n  encoding: 'utf8',\n})\nfor (const line of output.split('\\n')) {\n  if (!line.trim()) continue\n  const event = JSON.parse(line)"
+        }
+      ],
+      "references": ["DSH-0.1.2-A1-04", "DSH-0.1.2-A1-05"]
+    },
+    {
+      "id": "mapping",
+      "verdict": "pass",
+      "reason": "All required cards are substantively mapped to located couplings, including the folded event pair; A1-05 appropriately supplements the subprocess mapping.",
+      "evidence": [
+        {
+          "report": "report.md",
+          "quote": "| #1 patch | ✅ | patch.yml:3-6; cordis.patch.yml:2-6; scripts/apply-patch.mjs:5-9 | DSH-0.1.2-A1-03 |"
+        },
+        {
+          "report": "report.md",
+          "quote": "| #2 events | ✅ | src/index.ts:15-22 | DSH-0.1.2-A1-02 + DSH-0.1.2-A2-01 |"
+        },
+        {
+          "report": "report.md",
+          "quote": "| #3 service/Remote | ✅ | src/index.ts:25-32 | DSH-0.1.2-A1-01 |"
+        },
+        {
+          "report": "report.md",
+          "quote": "| #4 host filesystem | ✅ | src/index.ts:35-38 | DSH-0.1.2-A1-04 |"
+        },
+        {
+          "report": "report.md",
+          "quote": "| #5 UI/commands/tools | ✅ | src/index.ts:10, 41-43 | DSH-0.1.2-A1-03 |"
+        },
+        {
+          "report": "report.md",
+          "quote": "| #6 custom channel | ✅ | src/index.ts:47-54 | DSH-0.1.2-A1-08 |"
+        },
+        {
+          "report": "report.md",
+          "quote": "| #7 subprocess/output | ✅ | src/index.ts:57-65; scripts/apply-patch.mjs:11-18 | DSH-0.1.2-A1-04, DSH-0.1.2-A1-05 |"
+        }
+      ],
+      "sources": [
+        {
+          "path": "patch.yml",
+          "quote": "  - target: src/session/view/SessionView.ts"
+        },
+        {
+          "path": "src/index.ts",
+          "quote": "    type: 'legacy/informational-note',\n    ignorable: true,"
+        },
+        {
+          "path": "src/index.ts",
+          "quote": "    const apiProxy = await ctx.get('apiProxy')\n    return apiProxy.invoke('llm.providers')"
+        },
+        {
+          "path": "src/index.ts",
+          "quote": "    const profileDir = join(homedir(), '.dsh', 'profiles', 'default')"
+        },
+        {
+          "path": "src/index.ts",
+          "quote": "import { SessionView } from '@deepseek-ai/dsh-session-view/internal'"
+        },
+        {
+          "path": "src/index.ts",
+          "quote": "    server.listen(43121, '127.0.0.1') // http://localhost:43121/api/legacy"
+        },
+        {
+          "path": "scripts/apply-patch.mjs",
+          "quote": "const output = execFileSync('dsh', ['--profile', 'headless', 'ping'], {\n  encoding: 'utf8',\n})\nfor (const line of output.split('\\n')) {\n  if (!line.trim()) continue\n  const event = JSON.parse(line)"
+        }
+      ],
+      "references": [
+        "DSH-0.1.2-A1-01",
+        "DSH-0.1.2-A1-02",
+        "DSH-0.1.2-A2-01",
+        "DSH-0.1.2-A1-03",
+        "DSH-0.1.2-A1-04",
+        "DSH-0.1.2-A1-05",
+        "DSH-0.1.2-A1-08"
+      ]
+    },
+    {
+      "id": "limits",
+      "verdict": "pass",
+      "reason": "Accounts for all seven hits, enumerates scan scope and static limitations, and proposes target-version validation rather than execution of the static fixture.",
+      "evidence": [
+        {
+          "report": "report.md",
+          "quote": "Scan scope: all files under `/app/fixture/`: README.md, package.json, cordis.patch.yml, patch.yml, scripts/apply-patch.mjs and src/index.ts."
+        },
+        {
+          "report": "report.md",
+          "quote": "No-hit notes: all seven categories hit; there is no no-hit category. Still, this scan only covers coupling discoverable by static regex/reading, and it does not prove the dependency graph and config surface are risk-free — before migrating you must still check the package.json dependencies and the profile composition, and verify on a real mount of the target version."
+        },
+        {
+          "report": "report.md",
+          "quote": "Must verify: build/typecheck, a real cold boot of an isolated profile (no `pending (waiting for service: ...)`), and at least one core functional path."
+        }
+      ],
+      "sources": [],
+      "references": ["DSH-0.1.2-A1-03", "DSH-0.1.2-A1-04"]
+    }
+  ],
+  "caps": []
+}

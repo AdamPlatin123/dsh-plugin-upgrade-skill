@@ -1,0 +1,490 @@
+
+> test
+> npm run validate && npm run test:release && npm run test:audit && npm run test:dsh:cases
+
+
+> validate
+> node scripts/validate.mjs && node scripts/validate-manifests.mjs && node benchmark/scripts/validate-task-registry.mjs && node benchmark/scripts/validate-execution-contract.mjs && node --test benchmark/scripts/validate-task-registry.test.mjs && node benchmark/scripts/validate-evaluation-snapshots.mjs && node --test benchmark/scripts/validate-evaluation-snapshots.test.mjs && npm run check:paper-benchmark && node --test paper/scripts/generate-benchmark-table.test.mjs && node benchmark/scripts/validate-checkpoints.mjs && node --test benchmark/scripts/validate-checkpoints.test.mjs && node --test benchmark/scripts/export-deepswe-report.test.mjs && node benchmark/scripts/validate-task-toml.mjs && node --test benchmark/scripts/validate-task-toml.test.mjs && npm run test:h11-judge && node --test benchmark/tasks/H12-remote-result-boundary-trap/tests/parse-sections.test.mjs && node --test benchmark/tasks/H20-session-events-ledger/tests/judge-utils.test.mjs && npm run test:h23-judge && node --test benchmark/tasks/H24-invalid-record-salvage-trap/tests/judge-utils.test.mjs && node --test benchmark/scripts/summarize-runs.test.mjs && node --test benchmark/scripts/audit-skill-activation.test.mjs && node skills/plugin-upgrade/scripts/verify-runtime.check.mjs && npm run test:smoke && npm run test:report-judge
+
+Validation OK: 9 skill, 8 card sets, 58 cards, 398 Markdown files, 7 touchpoint fixtures, 2 face contracts, read-only migration and workflow planners, offline ghost-host classifier, offline naming validator, read-only registry v2 query
+Manifest validation passed: 4 manifests, version 0.1.0-alpha.2
+skills: dsh-benchmark-case, dsh-upgrade-audit, plugin-heavy-dep, plugin-release, plugin-runtime-debug, plugin-test, plugin-upgrade, plugin-workflow, plugin-write
+[task-registry] OK: 54 tasks, README/scoring registry consistent
+Execution-contract validation OK: 54 tasks use BENCHMARK-AUTH-v1
+✔ clean registry passes (2.889833ms)
+✔ stray validation report in benchmark/ root fails (1.956709ms)
+✔ validation report inside benchmark/results/ is accepted (1.499625ms)
+✔ stale README top task count fails with declared/actual (1.256083ms)
+✔ stale authorization count fails (1.372375ms)
+✔ stale "# all N tasks" count fails (1.65725ms)
+✔ stale "existing N tasks" count fails (1.794417ms)
+✔ task missing from the README table fails (1.629958ms)
+✔ unknown task in the README table fails (1.317167ms)
+✔ duplicate task in the README table fails (1.479375ms)
+✔ task missing from the scoring table fails (1.486ms)
+✔ unknown task in the scoring table fails (1.672167ms)
+✔ wrong scoring total fails with declared/expected (1.442125ms)
+✔ instruction.md missing the BENCHMARK-AUTH-v1 marker fails (1.257792ms)
+✔ written/hands-on split mismatch fails (1.182375ms)
+✔ task directory missing instruction.md fails the inventory check (1.597375ms)
+✔ unknown Type value in the README table fails (1.335458ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 90.606625
+[evaluation-snapshot] OK: 2 snapshot(s) valid
+✔ valid snapshot passes (177.069208ms)
+✔ invalid JSON fails (119.096125ms)
+✔ filename/id mismatch fails (165.500333ms)
+✔ malformed createdAt fails (170.756458ms)
+✔ createdAt not matching the id date prefix fails (171.69875ms)
+✔ short benchmark SHA fails (130.888833ms)
+✔ short skill SHA fails (172.175417ms)
+✔ taskCount mismatch fails (172.408083ms)
+✔ duplicate task IDs fail (166.979458ms)
+✔ invalid task ID format fails (130.178583ms)
+✔ task missing at the snapshot commit fails (173.474917ms)
+✔ task without instruction.md at the snapshot commit fails (181.141834ms)
+✔ missing skill path at the skill commit fails (172.696375ms)
+✔ skill missing entirely at the skill commit fails (184.197125ms)
+✔ unresolvable benchmark commit gives an actionable fetch message (123.136958ms)
+✔ unresolvable skill commit gives an actionable fetch message (167.444583ms)
+✔ invalid runsPerTask fails (369.08625ms)
+✔ empty conditions fail (167.764792ms)
+✔ duplicate conditions fail (166.214416ms)
+✔ unsupported aggregation fails (166.996625ms)
+✔ non-string notes fail (166.855583ms)
+✔ wrong repository fails (166.802958ms)
+✔ KEY: a snapshot pinned to commit A stays valid while the working tree sits at a later commit B (165.588ms)
+✔ KEY: a task that only exists at the later commit fails when the snapshot points to the earlier commit (183.360375ms)
+✔ a snapshot pinned to the later commit passes and includes the new task (183.999125ms)
+✔ a snapshot against a non-commit object id fails as unresolved (129.087167ms)
+✔ snapshots directory without any manifests fails (101.683459ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4609.9645
+
+> check:paper-benchmark
+> node paper/scripts/generate-benchmark-table.mjs benchmark/snapshots/2026-09-01-main-23.json --check
+
+paper benchmark metadata is up to date (snapshot 2026-09-01-main-23, 23 tasks)
+out of date: paper/generated/benchmark-metadata.tex
+Run: npm run generate:paper-benchmark
+✔ escapeLatex escapes LaTeX specials and transliterates unicode (0.863459ms)
+✔ generates frozen metadata at HEAD=B and ignores the current checkout (212.128875ms)
+✔ repeated generation is byte-identical (277.236083ms)
+✔ valid snapshot renders the expected macros (202.893958ms)
+✔ H-prefixed Static task is counted Static, never inferred Hands-on/Hybrid (202.818708ms)
+✔ snapshot task order is preserved in the table (not README order) (169.291875ms)
+✔ condition order is preserved (204.168333ms)
+✔ generated TeX is brace-balanced and starts with the AUTO-GENERATED banner (204.842458ms)
+✔ description special characters are escaped in the table (151.960542ms)
+✔ snapshot id and aggregation are escaped by the macro renderer (203.402541ms)
+✔ taskCount mismatch fails (204.306375ms)
+✔ duplicate task ID fails (202.582625ms)
+✔ referenced benchmark commit missing locally fails (150.238916ms)
+✔ task absent at the pinned commit fails even when it exists at HEAD (212.43325ms)
+✔ task row missing from the pinned README fails (169.403792ms)
+✔ duplicate README row fails (151.908625ms)
+✔ unknown registry Type fails (155.833542ms)
+✔ task ID prefix outside S/M/H fails (165.01675ms)
+✔ missing README task table at the pinned commit fails (156.214667ms)
+✔ loadPinnedBenchmarkTable reads git objects only (never the working tree) (227.449ms)
+✔ CLI writes the two generated files and --check passes; drift fails --check (530.101792ms)
+✔ real frozen snapshot 2026-09-01-main-23 generates the documented metadata (495.352708ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 22
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4710.4245
+[checkpoints] OK: 2 checkpoint manifest(s) valid
+✔ valid manifest passes (2.096541ms)
+✔ tasks without a manifest are unaffected (1.618792ms)
+✔ points not summing to 100 fails (1.359791ms)
+✔ unknown checkpoint type fails (1.215833ms)
+✔ uncited card fails (1.186792ms)
+✔ cited card passes (1.078209ms)
+✔ checkpoint not implemented in judge.mjs fails (1.149042ms)
+✔ requires referencing a later checkpoint fails (1.12875ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 68.504875
+✔ full pass maps to binary reward 1 with all buckets passed (0.998667ms)
+✔ partial state maps to binary reward 0 with the graded score preserved (0.057083ms)
+✔ an empty p2p bucket defaults the p2p ratio to 1.0 (0.052084ms)
+✔ an empty ledger maps to zeroed buckets, not division errors (0.036083ms)
+✔ report and pass checkpoints are bucketed as f2p (0.05575ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 60.923916
+Task-toml string-syntax validation OK: 54 task.toml files scanned
+✔ H7 regression: the shipped broken description fails, the #105 fix passes (0.989416ms)
+✔ all valid TOML 1.0 escapes are accepted (0.075083ms)
+✔ TOML 1.1-only escapes are rejected (Harbor parses with tomllib / TOML 1.0) (0.039166ms)
+✔ malformed hex escapes are reported (0.033708ms)
+✔ literal strings and comments never produce escape failures (0.04525ms)
+✔ multiline basic strings allow line-ending backslash but not bad escapes (0.059208ms)
+✔ unterminated single-line strings are reported with the opening line (0.038542ms)
+✔ the real benchmark/tasks tree passes clean (2.507042ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 61.717
+
+> test:h11-judge
+> node --test benchmark/tasks/H11-dual-cohort-rpc/tests/judge-utils.test.mjs
+
+✔ channel comparison is order independent but still rejects duplicates (0.486875ms)
+✔ authority policy is matched by channel rather than as an ordered vector or multiset (0.05675ms)
+✔ branch scan covers nested source helpers and ignores explanatory comments (4.270833ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 60.139708
+✔ ### sub-heading does not end the enclosing canonical section (0.597209ms)
+✔ #### sub-heading does not end the enclosing canonical section (0.049333ms)
+✔ the next ## canonical heading switches the section (0.06175ms)
+✔ an unrecognized ## heading switches to an unscored block deterministically (0.048958ms)
+✔ # level-1 heading does not end the enclosing section (0.045042ms)
+✔ a canonical heading spelled in Chinese alias switches sections (0.062584ms)
+✔ catchBodies matches nested blocks and honors rethrow-after-nested-block (0.1895ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 59.578083
+✔ stripComments removes line and block comments but keeps strings (0.616208ms)
+✔ extractNamedFunctions handles function declarations and arrow consts (0.473125ms)
+✔ extractNamedFunctions captures inline arrow expressions (0.389333ms)
+✔ scanForbidden flags each trap form and nothing else (0.754375ms)
+✔ scanForbidden: console.log is not private access; own/snapshot APIs are not stale (0.04525ms)
+✔ scanForbidden: bracket field access and destructure count as stale/private (0.050375ms)
+✔ scoreCanonical: oracle earns full 15, alternatives earn 2s, traps earn 0s (0.336583ms)
+✔ scoreHygiene subtracts 3 per trap form (0.042333ms)
+✔ capFor picks the smallest triggered cap (0.052292ms)
+✔ control 1: untouched old fixture scores 0 behaviorally and carries stale+index flags (0.109042ms)
+✔ control 2: stale session.events read caps at 30 (0.071ms)
+✔ control 3: invented getEvents() caps at 15 (0.048917ms)
+✔ control 4: ownEvents semantic misuse lands in 0.4–0.7 (0.040458ms)
+✔ control 5: seq-as-array-index caps at 70 (0.037375ms)
+✔ control 6: off-by-one window lands in 0.5–0.8 (0.066584ms)
+✔ control 7: internal/private workaround caps at 60 (0.046666ms)
+✔ control 8: oracle scores 100 (0.029834ms)
+✔ control 9: honest alternative implementation stays near-perfect (0.045459ms)
+✔ control 10: comments naming trap APIs do not penalize correct code (0.034ms)
+✔ assembleScore clamps to 0..100 and reports reasons (0.0605ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 65.303917
+
+> test:h23-judge
+> npm ci --prefix benchmark/tasks/H23-storage-domain-version-compat-trap/environment/fixture --ignore-scripts --no-audit --no-fund && node --test benchmark/tasks/H23-storage-domain-version-compat-trap/tests/judge-utils.test.mjs benchmark/tasks/H23-storage-domain-version-compat-trap/tests/judge.test.mjs
+
+
+added 9 packages in 248ms
+✔ dependency scan only flags alpha.4 in dependency values (0.8025ms)
+✔ compatibility validation uses actual values and the declared current version (0.0815ms)
+✔ runtime dependency contract fails closed for incomplete or invalid manifests (2.676583ms)
+✔ honest schema preserves valid records with optional pinned (0.172583ms)
+✔ schema probes reject any/unknown, missing fields, coercion, and record transforms (1.195375ms)
+✔ schema probes fail closed when parsing throws (0.051ms)
+✔ migration points require an inspected schema even when module loading fails (0.046167ms)
+✔ score assembly awards the oracle 100 and caps schema bypasses at 70 (0.247916ms)
+✔ score assembly caps downgrades and pins at 20, invalid declarations at 30 (0.522958ms)
+✔ backup-and-skip cap uses the evaluated policy and compatibility declaration (0.459542ms)
+✔ capFor picks the smallest cap; clean runtime contracts have no cap (0.051208ms)
+✔ hygiene and score reasons are deterministic (0.439917ms)
+✔ oracle earns 100 against the real runtime (243.886083ms)
+✔ constant compatibility version earns 100 against the real runtime (223.96475ms)
+✔ computed compatibility version earns 100 against the real runtime (232.663792ms)
+✔ spread compatibility version earns 100 against the real runtime (236.195667ms)
+✔ removing id loses record-preservation points (224.636875ms)
+✔ removing title loses record-preservation points (215.464417ms)
+✔ removing pinned loses record-preservation points (204.044083ms)
+✔ direct any cannot earn more than 70 (205.186917ms)
+✔ aliased any cannot earn more than 70 (222.586666ms)
+✔ imported any cannot earn more than 70 (218.948625ms)
+✔ aliased unknown cannot earn more than 70 (207.636416ms)
+✔ untouched retains its negative control (102.03275ms)
+✔ comment-only migration retains its negative control (206.912917ms)
+✔ version downgrade retains its negative control (220.81775ms)
+✔ backup-and-skip without compatibility retains its negative control (197.540083ms)
+✔ invalid current-version compatibility retains its negative control (165.848916ms)
+✔ invalid negative compatibility retains its negative control (164.621083ms)
+✔ alpha.4 dependency pin remains capped at 20 (206.500792ms)
+✔ editing sealed data/migration_summaries/summaries/A.json remains a flat zero (103.897042ms)
+✔ editing sealed node_modules/zod/index.js remains a flat zero (102.778875ms)
+✔ deleting a persisted record remains a flat zero (104.072833ms)
+✔ delete a foreign record at import is a flat zero (143.81575ms)
+✔ rewrite old stamps at import instead of declaring compatibility is a flat zero (155.609ms)
+✔ patch an installed package at import is a flat zero (155.265208ms)
+✔ add a persisted record at import is a flat zero (154.199125ms)
+✔ delete during initial schema parsing is a flat zero (178.054917ms)
+✔ delete then throw during schema parsing is a flat zero (184.87425ms)
+✔ change the judge-written record on reopen is a flat zero (217.299042ms)
+✔ delete during final schema probes is a flat zero (211.110792ms)
+✔ unavailable verifier baseline (null) fails closed (81.394333ms)
+✔ unavailable verifier baseline () fails closed (84.744083ms)
+✔ unavailable verifier baseline (not-a-sha) fails closed (86.651ms)
+✔ unavailable verifier baseline (0000000000000000000000000000000000000000) fails closed (93.295125ms)
+✔ committed data deletion cannot reset the baseline (workspace anchor: false) (117.910792ms)
+✔ committed data deletion cannot reset the baseline (workspace anchor: true) (125.292833ms)
+✔ all runtime dependencies deleted cannot hide behind installed node_modules (203.982917ms)
+✔ required dependency deleted cannot hide behind installed node_modules (207.032583ms)
+✔ required dependency changed cannot hide behind installed node_modules (204.275333ms)
+✔ target version loosened cannot hide behind installed node_modules (217.704334ms)
+✔ runtime dependencies moved to devDependencies cannot hide behind installed node_modules (223.305292ms)
+✔ manifest description edits preserve the full score (210.576166ms)
+✔ candidate cannot remove dependencies after the manifest was inspected (133.136542ms)
+ℹ tests 54
+ℹ suites 0
+ℹ pass 54
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8050.352583
+✔ stripComments removes line and block comments but keeps strings (0.593458ms)
+✔ scanSpecSource detects the policy, z.any, compat confusion, version (0.196583ms)
+✔ scanSrcForCatch detects a catch around the open (0.081584ms)
+✔ scanPackageJson detects the alpha.4 pin in dependency values only (0.085625ms)
+✔ scoreMigration: oracle 20, untouched 10, z.any 5, compat confusion 10 (0.364833ms)
+✔ control 12: oracle scores 100 (0.137666ms)
+✔ control 1: untouched (open still rejects) scores low — judge gate flattens to 0 (0.042916ms)
+✔ control 4: catch-and-empty caps at 30 (0.037458ms)
+✔ control 5: z.any schema caps at 40 (0.047958ms)
+✔ control 6: field-level schema loosening caps at 60 (0.091417ms)
+✔ control 7: backup deleted after salvage caps at 60 (0.048625ms)
+✔ control 8: manual backup without the runtime contract caps at 50 (0.052209ms)
+✔ control 9: policy globalized outside the domain spec caps at 70 (0.039083ms)
+✔ control 2: deleting the corrupt record with no salvage and no backup caps at 30 (0.048083ms)
+✔ control 13: compatibleVersions confusion does not fix schema failure (0.049667ms)
+✔ control 11: keyword/comment mention without the policy keeps the failure (0.034125ms)
+✔ control 3: alpha.4 pin caps at 20 (0.044875ms)
+✔ spec load failure caps at 30 (0.044583ms)
+✔ capFor picks the smallest triggered cap and null when clean (0.056125ms)
+✔ scoreHygiene subtracts for the alpha.4 pin only (0.023ms)
+✔ assembleScore is byte-deterministic and reports reasons (0.488791ms)
+✔ backup filename glob accepts the runtime timestamp shape only (0.047042ms)
+✔ sealed-file gates: authoritative source / healthy records / data edits are flat 0 via judge gates (0.015ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 62.237041
+✔ single result / single group summarizes correctly (1.951ms)
+✔ two result files merge into one group (0.536292ms)
+✔ same task 3 runs aggregates with a correct median (0.537792ms)
+✔ even-length median averages the two middle values (0.049375ms)
+✔ reward 0 is scored, not treated as missing (0.267791ms)
+✔ perfect trials are counted (0.479792ms)
+✔ no-reward trial is an anomaly and never scored as 0 (0.4275ms)
+✔ scored trial with an execution exception keeps its reward and is flagged (0.280625ms)
+✔ reward below 0 fails loudly (0.391208ms)
+✔ reward above 1 fails loudly (0.325792ms)
+✔ malformed JSON fails with an actionable message (0.269792ms)
+✔ unsupported schema fails with an actionable message (0.296208ms)
+✔ the same input file listed twice is a hard error (0.282375ms)
+✔ the same trial id loaded from two different files is a hard error (0.386417ms)
+✔ two groups produce a paired comparison with deltas (0.761041ms)
+✔ a task present in only one group is excluded from deltas and listed as an anomaly (0.478ms)
+✔ improvement/tie/regression counts are computed from deltas (0.774125ms)
+✔ JSON output is deterministic and contains raw numbers (0.910167ms)
+✔ Markdown output is deterministic and lists the anomalies section (0.432667ms)
+✔ no groups at all is a hard error (0.064708ms)
+✔ job-level result.json expands into per-trial records from reward_stats (0.344625ms)
+✔ job-level cancelled trial count is reported as an anomaly (0.26025ms)
+✔ job-level exception without a reward is an anomaly (0.268833ms)
+✔ normalizeFile on a trial-level object yields one record with normalized task id (0.029625ms)
+✔ loadResultFile throws for a missing path (0.042208ms)
+✔ multiple reward keys without a canonical reward key fail loudly (0.266917ms)
+✔ empty rewards object fails loudly (0.264458ms)
+✔ a single non-canonical numeric reward key is still accepted (kept compatibility) (0.229083ms)
+✔ non-object eval entry in job-level stats fails loudly (0.273458ms)
+✔ non-array trial names in reward_stats fail loudly (0.349667ms)
+✔ non-object reward_stats entries fail loudly (0.284583ms)
+✔ non-object exception_stats fail loudly (0.598166ms)
+✔ non-array exception_stats names fail loudly (0.262542ms)
+✔ non-string trial names fail loudly (0.251791ms)
+✔ group labels with pipes are escaped in Markdown tables (0.260875ms)
+ℹ tests 35
+ℹ suites 0
+ℹ pass 35
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 74.34775
+unknown option: --bogus
+error: ENOENT: no such file or directory, stat '/var/folders/bz/ccg99j252cq4vnj45mrqq67r0000gn/T/skill-audit-VWpM1g/nope'
+✔ normalizePath is lexical and resolves dot segments (0.658542ms)
+✔ shellWords honors quotes and escapes (0.511584ms)
+✔ stripShellComments removes line comments only (0.0475ms)
+✔ decodeJsonStringAt decodes escapes (0.057458ms)
+✔ extractExecCalls pairs cmd/workdir and flags mismatches (0.260125ms)
+✔ classifyShellCommand: content commands and operand extraction (0.219291ms)
+✔ classifyShellCommand: discovery, complex, interpreter, none (0.074334ms)
+✔ classifyShellCommand: grep -r recursive flag (0.038459ms)
+✔ parseSkillsInstructions extracts roots and the skill catalog (0.218334ms)
+✔ matchTargetFile: absolute, relative-with-workdir, references, root (0.124917ms)
+✔ resolveTargetRoots: union of explicit paths and auto runtime roots; hard error when unknown (0.283334ms)
+✔ valid structured SKILL.md read: opened with count, first event, normalized file (1.379166ms)
+✔ discovery only (ls/find/stat + listing output) is NOT an open — the key regression (0.582667ms)
+✔ prose mention alone is neither discovery evidence nor an open (0.53625ms)
+✔ target unavailable: no catalog entry, explicit target path, no reads (0.565792ms)
+✔ target supplied but unread: supplied=true, opened=false (0.490791ms)
+✔ reference-only access: opened stays false, referenceAccessed true, any content access true (0.468417ms)
+✔ repeated reads: openCount counts every read, firstOpenEvent is the first (0.467209ms)
+✔ partial reads count: sed and head are content access (1.135667ms)
+✔ other skill read: otherSkills.opened with the skill name, target untouched (0.425083ms)
+✔ baseline other-skill access is observational, reported only under the baseline condition label (0.492959ms)
+✔ unrelated SKILL.md with the same basename never counts (0.378708ms)
+✔ echo/printf of the path is not a read (0.397542ms)
+✔ shell comment mentioning the read never counts (0.499291ms)
+✔ find/stat/ls/glob false positives: discovered at most, never opened (2.495916ms)
+✔ assistant prose naming SKILL.md does not open; output mention marks discovery only (0.734209ms)
+✔ ambiguous complex shell mentioning the target warns and never opens (0.507417ms)
+✔ grep -r over the skill root opens; plain grep on the root dir does not (0.848542ms)
+✔ explicit target path resolves relative commands against workdir (0.411375ms)
+✔ unknown target path without explicit --target-path is a hard error (0.407333ms)
+✔ ATIF-only trial: supplied detectable, opened not auditable, explicit warning (0.41925ms)
+✔ malformed trajectory.json is a hard error (0.375042ms)
+✔ trajectory.json without a steps array is unsupported (0.386458ms)
+✔ unsupported trial layout (no agent artifacts) is a hard error (0.281ms)
+✔ invalid trailing jsonl lines warn without killing the audit (0.564917ms)
+✔ exec pairing mismatch warns (0.44925ms)
+✔ job directory expands all trials and aggregates (0.910875ms)
+✔ condition grouping and baseline counts in the aggregate (4.643708ms)
+✔ first event index is the 0-based session-log ordinal (0.497916ms)
+✔ JSON output is byte-deterministic across repeated runs (0.674583ms)
+✔ Markdown output is byte-deterministic across repeated runs (0.65125ms)
+✔ paths are normalized skill-relative and no absolute/private path leaks into output (0.444833ms)
+✔ command text and output text never leak into the output (0.430042ms)
+✔ CLI: opened=false is exit 0; markdown renders; unknown option and bad input exit non-zero (180.681666ms)
+ℹ tests 44
+ℹ suites 0
+ℹ pass 44
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 268.912875
+verify-runtime.check: all assertions passed
+
+> test:smoke
+> node --test skills/plugin-test/scripts/docker-release-smoke.test.mjs
+
+✔ validateConfig accepts a pinned smoke configuration (1.156125ms)
+✔ validateConfig rejects mutable and ranged targets (0.18475ms)
+✔ parseMemoryBytes handles Docker binary and decimal units (0.122292ms)
+✔ redactLogs removes common credential forms (0.347792ms)
+✔ classifyFailure maps setup, install, startup, probe, and infrastructure failures (0.074208ms)
+✔ buildReport and renderMarkdown include metrics but not command secrets (0.869584ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 66.636541
+
+> test:report-judge
+> node --test benchmark/report-judge/judge.test.mjs benchmark/report-judge/codex-judge.test.mjs
+
+✔ Codex judge rejects failed, repeated and tool-using turns (1.136166ms)
+✔ Codex transport preserves evidence scoring, records usage, isolates and removes copied auth (33.973667ms)
+✔ all four packets use exact source bytes, bounded excerpts and 100-point rubrics (51.429542ms)
+✔ aggregation is deterministic: full, half and missing; model totals ignored (43.542625ms)
+✔ declared caps require quoted claims and apply after aggregation (10.464666ms)
+✔ unknown, duplicate and omitted criteria/caps cannot produce a reward (10.215333ms)
+✔ judge cannot invent report quotes, fixture evidence or reference IDs (11.096416ms)
+✔ candidate citations are checked against real paths and line bounds (11.056333ms)
+✔ missing reports score zero without credentials or network (12.507375ms)
+✔ sealed hashes reject modified, deleted and untracked fixture files without trusting git (14.565625ms)
+✔ symlinks, special paths and oversized reports cannot escape or get silently truncated (11.870625ms)
+✔ transport sends a text-only blinded request and validates returned evidence (29.22575ms)
+✔ transport fails loudly for HTTP errors, refusals, truncation and malformed JSON (11.796458ms)
+✔ config has no implicit provider and never permits credentials in a URL (0.193667ms)
+✔ output distinguishes judge errors from genuine zeros and clears stale rewards (0.978083ms)
+✔ CLI failure produces details and nonzero exit, never a default-zero reward (63.559166ms)
+✔ pilot preparation keeps agent prompts/fixtures exact and puts references/keys only in verifier (95.991ms)
+✔ generated standalone entry executes through symlinked paths (including macOS /tmp) (105.775209ms)
+✔ calibration includes adversarial and alternative cases; legacy keyword exploit remains reproducible (476.266375ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1028.706791
+
+> test:release
+> node --test skills/plugin-release/scripts/verify-release.test.mjs
+
+✔ parseSemver validates prerelease identifiers and ignores build metadata (0.621375ms)
+✔ compareSemver follows semver prerelease ordering (0.107792ms)
+✔ validateRelease accepts stable and prerelease publications (0.51525ms)
+✔ validateRelease rejects tag and prerelease mismatches (0.144541ms)
+✔ validateRelease rejects incorrect dist-tags (0.060875ms)
+✔ validateRelease refuses stable downgrades and invalid inputs (0.071375ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 60.156333
+
+> test:audit
+> node skills/dsh-upgrade-audit/scripts/gen-artifacts.check.mjs
+
+gen-artifacts checks OK: impure corridors fail closed; pure corridors generate artifacts
+
+> test:dsh:cases
+> node benchmark/runtime/verify.mjs --check
+
+DSH case definitions OK: 1 case, 3 checks

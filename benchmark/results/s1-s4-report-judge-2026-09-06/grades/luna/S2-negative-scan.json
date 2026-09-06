@@ -1,0 +1,315 @@
+{
+  "status": "scored",
+  "score": 60,
+  "max": 100,
+  "passed": false,
+  "decisions": [
+    {
+      "id": "host-break",
+      "verdict": "partial",
+      "reason": "Correctly locates the legacy injection, provider call, and dependency. However, it substitutes “Change Card #3” for A1-01, leaves the confirmed removal unresolved, and supplies neither host-plane llm injection/listProviders nor removal of the dead apiproxy dependency.",
+      "evidence": [
+        {
+          "report": "report.md",
+          "quote": "`export const inject = [\"apiProxy\"]` (`index.js:3`); `ctx.apiProxy.llm.providers()` (`index.js:9`); and the matching legacy dependency `@deepseek-ai/dsh-host-apiproxy@0.0.1-rc.1` (`package.json:16-18`)."
+        },
+        {
+          "report": "report.md",
+          "quote": "### Confirmed hit: Change Card #3 — internal service / Remote contract"
+        },
+        {
+          "report": "report.md",
+          "quote": "This must be aligned with the versions required by the target dsh corridor as part of the same service migration."
+        }
+      ],
+      "sources": [
+        {
+          "path": "index.js",
+          "quote": "export const inject = [\"apiProxy\"]"
+        },
+        {
+          "path": "index.js",
+          "quote": "const providers = await ctx.apiProxy.llm.providers()"
+        },
+        {
+          "path": "package.json",
+          "quote": "\"@deepseek-ai/dsh-host-apiproxy\": \"0.0.1-rc.1\""
+        }
+      ],
+      "references": [
+        "DSH-0.1.2-A1-01"
+      ],
+      "points": 40,
+      "awarded": 20
+    },
+    {
+      "id": "negative-coverage",
+      "verdict": "pass",
+      "reason": "Provides six separate negative assessments with located source evidence. Correctly treats session-notes as string/array utilities and the YAML as ordinary package insertion, without inventing coupling from their names.",
+      "evidence": [
+        {
+          "report": "report.md",
+          "quote": "`index.js` has ESM exports only (`index.js:3`, `index.js:5`); it has no runtime dsh import or deep import. `package.json:7-9` contains ordinary package exports."
+        },
+        {
+          "report": "report.md",
+          "quote": "The plugin has the ordinary `apply(ctx)` entry point and uses generic `ctx.effect(...)` (`index.js:5-7`). There is no alternate lifecycle hook, custom disposer, or version-specific lifecycle API."
+        },
+        {
+          "report": "report.md",
+          "quote": "No `ctx.on`, `ctx.emit`, command registration, command lookup, event name, or message handler appears in the source. The only callback is the function passed to `ctx.effect` (`index.js:7-14`)."
+        },
+        {
+          "report": "report.md",
+          "quote": "No configuration read/write, schema declaration, option object, validator, or `ctx.config`/`ctx.schema` use appears. `package.json:11-14` is static bundle metadata, not plugin configuration code."
+        },
+        {
+          "report": "report.md",
+          "quote": "`src/session-notes.js` is a pure utility module despite its filename: `formatSessionNote` only normalizes a string (`src/session-notes.js:2-4`), and `chunk` only slices an input array (`src/session-notes.js:6-9`). Neither receives `ctx` nor accesses a session, store, database, cache, or filesystem."
+        },
+        {
+          "report": "report.md",
+          "quote": "`cordis.patch.yml:1-3` only inserts the package name into the bundle patch; it contains no UI/asset/runtime I/O operation."
+        }
+      ],
+      "sources": [
+        {
+          "path": "index.js",
+          "quote": "export function apply(ctx) {\n  console.error(\"[minimal-llm] apply() 执行 — 旧 API（apiProxy）路径\")\n  ctx.effect(async () => {\n    try {\n      const providers = await ctx.apiProxy.llm.providers()\n      console.error(\"[minimal-llm] apiProxy.llm.providers() 成功 →\", JSON.stringify(providers).slice(0, 160))\n    } catch (error) {\n      console.error(\"[minimal-llm] apiProxy.llm.providers() 失败 →\", error.message)\n    }\n  })\n}"
+        },
+        {
+          "path": "package.json",
+          "quote": "  \"exports\": {\n    \".\": \"./index.js\",\n    \"./cordis.patch.yml\": \"./cordis.patch.yml\"\n  },\n  \"dsh\": {\n    \"bundle\": {\n      \"patch\": \"./cordis.patch.yml\"\n    }\n  },"
+        },
+        {
+          "path": "src/session-notes.js",
+          "quote": "export function formatSessionNote(text) {\n  return String(text).trim().replace(/\\s+/g, ' ').slice(0, 200)\n}\n\nexport function chunk(lines, size) {\n  const out = []\n  for (let i = 0; i < lines.length; i += size) out.push(lines.slice(i, i + size))\n  return out\n}"
+        },
+        {
+          "path": "cordis.patch.yml",
+          "quote": "- insert:\n    - id: minimal-llm\n      name: \"@demo/dsh-minimal-llm\""
+        }
+      ],
+      "references": [],
+      "points": 20,
+      "awarded": 20
+    },
+    {
+      "id": "inference-boundary",
+      "verdict": "partial",
+      "reason": "Clearly explains limited static coverage and the need for dependency, configuration, and runtime evidence. Distinguishes the positive category from six negatives, but treats apiProxy compatibility as unresolved rather than recognizing its removal as already decisive.",
+      "evidence": [
+        {
+          "report": "report.md",
+          "quote": "The other six categories have no source hits, but a no-hit result only means that this source does not visibly use those surfaces; it is not a compatibility proof."
+        },
+        {
+          "report": "report.md",
+          "quote": "- package resolution, exports, bundle patching, or host startup behave the same under dsh `0.1.2-alpha.2`;\n- generated code, transitive dependencies, or runtime wiring introduce a surface that is not visible in this tiny source tree; or\n- the asynchronous effect actually runs and returns the expected provider data in the target host."
+        },
+        {
+          "report": "report.md",
+          "quote": "The scan narrows the migration scope substantially, but compatibility remains conditional on the category #3 card and runtime verification."
+        }
+      ],
+      "sources": [],
+      "references": [
+        "DSH-0.1.2-A1-01"
+      ],
+      "points": 20,
+      "awarded": 10
+    },
+    {
+      "id": "verification-plan",
+      "verdict": "partial",
+      "reason": "Proposes target-version build/typecheck, isolated-profile cold boot, and an end-to-end provider call without claiming execution. However, checking for startup or service-resolution errors does not explicitly establish that the plugin is active rather than silently pending.",
+      "evidence": [
+        {
+          "report": "report.md",
+          "quote": "After applying the card-prescribed migration, run all of the following in an environment with dsh `0.1.2-alpha.2`:"
+        },
+        {
+          "report": "report.md",
+          "quote": "**Build/typecheck** the package and resolve its exports and host dependency."
+        },
+        {
+          "report": "report.md",
+          "quote": "**Isolated-profile cold boot**: start a fresh profile with the migrated plugin and confirm there are no injection, service-resolution, or startup errors."
+        },
+        {
+          "report": "report.md",
+          "quote": "**Functional smoke test**: exercise the provider-listing path end to end, including the successful result and the error path, and confirm the async effect is disposed/behaves correctly across reload or shutdown."
+        },
+        {
+          "report": "report.md",
+          "quote": "The fixture is static: dsh is not installed and no build, boot, or functional test was run."
+        }
+      ],
+      "sources": [],
+      "references": [
+        "DSH-0.1.2-A1-01"
+      ],
+      "points": 20,
+      "awarded": 10
+    }
+  ],
+  "caps": [],
+  "model": {
+    "requested": "gpt-6-astra",
+    "returned": null,
+    "resolved": "gpt-6-astra",
+    "endpoint": "codex://chatgpt-login",
+    "transport": "codex-exec-v1",
+    "cli_version": "codex-cli 0.153.3",
+    "reasoning_effort": "high",
+    "usage": {
+      "input_tokens": 10451,
+      "cached_input_tokens": 0,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 2246,
+      "reasoning_output_tokens": 379
+    },
+    "request_id": "01a07497-2d7c-71b3-af70-65871b9719af",
+    "tool_calls": 0,
+    "diagnostics": [],
+    "request_sha256": "57f5a019ed12a4531fdbaab58089e4741245bbea1b29dc7cb801a58c07d5dd8b",
+    "response_sha256": "ea88f32b4639b3e390f1b94d6a4fd0d66ac7b1e4b674be035cf8cd84c08c6dcc"
+  },
+  "citation_audit": [
+    {
+      "report": "report.md",
+      "citation": "index.js:3",
+      "path": "index.js",
+      "start": 3,
+      "end": 3,
+      "valid": true
+    },
+    {
+      "report": "report.md",
+      "citation": "index.js:5",
+      "path": "index.js",
+      "start": 5,
+      "end": 5,
+      "valid": true
+    },
+    {
+      "report": "report.md",
+      "citation": "package.json:7-9",
+      "path": "package.json",
+      "start": 7,
+      "end": 9,
+      "valid": true
+    },
+    {
+      "report": "report.md",
+      "citation": "index.js:5-7",
+      "path": "index.js",
+      "start": 5,
+      "end": 7,
+      "valid": true
+    },
+    {
+      "report": "report.md",
+      "citation": "index.js:3",
+      "path": "index.js",
+      "start": 3,
+      "end": 3,
+      "valid": true
+    },
+    {
+      "report": "report.md",
+      "citation": "index.js:9",
+      "path": "index.js",
+      "start": 9,
+      "end": 9,
+      "valid": true
+    },
+    {
+      "report": "report.md",
+      "citation": "package.json:16-18",
+      "path": "package.json",
+      "start": 16,
+      "end": 18,
+      "valid": true
+    },
+    {
+      "report": "report.md",
+      "citation": "index.js:1-2",
+      "path": "index.js",
+      "start": 1,
+      "end": 2,
+      "valid": true
+    },
+    {
+      "report": "report.md",
+      "citation": "index.js:7-14",
+      "path": "index.js",
+      "start": 7,
+      "end": 14,
+      "valid": true
+    },
+    {
+      "report": "report.md",
+      "citation": "package.json:11-14",
+      "path": "package.json",
+      "start": 11,
+      "end": 14,
+      "valid": true
+    },
+    {
+      "report": "report.md",
+      "citation": "src/session-notes.js:2-4",
+      "path": "src/session-notes.js",
+      "start": 2,
+      "end": 4,
+      "valid": true
+    },
+    {
+      "report": "report.md",
+      "citation": "src/session-notes.js:6-9",
+      "path": "src/session-notes.js",
+      "start": 6,
+      "end": 9,
+      "valid": true
+    },
+    {
+      "report": "report.md",
+      "citation": "cordis.patch.yml:1-3",
+      "path": "cordis.patch.yml",
+      "start": 1,
+      "end": 3,
+      "valid": true
+    },
+    {
+      "report": "report.md",
+      "citation": "index.js:3",
+      "path": "index.js",
+      "start": 3,
+      "end": 3,
+      "valid": true
+    },
+    {
+      "report": "report.md",
+      "citation": "index.js:9",
+      "path": "index.js",
+      "start": 9,
+      "end": 9,
+      "valid": true
+    },
+    {
+      "report": "report.md",
+      "citation": "package.json:17",
+      "path": "package.json",
+      "start": 17,
+      "end": 17,
+      "valid": true
+    }
+  ],
+  "reports": {
+    "report.md": "9673c058f8c5fab502f8ea012d2ce03a2dcc27301dfd3044157db1ee1b0dac0f"
+  },
+  "protocol": "report-judge-v1",
+  "packet_sha256": "a1e9ddc7d05ba28ab76a68d2182d0381d90159dea0f5fc92de6b65b02487ceb2",
+  "judge_sha256": "3c26bfb2395cd35147f56409d20703a3ff91cbce6ed71e9f045e2a45032e3910",
+  "adapter_sha256": "8bc544808fc705c35cfc993a2072c57c37b7f398f5fe073fe1ec12a0d439a7f6"
+}

@@ -1,0 +1,48 @@
+[
+  {
+    "task": "S1-static-scan",
+    "previous_packet_sha256": "6d07f6b3fa17f3ecfc08753acefdff34f37f5cfa7a73c26b1e422b1354f152ec",
+    "packet_sha256": "6d07f6b3fa17f3ecfc08753acefdff34f37f5cfa7a73c26b1e422b1354f152ec",
+    "criterion_changes": []
+  },
+  {
+    "task": "S2-negative-scan",
+    "previous_packet_sha256": "a1e9ddc7d05ba28ab76a68d2182d0381d90159dea0f5fc92de6b65b02487ceb2",
+    "packet_sha256": "acde91cb15e766ac4629e894b7745682b10f33f47c4f707f2bd6f8ab0433fbe2",
+    "criterion_changes": [
+      {
+        "id": "negative-coverage",
+        "before": "Account for each of the other six categories with scanned-file evidence. session-notes.js is a pure string/array utility; cordis.patch.yml is ordinary plugin composition, not a host-source patch. Do not invent coupling from filenames.",
+        "after": "Account for each of the other six categories with scanned-file evidence. session-notes.js is a pure string/array utility; cordis.patch.yml is ordinary plugin composition, not a host-source patch. Interpret a negative patch conclusion in its touchpoint-category context: wording such as no patch file/declaration under the source-patch category can correctly mean no host-source patch, especially when the scan scope includes the composition file. Do not deduct solely because an ordinary composition file has patch in its name, or require an extra explanation of that naming distinction when the category conclusion and scan evidence are correct. Still deduct for an explicit denial that the existing composition file itself exists, for misclassifying its insertion as host-source modification, or for unsupported negative conclusions. Do not invent coupling from filenames."
+      }
+    ]
+  },
+  {
+    "task": "S3-snapshot-migration",
+    "previous_packet_sha256": "f7b1b2c07ad8dd50ccae21f4558f276474a34d085a96c906e754f73beb7f2a39",
+    "packet_sha256": "f7b1b2c07ad8dd50ccae21f4558f276474a34d085a96c906e754f73beb7f2a39",
+    "criterion_changes": []
+  },
+  {
+    "task": "S4-legacy-client-imports",
+    "previous_packet_sha256": "957e1474d25385095ddb306150ec3c9d7d70d5c01e118667e90de0685aac8f8f",
+    "packet_sha256": "84fccdf79506106d59b6096d583d9276b8be2b71d6a8bb4036d79be927d4e3c5",
+    "criterion_changes": [
+      {
+        "id": "runtime-removal",
+        "before": "Locate the old ClientContext import, identify Web Client/plugin impact and A1-25, and migrate to actual target owners. Type erasure does not make a removed type package harmless.",
+        "after": "Locate the old ClientContext import, identify Web Client/plugin impact and A1-25, and require removing the deleted-package import in favor of a supported target owning package. A direction such as importing Context from its actual target owning package with the needed type augmentation is sufficient; the fixture does not establish the exact package name. Type erasure does not make a removed type package harmless. Respect the closed-book task: exact successor package names, symbols or signatures absent from the fixture are not mandatory for full credit. Accept a correct located diagnosis, card and defensible migration direction with unavailable details marked unconfirmed or deferred to the actual target owners/exports. Use the sealed references to check asserted details, not to require unseen names. Uncertainty alone without the diagnosis and migration direction earns no credit; positively invented replacements still lose credit."
+      },
+      {
+        "id": "session-content",
+        "before": "Locate useSession/nodes, map A1-27 and move content to the supported target chat/durable window or selectors, retaining order (e.g. useChat plus order/nodes.get). Pet.tsx is empty and has no breaking surface.",
+        "after": "Locate useSession/nodes, map A1-27 and require replacing the removed flat content access with a supported target content-reading surface, preserving ordering. Chat/durable windows or public selectors are supported directions; exact hook/store names such as useChat plus order/nodes.get are not mandatory when unavailable in the fixture. Do not positively claim that the old flat useSession nodes API remains supported. Pet.tsx is empty and has no breaking surface. Respect the closed-book task: exact successor package names, symbols or signatures absent from the fixture are not mandatory for full credit. Accept a correct located diagnosis, card and defensible migration direction with unavailable details marked unconfirmed or deferred to the actual target owners/exports. Use the sealed references to check asserted details, not to require unseen names. Uncertainty alone without the diagnosis and migration direction earns no credit; positively invented replacements still lose credit."
+      },
+      {
+        "id": "connection-face",
+        "before": "Locate connection.api.agentPresets.list, map A1-30 and remove that deleted face in favor of verified Remote/public domain APIs. Accept explicit uncertainty about the exact successor rather than invented method names.",
+        "after": "Locate connection.api.agentPresets.list, map A1-30 and require removing that deleted face in favor of a verified public target interface for the operation. Remote/public domain APIs are supported directions, but the exact successor name is not mandatory when unavailable in the fixture. Respect the closed-book task: exact successor package names, symbols or signatures absent from the fixture are not mandatory for full credit. Accept a correct located diagnosis, card and defensible migration direction with unavailable details marked unconfirmed or deferred to the actual target owners/exports. Use the sealed references to check asserted details, not to require unseen names. Uncertainty alone without the diagnosis and migration direction earns no credit; positively invented replacements still lose credit."
+      }
+    ]
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "previous_manifest_sha256": "faca0be7c5614e59e5209e6c4529e8916b92aeef11b82740545c5088d32b473c",
+  "previous_files_verified": 51,
+  "previous_archive_unchanged": true,
+  "luna_artifacts_unchanged": true,
+  "instructions_fixtures_references_unchanged": true,
+  "s1_s3_rubrics_and_packet_hashes_unchanged": true,
+  "s2_s4_oracles_byte_identical": true,
+  "rubric_weights_criterion_ids_source_requirements_caps_unchanged": true,
+  "judge_and_adapter_byte_identical": true,
+  "packet_report_request_response_hashes_verified": true,
+  "all_scores_recomputed_from_raw_decisions": true,
+  "normalized_reward_files_verified": true,
+  "judge_tool_calls_total": 0,
+  "report_judge_tests": "19 passed",
+  "full_npm_test": "passed"
+}
