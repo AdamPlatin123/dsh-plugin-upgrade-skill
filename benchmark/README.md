@@ -1,8 +1,8 @@
 # dsh plugin upgrade tasks (benchmark v2.4 · Harbor format)
 
-The 53 plugin-upgrade tasks measure one thing: **once an AI has our upgrade skill
+The 54 plugin-upgrade tasks measure one thing: **once an AI has our upgrade skill
 installed, will it actually upgrade the plugin**. The first 19 are written exams (read
-the code, produce the answer); the last 34 are hands-on (actually install dsh and run
+the code, produce the answer); the last 35 are hands-on (actually install dsh and run
 the plugin — whether it is alive is obvious at a glance). Every task ships with
 auto-grading, so no human marking is involved.
 
@@ -72,6 +72,7 @@ honestly instead of quietly fixing it and pretending nothing happened).
 | H21-question-answerer-waterfall | Hands-on | A structured-question answerer still uses the rc.2 single-seat registration: can it migrate to the alpha.2 waterfall while preserving current-owner claim, foreign-owner delegation, rebinding, disposal, and the legacy cohort |
 | H22-dsh-data-agent-alpha2 | Hands-on | Can it migrate the complete real dsh-data-agent v0.1.3 repository to the exact v0.1.4 alpha.2 client behavior, including provider ownership, New Session Hero preservation, revisioned workbench hand-off, Lexical fallback, release artifacts, and browser execution |
 | H23-storage-domain-version-compat-trap | Hands-on | alpha.4 → alpha.5: after a domain version bump the plugin boots and the storage domain opens green while older version-4 per-record documents silently read as absent — can the agent repair the version-stamp compatibility declaration (v4 records reappear, the v5 record stays, the unlisted v3 stamp stays foreign, writes re-stamp 5) without downgrading or patching the runtime |
+| H24-invalid-record-salvage-trap | Hands-on | alpha.4 → alpha.5: one current-version schema-invalid record in a disposable derived-index domain rejects the entire domain open — can the agent salvage it through the backup-and-skip contract (corrupted bytes preserved on disk, healthy records kept, damaged key rebuildable) instead of deleting evidence, swallowing the error, or loosening the schema |
 
 ## Benchmark results
 
@@ -260,7 +261,7 @@ harbor run -p benchmark/tasks/S1-static-scan -a oracle
 # evaluate a single task with an agent
 harbor run -p benchmark/tasks/M1-host-migration -a claude-code -m anthropic/claude-opus-4-1
 
-# all 53 tasks: pointing -p at the tasks/ directory runs them as a dataset batch
+# all 54 tasks: pointing -p at the tasks/ directory runs them as a dataset batch
 harbor run -p benchmark/tasks -a claude-code -m anthropic/claude-opus-4-1
 ```
 
@@ -272,7 +273,7 @@ the judge's per-item reasons are in the verifier log.
 
 ### Unattended authorization
 
-All 53 `instruction.md` files carry the `BENCHMARK-AUTH-v1` marker: the task prompt
+All 54 `instruction.md` files carry the `BENCHMARK-AUTH-v1` marker: the task prompt
 itself is the user's confirmation of the plan and the execution within the stated
 scope. The agent should complete the necessary analysis/planning and then proceed — it
 must not stop just because Harbor will not send a second round of "confirmation". The
@@ -449,7 +450,7 @@ numbers cannot be compared across models or against later runs.
   adding ordinary fixture tasks** — the point is to stop anyone from accidentally
   publishing fake plugins to npm.
 - When adding a task, scaffold it with `harbor task init`, then fill in
-  judge / solve.sh following the layout of the existing 53 tasks, and verify the
+  judge / solve.sh following the layout of the existing 54 tasks, and verify the
   reference answer scores 1.0 with `harbor run -p <task> -a oracle`.
 - After adding or modifying prompts, run
   `node benchmark/scripts/validate-execution-contract.mjs` to make sure the
