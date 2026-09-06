@@ -36,7 +36,7 @@ Oracle是原始`solution/solve.sh`生成的报告，与原`solution/report.md`�
 
 扣分是裁判按冻结rubric作出的判断。已核对其中提及的原报告内容；本次没有另做独立
 专家标注或上游API复核，不能把裁判判断直接视为无争议的ground truth。
-逐项原文引用、源码引用和理由见[评分明细与运行汇总](s1-s4-report-judge-2026-09-06/summary.json)。
+原始引用及逐项判分保留在本机，仓库仅保留本报告的结果汇总。
 
 ## 执行条件
 
@@ -65,8 +65,6 @@ Codex写出的“总分”直接当作结果。CLI turn context确认实际配�
 这条原生skill读取是需要披露的执行偏差，不能声称本组完全没有skill文本。
 若后续要做严格零skill对照，应进一步禁用插件同步，并在隔离环境中验证不存在可读的
 原生skill文件后重新运行；本报告没有悄悄用补跑最高分替换某题。
-见[目标skill审计](s1-s4-report-judge-2026-09-06/plugin-upgrade-audit.json)及
-[原生skill边界](s1-s4-report-judge-2026-09-06/skill-boundary.json)。
 
 ## 时间与用量
 
@@ -88,8 +86,8 @@ output为2,698，属于output，不另加。没有可核实的裁判实际费用
 Trial 总耗时按 Harbor `started_at` / `finished_at` 计算，包含环境准备、排队与产物收集，
 与 agent 执行耗时和并行 job 墙钟时间分开。四次 Oracle trial 总耗时依次为
 9.679、9.768、6.268、13.020 秒；Oracle 只复制报告，不调用 solver 模型，Harbor token
-字段均为 null。Oracle 组最早开始至最后完成共 29.211 秒。原始时间戳与使用量见
-[trial 记录](s1-s4-report-judge-2026-09-06/manifest.json)。
+字段均为 null。Oracle 组最早开始至最后完成共 29.211 秒。原始时间戳与使用量已在本机
+Harbor trial 记录中核对。
 
 ## 异常处理
 
@@ -102,36 +100,15 @@ Trial 总耗时按 Harbor `started_at` / `finished_at` 计算，包含环境准�
    fatal error、tool call、截断和无效引用仍会失败，不产生默认零分。
 3. 自动审批最初要求明确授权GPT-6 Astra接收评分材料。用户明确授权后才继续调用。
 
-## 可复核证据与复现
+## 记录与验证边界
 
-证据目录：[s1-s4-report-judge-2026-09-06](s1-s4-report-judge-2026-09-06/manifest.json)。
-包含四份packet、八份原报告（按原文件名和文本封装为JSON）、八份完整裁判请求与响应、
-逐项计分、精简trial结果、冻结计分代码及全部文件SHA-256。请求中没有独立提供候选模型
-或skill条件标签，也没有额外参考答案。S3 Oracle原文标题自带“Reference Answer”，
-为保持原答案未去掉，因此本次并非完全盲评。
+仓库只保留结果报告。冻结材料、候选报告、请求/响应、逐项评分及日志保留在本机，
+未打包或纳入本次 PR。原始运行目录为 `/private/tmp/s1-s4-live-20260906/`，
+有效 Luna job 为 `jobs/luna-no-skill-clean/`，最终裁判输出为 `grades-v3/`。
+使用方法见[评分试点说明](../docs/report-judge-pilot.md)。
 
-完整原始轨迹和容器job保留在本机`/private/tmp/s1-s4-live-20260906/`。
-有效Luna job是`jobs/luna-no-skill-clean/`；Oracle使用
-`jobs/oracle-luna-no-skill-run/`中的四个oracle trial；最终裁判输出在`grades-v3/`。
-前两次失败的适配层尝试与首次损坏的Luna导出也单独保留，不参与均分。
-
-```sh
-# 复用本次已经准备好的四题快照、固定Codex镜像与实际配置，输出到新job。
-harbor run -c /private/tmp/s1-s4-live-20260906/luna-job.json \
-  --job-name luna-rerun --jobs-dir /tmp/s1-s4-rerun -y
-
-# 对已保留的artifact评分；四题、两组使用相同packet和裁判配置。
-node benchmark/report-judge/codex-judge.mjs \
-  --packet /private/tmp/s1-s4-live-20260906/tasks/S1-static-scan/tests/packet.json \
-  --app /tmp/retained-artifacts/app --logs /tmp/grade \
-  --model gpt-6-astra --bin /path/to/codex --effort high
-```
-
-实际批次完整配置见[execution-config.json](s1-s4-report-judge-2026-09-06/execution-config.json)，
-认证文件位置已改为占位符；具体solver配置见[solver-config.toml](s1-s4-report-judge-2026-09-06/solver-config.toml)。
-临时task的Dockerfile基于预装Codex 0.153.3的`report-judge-codex:0.153.3`镜像；
-由于评分改为独立Codex阶段，删除了临时task中不再使用的`[verifier.env]` API变量。
-这些调整均未改变原题提示、fixture、Oracle报告或冻结参考材料。
+请求未额外提供候选模型、skill条件或参考答案；S3 Oracle原文标题自带“Reference Answer”，
+为保持原文而保留，因此本次并非完全盲评。
 
 验证：`npm test`通过，包含19项report-judge测试；任务注册表与execution-contract验证均
 通过，仍为54道题；八份报告哈希、冻结packet、最终裁判实现和计分结果均复核一致。

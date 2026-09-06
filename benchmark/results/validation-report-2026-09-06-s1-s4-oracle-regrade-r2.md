@@ -12,14 +12,14 @@
 
 原分数来自[首次 Oracle/Luna 验证](validation-report-2026-09-06-s1-s4-oracle-luna-llm-judge.md)。S1、S3 是答案修正，S2、S4 是评分口径修正；这张表用于记录校准变化。S2、S4 的新分数不能与旧 Luna 分数作为同一 rubric 下的成绩直接比较。
 
-## 修改内容与裁判反馈
+## 修改内容
 
-- **S1 Oracle**：补全源码 patch 的声明、目标路径及替换关系；说明事件 `ignorable` 的移除与恢复、可忽略事件的边界；修正固定 home/profile 路径、私有 UI 入口、未被调用的桥接服务及子进程输出解析的判断。明确两个 stdout 解析问题在 rc.2 已存在，以及静态检查与后续运行验证的边界。原 rubric 不变，本次九项均通过。见[修正答案](../tasks/S1-static-scan/solution/report.md)和[逐项裁决](s1-s4-oracle-regrade-2026-09-06-r2/grades/oracle/S1-static-scan.json)。
-- **S2 rubric**：修正 `negative-coverage` 的语境解释。“无 patch 文件/声明”处于源码 patch 类别时，可以表示没有宿主源码 patch；不能仅因普通 composition 文件名含 `patch` 而扣分。明确否认实际文件存在、错误分类、缺乏扫描证据仍应扣分。Oracle 原文未改，裁判接受其类别结论与扫描范围，四项均通过。见[逐项裁决](s1-s4-oracle-regrade-2026-09-06-r2/grades/oracle/S2-negative-scan.json)。
-- **S3 Oracle**：将 Cordis 的 `Context` 与 Session/Chat 领域快照类型分开；定位 manifest 中已经删除的注入依赖；补充 Chat legacy 的阶段性迁移、Session `running` 的归属，以及保留原有依赖 scope、slot 标识、顺序和销毁生命周期的 `slots.inject` 方案。原 rubric 不变，本次五项均通过。见[修正答案](../tasks/S3-snapshot-migration/solution/report.md)和[逐项裁决](s1-s4-oracle-regrade-2026-09-06-r2/grades/oracle/S3-snapshot-migration.json)。
-- **S4 rubric**：统一 `runtime-removal`、`session-content`、`connection-face` 三项的闭卷边界。准确定位问题、匹配卡号、提出有依据的迁移方向，并将材料中缺失的精确包名、符号或签名留待目标版本核验，可以获得满分；单纯写“待确认”或编造替代 API 仍不合格。注册 ID 项及错误迁移断言的 70 分上限不变。Oracle 原文未改，四项均通过。见[逐项裁决](s1-s4-oracle-regrade-2026-09-06-r2/grades/oracle/S4-legacy-client-imports.json)。
+- **S1 Oracle**：补全源码 patch、事件语义、路径和 UI 入口分析，说明子进程输出解析问题在 rc.2 已存在，以及静态检查的边界。原 rubric 不变，九项均通过。见[修正答案](../tasks/S1-static-scan/solution/report.md)。
+- **S2 rubric**：按源码 patch 类别理解“无 patch 文件/声明”，不因普通 composition 文件名含 `patch` 而扣分；错误分类和无依据的结论仍扣分。Oracle 未改，四项均通过。
+- **S3 Oracle**：修正 Context 与快照类型归属、删除依赖的处理、Chat 与 Session 的分流，以及 slot 注册的 scope 和生命周期。原 rubric 不变，五项均通过。见[修正答案](../tasks/S3-snapshot-migration/solution/report.md)。
+- **S4 rubric**：闭卷材料未给出的精确替代 API 可以待确认，但必须有正确定位、卡号和迁移方向；保留错误迁移断言的 70 分上限。Oracle 未改，四项均通过。
 
-评分文本的完整前后差异保存在 [rubric-changes.json](s1-s4-oracle-regrade-2026-09-06-r2/rubric-changes.json)。
+完整评分要求见[rubrics.mjs](../report-judge/rubrics.mjs)。
 
 ## 执行条件与验证
 
@@ -32,7 +32,7 @@
 ## 时间与用量
 
 本轮只调用裁判，没有新增 Harbor trial，Harbor 的 solver token 和 trial 耗时不适用。
-下表耗时来自本机 Codex native 轨迹的 `task_started` / `task_complete`，token 来自归档评分详情。
+下表耗时来自本机 Codex native 轨迹的 `task_started` / `task_complete`，token 来自本机评分记录。
 
 | Oracle | 裁判耗时/秒 | Input tokens | Output tokens |
 |---|---:|---:|---:|
@@ -45,15 +45,8 @@
 四次调用从首次开始到最后完成共 267.517 秒（UTC 03:18:10.423–03:22:37.940，包含调度间隔）。
 Cached input 为 0；reasoning output 为 623，已包含在 output 中，不重复相加。实际费用未提供。
 
-## 证据与边界
+## 记录与边界
 
-本次证据独立归档，未覆盖首次结果：
-
-- [评分汇总与使用量](s1-s4-oracle-regrade-2026-09-06-r2/summary.json)
-- [一致性核验记录](s1-s4-oracle-regrade-2026-09-06-r2/verification.json)
-- [文件 SHA-256 清单](s1-s4-oracle-regrade-2026-09-06-r2/manifest.json)
-- [完整测试日志](s1-s4-oracle-regrade-2026-09-06-r2/checks/npm-test.log)
-
-归档还包含四份候选答案、完整 packet、原始裁判请求/响应、逐项判分及冻结评分实现。更完整的本机 CLI/native 轨迹保留在 `/private/tmp/s1-s4-oracle-regrade-20260906-r2`；登录凭据未归档。
+仓库只保留结果报告。候选答案、冻结材料、原始请求/响应、逐项评分和日志保留在本机，未打包或纳入本次 PR。评分运行目录为 `/private/tmp/s1-s4-oracle-regrade-20260906-r2`。
 
 这次验证说明修正后的 Oracle 与对应 rubric 在一次实评分中一致。它没有测量重复评分稳定性或独立样本上的人工一致率，也没有验证真实上游 API、迁移代码运行效果或容器内 API verifier 路径。

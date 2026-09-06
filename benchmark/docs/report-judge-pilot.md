@@ -7,7 +7,8 @@ The first live Oracle/Luna validation is recorded in the
 [2026-09-06 comparison report](../results/validation-report-2026-09-06-s1-s4-oracle-luna-llm-judge.md).
 The subsequent [Oracle-only R2 calibration](../results/validation-report-2026-09-06-s1-s4-oracle-regrade-r2.md)
 corrects S1/S3 reference reports and clarifies S2/S4 rubrics; Luna was neither rerun
-nor regraded. Its evidence is archived separately from the first comparison.
+nor regraded. The repository keeps result reports; raw evidence for both rounds
+is retained locally and is not included or packaged in this PR.
 Generated tasks have version `2.0.0` and protocol `report-judge-v1`. Do not combine
 their scores with historical scores. Regrade both skill conditions with the same
 packet, rubric, judge implementation and model configuration.
