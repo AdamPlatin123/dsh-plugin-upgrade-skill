@@ -13,6 +13,12 @@ source-launched dsh 0.1.3-alpha.1 web profile on Windows (misattributed combo fa
 ModuleLoader repackaging → cross-entry slot declaration → tree-kill restart discipline).
 
 - Type: static / read-only report
-- Score: 5 aspects × 20 points, fixture-modification gate → 0
+- Score: 5 aspects × 20 points; every listed condition within an aspect is required.
+  Explicitly wrong operational advice or a failed fixture-integrity check → 0.
+  The deterministic prose rubric reports missing conditions; it is not a general semantic evaluator.
 - **Oracle**: `harbor run -p benchmark/tasks/S17-external-ui-plugin-onboarding-trap -a oracle`, expected 1.0.
 - See `instruction.md` for the brief, `solution/SOLUTION.md` for the reference answer.
+
+Run `npm run test:s17-judge` for the isolated judge and verifier regressions (also included
+in `npm test`). The verifier only reads agent artifacts; it never installs counter-example
+or oracle reports into the answer directory and does not require `/solution/`.
