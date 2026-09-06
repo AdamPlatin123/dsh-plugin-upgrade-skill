@@ -1,8 +1,8 @@
 # dsh plugin upgrade tasks (benchmark v2.4 · Harbor format)
 
-The 54 plugin-upgrade tasks measure one thing: **once an AI has our upgrade skill
+The 55 plugin-upgrade tasks measure one thing: **once an AI has our upgrade skill
 installed, will it actually upgrade the plugin**. The first 20 are written exams (read
-the code, produce the answer); the last 34 are hands-on (actually install dsh and run
+the code, produce the answer); the last 35 are hands-on (actually install dsh and run
 the plugin — whether it is alive is obvious at a glance). Every task ships with
 auto-grading, so no human marking is involved.
 
@@ -50,7 +50,6 @@ honestly instead of quietly fixing it and pretending nothing happened).
 | S15-slot-error-boundary-crash | Static | After a feature release the pending-attachment dock vanishes entirely: a dangling `busy` identifier (another component's state) throws only when a chip renders and the phase guard short-circuits open — can it find the pre-existing line behind the misleading new diff and design a data-present render regression |
 | S16-self-host-upgrade-trap | Static | An agent runs the global dsh upgrade from inside its own session on the running host: npm replaces the live package tree, the GUI dies mid-call, and the interrupted install leaves the package present but the `dsh` command gone — can it diagnose the self-upgrade failure, repair via an external pinned re-install, and state the hand-off protocol (host stopped BEFORE npm so nothing crashes mid-install) |
 | S17-external-ui-plugin-onboarding-trap | Static | A hand-written external web UI plugin is inserted into a running profile: one raw-ESM client bundle fails the whole combo so ZERO plugins register (the error names an innocent first-awaited entry), the repackaged plugin then hits a cross-entry slot declaration race, and every edit needs a full host restart (Windows tree-kill or EADDRINUSE) - diagnose all three from the evidence pack |
-| H23-storage-domain-version-compat-trap | Hands-on | alpha.4 → alpha.5: after a domain version bump the stored session data is refused — can it pin the migration contract and prove the read path |
 | M2-optional-dep-trap | Hands-on | The plugin declares an optional dependency but imports it unconditionally at top level (the comment says optional is harmless): does it fix the dependency contract instead of wrapping the import, and prove it with a cold boot |
 | M3-session-projection | Hands-on | A self-assembled profile mounts dsh-tool-todo without the sessionProjections service: does it fix the composition (never edit shipped packages) so the tree activates while the todo tool survives in the final composition |
 | M4-peer-prerelease-range | Hands-on | A peer lower bound written as ^0.1.0-rc.8 does not match 0.1.2-alpha.2 under npm semver's prerelease rule: does it rewrite the bound to the target cohort instead of widening it into a meaningless range |
@@ -73,6 +72,8 @@ honestly instead of quietly fixing it and pretending nothing happened).
 | H20-session-events-ledger | Hands-on | alpha.4 removes the `Session.events` getter (implicit whole-event-array access): does the agent migrate a plugin-internal event ledger module to the explicit sequence/window surface — visible window keeps fork-inherited history, exact-seq lookup, half-open window bounds, own/inherited cut — instead of a symbol rename, an invented getEvents, or a runtime patch |
 | H21-question-answerer-waterfall | Hands-on | A structured-question answerer still uses the rc.2 single-seat registration: can it migrate to the alpha.2 waterfall while preserving current-owner claim, foreign-owner delegation, rebinding, disposal, and the legacy cohort |
 | H22-dsh-data-agent-alpha2 | Hands-on | Can it migrate the complete real dsh-data-agent v0.1.3 repository to the exact v0.1.4 alpha.2 client behavior, including provider ownership, New Session Hero preservation, revisioned workbench hand-off, Lexical fallback, release artifacts, and browser execution |
+| H23-storage-domain-version-compat-trap | Hands-on | alpha.4 → alpha.5: after a domain version bump the plugin boots and the storage domain opens green while older version-4 per-record documents silently read as absent — can the agent repair the version-stamp compatibility declaration (v4 records reappear, the v5 record stays, the unlisted v3 stamp stays foreign, writes re-stamp 5) without downgrading or patching the runtime |
+| H24-invalid-record-salvage-trap | Hands-on | alpha.4 → alpha.5: one current-version schema-invalid record in a disposable derived-index domain rejects the entire domain open — can the agent salvage it through the backup-and-skip contract (corrupted bytes preserved on disk, healthy records kept, damaged key rebuildable) instead of deleting evidence, swallowing the error, or loosening the schema |
 
 ## Benchmark results
 
@@ -261,7 +262,7 @@ harbor run -p benchmark/tasks/S1-static-scan -a oracle
 # evaluate a single task with an agent
 harbor run -p benchmark/tasks/M1-host-migration -a claude-code -m anthropic/claude-opus-4-1
 
-# all 54 tasks: pointing -p at the tasks/ directory runs them as a dataset batch
+# all 55 tasks: pointing -p at the tasks/ directory runs them as a dataset batch
 harbor run -p benchmark/tasks -a claude-code -m anthropic/claude-opus-4-1
 ```
 
@@ -273,7 +274,7 @@ the judge's per-item reasons are in the verifier log.
 
 ### Unattended authorization
 
-All 54 `instruction.md` files carry the `BENCHMARK-AUTH-v1` marker: the task prompt
+All 55 `instruction.md` files carry the `BENCHMARK-AUTH-v1` marker: the task prompt
 itself is the user's confirmation of the plan and the execution within the stated
 scope. The agent should complete the necessary analysis/planning and then proceed — it
 must not stop just because Harbor will not send a second round of "confirmation". The
@@ -450,7 +451,7 @@ numbers cannot be compared across models or against later runs.
   adding ordinary fixture tasks** — the point is to stop anyone from accidentally
   publishing fake plugins to npm.
 - When adding a task, scaffold it with `harbor task init`, then fill in
-  judge / solve.sh following the layout of the existing 54 tasks, and verify the
+  judge / solve.sh following the layout of the existing 55 tasks, and verify the
   reference answer scores 1.0 with `harbor run -p <task> -a oracle`.
 - After adding or modifying prompts, run
   `node benchmark/scripts/validate-execution-contract.mjs` to make sure the

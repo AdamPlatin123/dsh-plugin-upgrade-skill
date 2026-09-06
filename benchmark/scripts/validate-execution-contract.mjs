@@ -29,6 +29,7 @@ const expectedModes = new Map([
   ['H11-dual-cohort-rpc', 'mutable'],
   ['H22-dsh-data-agent-alpha2', 'mutable'],
   ['H23-storage-domain-version-compat-trap', 'mutable'],
+  ['H24-invalid-record-salvage-trap', 'mutable'],
   ['H6-remote-error-trap', 'readonly'],
   ['S4-legacy-client-imports', 'readonly'],
   ['S5-negative-naming', 'readonly'],
