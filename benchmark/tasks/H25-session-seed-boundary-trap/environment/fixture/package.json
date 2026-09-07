@@ -1,0 +1,10 @@
+{
+  "name": "fork-state-session-fixture",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Fork-aware session state helper fixture migrated from dsh 0.1.2-alpha.3 to 0.1.2-alpha.4 (benchmark fixture).",
+  "dependencies": {
+    "@deepseek-ai/dsh-session": "0.1.2-alpha.4"
+  }
+}
