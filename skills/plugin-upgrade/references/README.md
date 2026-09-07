@@ -37,6 +37,7 @@ Companion material:
 - [host-plane-probes.md](host-plane-probes.md): three ways for the host plane to run dual-cohort probes in `cordis.patch.yml`;
 - [migration-hygiene.md](migration-hygiene.md): version-independent toolchain pitfalls (tsbuildinfo false positives, oxc parsing strictness, the plane a change takes effect in, pnpm interception, test syntax);
 - [troubleshooting.md](troubleshooting.md): post-migration symptom → root cause → card lookup;
+- [precision-checklist.md](precision-checklist.md): alpha.2 static-migration precision checklist — peer floors, runtime module composition versus type declarations, locale pairing, channel authentication with protocol preservation, landing discipline and citations; pairs with `inject-lint` for residue/peer checks;
 - [examples/legacy-plugin/](../examples/legacy-plugin/): static fixture for the seven touchpoint classes.
 
 ## Card file metadata
