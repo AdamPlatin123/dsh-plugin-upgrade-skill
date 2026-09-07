@@ -136,7 +136,7 @@
 | [references/v0.1.1-rc.1.md](references/v0.1.1-rc.1.md) | rc.8→rc.1 草稿卡：repository-plugins 机制移除、`dshClient`→`dsh.client` manifest 合并、client-modules 扫描 → bundle `dsh.client`、严格注入 + 弱 `ctx.get`、session 事件契约、自渲染 client 会话聚合、`tasks.peek` 移除、0812 服务改名（vlln 插件迁移；走廊为 0810–0812 内测快照窗口的最近公开 tag 对齐，待上游复核） |
 | [references/v0.1.2-alpha.1.md](references/v0.1.2-alpha.1.md) | rc.2→alpha.1 curated 卡 |
 | [references/v0.1.2-alpha.2.md](references/v0.1.2-alpha.2.md) | alpha.1→alpha.2 curated 卡 |
-| [references/v0.1.2-alpha.3.md](references/v0.1.2-alpha.3.md) | alpha.2→alpha.3 curated 卡（0 张卡：无插件面变更，含核对记录） |
+| [references/v0.1.2-alpha.3.md](references/v0.1.2-alpha.3.md) | alpha.2→alpha.3 curated 卡（2 张）：A3-01 新增 `settings.plugin.item` keyed-slot 设置卡能力（首批真实集成）；A3-02 移除可选 SQLite Session 持久化后端（opt-in 部署的旧库需用旧版导出）；含核对记录 |
 | [references/v0.1.2-alpha.4.md](references/v0.1.2-alpha.4.md) | alpha.3→alpha.4 curated 卡（6 张）：`report` 工具包删除改用 `send_message`、Python code-runtime 包改名、`Session.events` 换成 `seq`/`eventAt`/`snapshotEvents`、`SessionSeq`/`SessionLogOffset` 强类型 + `seedLength`→`isSeeded`、PTC 预设不再暴露 `workflow`、base bundle 默认开 `web_fetch`；含三台真宿主核对记录 |
 | [references/v0.1.2-alpha.5.md](references/v0.1.2-alpha.5.md) | alpha.4→alpha.5 curated 卡（3 张）：storage 域新增可选 `compatibleVersions` 读兼容与 `invalidRecords: 'backup-and-skip'` 兜底；修复 rc.2/alpha.3 时代旧家升级 alpha.4 后拒启/会话列表标题丢失；含 storage 层复现核对记录 |
 | [references/v0.1.2-rc.1.md](references/v0.1.2-rc.1.md) | alpha.5→rc.1（0.1.2 系列首个候选版，0 张卡：纯版本号 bump、无插件面变更；含核对记录与 release notes 覆盖矩阵——把 rc.1 汇总 notes 对照到既有卡片并给出回填候选） |
