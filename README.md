@@ -8,7 +8,7 @@
 
 ## 这个仓库里有什么
 
-- **58 张升级说明卡**：每张卡记录一个真实的坑——什么坏了、为什么坏、怎么修、信息来源是哪个版本。按版本排好序，从 0.1.0-rc.8 一路到 0.1.2-rc.1（alpha.5→rc.1 无插件面变更，0 张卡；alpha.2→alpha.3 有 1 张新增能力卡；alpha.3→alpha.4 有 6 张；rc.8→rc.1 为 9 张草稿卡）。
+- **65 张升级说明卡**：每张卡记录一个真实的坑——什么坏了、为什么坏、怎么修、信息来源是哪个版本。按版本排好序，从 0.1.0-rc.8 一路到 0.1.3-alpha.2（alpha.5→rc.1 无插件面变更，0 张卡；alpha.2→alpha.3 有 1 张新增能力卡；alpha.3→alpha.4 有 6 张；rc.8→rc.1 为 9 张草稿卡；0.1.2-rc.1→0.1.3-alpha.1 有 2 张、0.1.3-alpha.1→0.1.3-alpha.2 有 5 张草稿卡）。
 - **12 条通用对策**：有些坑和版本无关（比如"先备份再动手""新旧版本怎么共存"），这些写成了一份对策清单。
 - **9 个 skill**：一个统一工作流负责选择和编排，另外八个分别负责查升级、写新插件、测插件、发插件、对比两个版本的差别、排查运行时故障、给轻量插件接入重依赖，以及把插件升级经验提取成 benchmark 考题。
 - **52 道考题（benchmark）**：用来测"AI 装了我们的 skill 之后到底会不会升级插件"，每道题都有自动判分；其中包含 dsh-web v0.3.8 → v0.3.9 和 dsh-data-agent v0.1.3 → v0.1.4 两道真实迁移。
@@ -93,7 +93,7 @@ Claude Code 中按名字调用 skill（插件安装后带命名空间）：
 /dsh-plugin-upgrade-skill:plugin-upgrade 0.1.2
 ```
 
-首次只调用统一入口、尚未说明目标流程时，它会先列出 7 个工作流程和 12 项可选能力，推荐只读
+首次只调用统一入口、尚未说明目标流程时，它会先列出 9 个工作流程和 14 项可选能力，推荐只读
 `health-check` 但不会自动执行。回复流程编号或名称，并按需增减能力后，它才会生成阶段账本并开始：
 
 ```text
@@ -131,13 +131,15 @@ Claude Code 中按名字调用 skill（插件安装后带命名空间）：
 | 0.1.1-rc.1 → 0.1.1-rc.2 | ✅ 完成 | [v0.1.1-rc.2.md](skills/plugin-upgrade/references/v0.1.1-rc.2.md) | 3 张卡 |
 | 0.1.1-rc.2 → 0.1.2-alpha.1 | ✅ 完成 | [v0.1.2-alpha.1.md](skills/plugin-upgrade/references/v0.1.2-alpha.1.md) | 28 张卡 |
 | 0.1.2-alpha.1 → 0.1.2-alpha.2 | ✅ 完成 | [v0.1.2-alpha.2.md](skills/plugin-upgrade/references/v0.1.2-alpha.2.md) | 8 张卡 |
-| 0.1.2-alpha.2 → 0.1.2-alpha.3 | ✅ 完成 | [v0.1.2-alpha.3.md](skills/plugin-upgrade/references/v0.1.2-alpha.3.md) | 1 张卡（无破坏性插件面变更，含核对记录；新增 `settings.plugin.item` keyed-slot 设置卡能力） |
+| 0.1.2-alpha.2 → 0.1.2-alpha.3 | ✅ 完成 | [v0.1.2-alpha.3.md](skills/plugin-upgrade/references/v0.1.2-alpha.3.md) | 2 张卡（A3-01 新增 `settings.plugin.item` keyed-slot 设置卡能力；A3-02 移除可选 SQLite Session 持久化后端，opt-in 部署需旧版导出） |
 | 0.1.2-alpha.3 → 0.1.2-alpha.4 | ✅ 完成 | [v0.1.2-alpha.4.md](skills/plugin-upgrade/references/v0.1.2-alpha.4.md) | 6 张卡（`report` → `send_message`、Python 运行时包改名、`Session.events` 移除、seq 强类型、PTC `workflow` 与 base `web_fetch` 默认值；三台真宿主验证） |
 | 0.1.2-alpha.4 → 0.1.2-alpha.5 | ✅ 完成 | [v0.1.2-alpha.5.md](skills/plugin-upgrade/references/v0.1.2-alpha.5.md) | 3 张卡（storage 域 `compatibleVersions` 读兼容与 `backup-and-skip` 兜底；旧家升级拒启/标题丢失修复；storage 层复现核对） |
 | 0.1.2-alpha.5 → 0.1.2-rc.1 | ✅ 完成 | [v0.1.2-rc.1.md](skills/plugin-upgrade/references/v0.1.2-rc.1.md) | 0 张卡（纯版本 bump；含核对记录、macOS 真机验证与 release notes 覆盖矩阵） |
+| 0.1.2-rc.1 → 0.1.3-alpha.1 | 📝 草稿 | [v0.1.3-alpha.1.md](skills/plugin-upgrade/references/v0.1.3-alpha.1.md) | 2 张草稿卡（session-log 走廊：v0→v1 迁移器拒读 0.1.2-alpha.x writer 日志、跨版本 resume cursor 报错；release tarball 实测，tag 对齐待上游复核） |
+| 0.1.3-alpha.1 → 0.1.3-alpha.2 | 📝 草稿 | [v0.1.3-alpha.2.md](skills/plugin-upgrade/references/v0.1.3-alpha.2.md) | 5 张草稿卡（persona 拆前缀/后缀、`SubprocessHandle.pid` 移除、base 移除 str-replace 编辑器默认行、launcher `runCli()`/`import.meta.main`、pi-ai 0.84.2→0.85.1） |
 | 跨版本通用对策 | ✅ 完成 | [rollup-0.1.2.md](skills/plugin-upgrade/references/rollup-0.1.2.md) | 12 条（新旧共存、先备份、启动卡死怎么办等） |
 | 0.1.1 → 0.1.2 正式版 | 🔄 等官方发版 | — | dsh 0.1.2 还没发正式版（最新是 rc.1，走廊已核实到 rc.1），发了之后我们要复核一遍 |
-| 0.1.2 → 更新版本 | 📝 等社区认领 | — | 想帮忙写卡？看 [贡献指南](CONTRIBUTING.md) |
+| 0.1.3-alpha.2 → 更新版本（0.1.3 正式版等） | 📝 等社区认领 | — | 想帮忙写卡？看 [贡献指南](CONTRIBUTING.md) |
 
 ## 考题（benchmark）
 
@@ -179,6 +181,9 @@ benchmark/                      # 52 道考题 + 判分 + 验证报告
 ```
 
 ## 想贡献？
+
+CI 分层、工作流组合回归和真实模型对照评测入口见
+[Skill CI 说明](benchmark/docs/skill-ci.md)。参考答案测试通过不代表模型已正确使用 Skill。
 
 1. 按 [skills/README.md](skills/README.md) 的规范写；
 2. 升级卡按 [卡片格式](skills/plugin-upgrade/references/README.md) 填；

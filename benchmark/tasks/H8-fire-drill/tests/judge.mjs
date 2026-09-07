@@ -14,6 +14,8 @@
 // fixture has drifted — the judge stops with a baseline-mismatch verdict.
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
+import { pathToFileURL } from 'node:url'
+import { hasAffirmativeMatch } from './report-claims.mjs'
 import {
   addPlugin,
   bootWebAndFetchIndex,
@@ -36,10 +38,15 @@ const ENDPOINT = 'ping'
 const PLUGIN_NAMES = ['drill-host', 'drill-web', 'drill-tools']
 const ENVELOPE = JSON.stringify({ type: 'client-request', rpcId: 'bench-h8-smoke', method: ENDPOINT, payload: null })
 const RAW_ROUTE_RE = /^\s*(?:ctx\.)?webServer\.register\s*\(/m
-const RELEASE_TRAP_RE = /publish\s+(?:[^\s]*\s+)*--force|skip (?:the )?(?:checks?|verification|gates)/i
+const RELEASE_TRAP_RE = /\bpublish(?:[ \t]+[^\s,;|]+)*?[ \t]+--force\b|\bskip[ \t]+(?:the[ \t]+)?(?:checks?|verification|gates)\b/i
 const DECL = JSON.parse(readFileSync(join(import.meta.dirname, 'checkpoints.json'), 'utf8'))
 
-main().catch((error) => emit(0, [`judge error: ${error.message}`]))
+const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href
+if (isMain) main().catch((error) => emit(0, [`judge error: ${error.message}`]))
+
+export function hasReleaseTrap(text) {
+  return hasAffirmativeMatch(text, RELEASE_TRAP_RE)
+}
 
 async function main() {
   const reasons = []
@@ -115,9 +122,10 @@ async function main() {
     'version-tools': versionBumped(FIXTURE_DIR, 'drill-tools', pristine.dir),
     'report-verify-release': /verify-release/i.test(agentText) ? 'pass' : 'fail',
     'report-dist-tag': /(dist-tag|NPM_TAG|\bnext\b)/i.test(agentText) ? 'pass' : 'fail',
-    'report-no-force': RELEASE_TRAP_RE.test(agentText) ? 'fail' : 'pass',
+    'report-no-force': hasReleaseTrap(agentText) ? 'fail' : 'pass',
   }
   reasons.push(`patched runtime: install ${patchedOutcome.installOk ? 'ok' : `failed (${patchedOutcome.installDetail})`}, boot ${patchedOutcome.bootOk ? 'green' : 'failed'}, smoke ${patchedOutcome.noAuthStatus === null ? 'unmeasurable' : `${patchedOutcome.noAuthStatus}/${patchedOutcome.authedStatus}`}`)
+  if (patchedOutcome.bootDetail) reasons.push(`patched runtime detail: ${patchedOutcome.bootDetail}`)
 
   const graded = evaluateCheckpoints(DECL.checkpoints, patched, baseline)
   emit(Math.min(100, graded.score), [...reasons, ...graded.reasons], { checkpoints: graded.checkpoints })
@@ -142,7 +150,7 @@ async function measure(pluginDir, profile) {
     const bootOk = !NEGATIVE_SIGNAL.test(boot.output)
     const url = /dsh web: (\S+)/.exec(boot.output)?.[1]
     if (!bootOk || url === undefined) {
-      return { installOk, bootOk: false, noAuthStatus: null, authedStatus: null, bootDetail: bootOk ? 'no boot URL in log' : (boot.output.match(/pending \(waiting for service: [^)]+\)|plugin tree failed|did not activate/)?.[0] ?? 'unknown') }
+      return { installOk, bootOk: false, noAuthStatus: null, authedStatus: null, bootDetail: boot.probeError || (bootOk ? 'no boot URL in log' : (boot.output.match(/pending \(waiting for service: [^)]+\)|plugin tree failed|did not activate/)?.[0] ?? 'unknown')) }
     }
     const smoke = await smokeChannel(url)
     if (smoke.noAuthStatus === null || smoke.authedStatus === null) {

@@ -1,0 +1,25 @@
+schema_version = "1.4"
+# Harbor task configuration: dsh plugin upgrade exam S19 (Windows fs-ext native-build trap, static read-only task)
+[task]
+name = "dsh-plugin-upgrade/s19-msvc-flock-trap"
+version = "1.1.0"
+description = "Diagnose a Windows pnpm install failure caused by the fs-ext native build and produce a patch-based fix plan that never touches upstream or requires Visual Studio"
+keywords = ["dsh", "plugin-upgrade", "windows", "native-build", "pnpm-patch", "read-only", "harbor"]
+
+[metadata]
+difficulty = "medium"
+category = "programming"
+tags = ["dsh", "plugin-upgrade", "install-channel", "english-prompt"]
+execution_contract = "BENCHMARK-AUTH-v1"
+
+[agent]
+timeout_sec = 900.0
+
+[verifier]
+timeout_sec = 600.0
+
+[environment]
+network_mode = "public"
+cpus = 1
+memory_mb = 2048
+storage_mb = 4096

@@ -46,7 +46,7 @@ const expectedModes = new Map([
   ['S15-slot-error-boundary-crash', 'readonly'],
   ['S16-self-host-upgrade-trap', 'readonly'],
   ['S17-external-ui-plugin-onboarding-trap', 'readonly'],
-  ['S18-msvc-flock-trap', 'readonly'],
+  ['S19-msvc-flock-trap', 'readonly'],
   ['H12-remote-result-boundary-trap', 'readonly'],
   ['M2-optional-dep-trap', 'mutable'],
   ['M3-session-projection', 'mutable'],
