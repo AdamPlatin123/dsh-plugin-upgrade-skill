@@ -5,6 +5,11 @@ Every judge: exit 0, with the last stdout line
 `{"score": 0-100, "max": 100, "reasons": [...]}`; `tests/test.sh` parses that last
 line as JSON and writes score/100 to `/logs/verifier/reward.txt`.
 
+The opt-in [S1–S4 semantic report-judge pilot](report-judge-pilot.md) generates
+separate version-2 tasks. Its LLM criteria, evidence validation and evaluator-error
+handling are not part of the historical scoring table below; compare both skill
+conditions with the same pilot snapshot before reporting new scores.
+
 ## Task → card / rollup recipe → score breakdown
 
 | Task | Checkpoint (cards / rollup recipes) | Score breakdown |
