@@ -1,0 +1,27 @@
+schema_version = "1.4"
+# Harbor task: a fork-metadata migration on the alpha.3 -> alpha.4 session
+# seed boundary (DSH-0.1.2-A4-04 SessionSeq/SessionLogOffset + seedLength
+# removal + isSeeded/inheritedEventCount).
+[task]
+name = "dsh-plugin-upgrade/h25-session-seed-boundary-trap"
+version = "1.1.0"
+description = "Migrate a fork-aware session state helper from alpha.3's seedLength metadata to alpha.4's isSeeded + inheritedEventCount contract while keeping event positions and log offsets distinct: a fresh fork looks right, but a resumed fork must keep the ORIGINAL inherited cut instead of the current log length"
+keywords = ["dsh", "plugin-migration", "session-seed", "fork-metadata", "SessionSeq", "alpha4", "harbor"]
+
+[metadata]
+difficulty = "hard"
+category = "programming"
+tags = ["dsh", "plugin-upgrade", "session-seed", "fork", "english-prompt"]
+execution_contract = "BENCHMARK-AUTH-v1"
+
+[agent]
+timeout_sec = 900.0
+
+[verifier]
+timeout_sec = 600.0
+
+[environment]
+network_mode = "public"
+cpus = 1
+memory_mb = 2048
+storage_mb = 4096
