@@ -134,6 +134,7 @@
 | [references/pre-flight.md](references/pre-flight.md) | 七类触点自查与汇总模板 |
 | [references/troubleshooting.md](references/troubleshooting.md) | 迁移后症状 → 根因 → 卡片 / 走廊配方速查 |
 | [references/v0.1.1-rc.1.md](references/v0.1.1-rc.1.md) | rc.8→rc.1 草稿卡：repository-plugins 机制移除、`dshClient`→`dsh.client` manifest 合并、client-modules 扫描 → bundle `dsh.client`、严格注入 + 弱 `ctx.get`、session 事件契约、自渲染 client 会话聚合、`tasks.peek` 移除、0812 服务改名（vlln 插件迁移；走廊为 0810–0812 内测快照窗口的最近公开 tag 对齐，待上游复核） |
+| [references/v0.1.1-rc.2.md](references/v0.1.1-rc.2.md) | rc.1→rc.2 reviewed 卡（3 张，`DSH-0.1.1-R2`） |
 | [references/v0.1.2-alpha.1.md](references/v0.1.2-alpha.1.md) | rc.2→alpha.1 curated 卡 |
 | [references/v0.1.2-alpha.2.md](references/v0.1.2-alpha.2.md) | alpha.1→alpha.2 curated 卡 |
 | [references/v0.1.2-alpha.3.md](references/v0.1.2-alpha.3.md) | alpha.2→alpha.3 curated 卡（2 张）：A3-01 新增 `settings.plugin.item` keyed-slot 设置卡能力（首批真实集成）；A3-02 移除可选 SQLite Session 持久化后端（opt-in 部署的旧库需用旧版导出）；含核对记录 |

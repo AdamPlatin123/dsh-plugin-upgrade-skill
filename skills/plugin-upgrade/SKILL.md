@@ -115,6 +115,7 @@ Structure the report as:
 | [references/pre-flight.md](references/pre-flight.md) | Seven-class touchpoint self-check and summary template |
 | [references/troubleshooting.md](references/troubleshooting.md) | Post-migration symptom → root cause → card lookup |
 | [references/v0.1.1-rc.1.md](references/v0.1.1-rc.1.md) | rc.8→rc.1 draft cards: repository-plugins mechanism removal, `dshClient`→`dsh.client` manifest merge, client-modules scan → bundle `dsh.client`, strict injection + weak `ctx.get`, session event contract, self-rendering client session aggregation, `tasks.peek` removal, 0812 service renames (vlln plugin migrations; corridor is the closest published-tag alignment for the internal 0810–0812 snapshot window) |
+| [references/v0.1.1-rc.2.md](references/v0.1.1-rc.2.md) | rc.1→rc.2 reviewed cards (3, `DSH-0.1.1-R2`) |
 | [references/v0.1.2-alpha.1.md](references/v0.1.2-alpha.1.md) | rc.2→alpha.1 curated cards |
 | [references/v0.1.2-alpha.2.md](references/v0.1.2-alpha.2.md) | alpha.1→alpha.2 curated cards |
 | [references/v0.1.2-alpha.3.md](references/v0.1.2-alpha.3.md) | alpha.2→alpha.3 curated cards (2): optional SQLite Session-persistence provider removed (opt-in databases need an older build to export, DSH-0.1.2-A3-02) and additive `settings.plugin.item` keyed-slot settings card capability (DSH-0.1.2-A3-01); carries the verification record |
