@@ -27,6 +27,10 @@ const expectedModes = new Map([
   ['H10-browser-activation-trap', 'mutable'],
   ['H13-ghost-host-trap', 'readonly'],
   ['H11-dual-cohort-rpc', 'mutable'],
+  ['H22-dsh-data-agent-alpha2', 'mutable'],
+  ['H23-storage-domain-version-compat-trap', 'mutable'],
+  ['H24-invalid-record-salvage-trap', 'mutable'],
+  ['H25-session-seed-boundary-trap', 'mutable'],
   ['H6-remote-error-trap', 'readonly'],
   ['S4-legacy-client-imports', 'readonly'],
   ['S5-negative-naming', 'readonly'],
@@ -36,6 +40,12 @@ const expectedModes = new Map([
   ['S9-composer-coordinate-trap', 'readonly'],
   ['S10-paste-rename-and-version-chip', 'readonly'],
   ['S11-mermaid-lazyload-trap', 'readonly'],
+  ['S12-global-upgrade-ebusy-trap', 'readonly'],
+  ['S13-peer-range-vs-runtime', 'readonly'],
+  ['S14-link-install-lock-trap', 'readonly'],
+  ['S15-slot-error-boundary-crash', 'readonly'],
+  ['S16-self-host-upgrade-trap', 'readonly'],
+  ['S17-external-ui-plugin-onboarding-trap', 'readonly'],
   ['H12-remote-result-boundary-trap', 'readonly'],
   ['M2-optional-dep-trap', 'mutable'],
   ['M3-session-projection', 'mutable'],
@@ -48,12 +58,15 @@ const expectedModes = new Map([
   ['M10-tools-tree', 'mutable'],
   ['M11-sidebar-spur', 'mutable'],
   ['M12-interpreters-card', 'mutable'],
+  ['M13-repository-plugins-removal', 'mutable'],
+  ['M14-service-renames-0812', 'mutable'],
   ['H14-mineru-api', 'mutable'],
   ['H15-locale-pack', 'mutable'],
   ['H16-history-dock', 'mutable'],
   ['H17-merge-calls', 'mutable'],
   ['H18-blame-bubbles', 'mutable'],
   ['H19-workspace-ya', 'mutable'],
+  ['H20-session-events-ledger', 'mutable'],
   ['H21-question-answerer-waterfall', 'mutable'],
 ])
 
@@ -149,32 +162,35 @@ for (const [taskId, mode] of expectedModes) {
     }
   }
 
-  if (taskId === 'H9-dsh-web-alpha2') {
+  if (taskId === 'H9-dsh-web-alpha2' || taskId === 'H22-dsh-data-agent-alpha2') {
+    const closedBookLabel = taskId === 'H9-dsh-web-alpha2' ? 'H9' : 'H22'
     const agentBlock = taskToml.match(/\[agent\]([\s\S]*?)(?=\n\[|$)/)?.[1] ?? ''
     const verifierBlock = taskToml.match(/\[verifier\]([\s\S]*?)(?=\n\[|$)/)?.[1] ?? ''
     for (const [pattern, label] of [
       [/\{ source = "\/app\/fixture" \}/, 'fixture artifact handoff'],
       [/\{ source = "\/app\/\.git" \}/, 'fixture baseline artifact handoff'],
     ]) {
-      if (!pattern.test(taskToml)) fail(taskFile, `H9 missing closed-book control: ${label}`)
+      if (!pattern.test(taskToml)) fail(taskFile, `${closedBookLabel} missing closed-book control: ${label}`)
     }
     if (!/^network_mode = "no-network"$/m.test(agentBlock)) {
-      fail(taskFile, 'H9 missing closed-book control: agent no-network policy')
+      fail(taskFile, `${closedBookLabel} missing closed-book control: agent no-network policy`)
     }
     if (!/^environment_mode = "separate"$/m.test(verifierBlock)) {
-      fail(taskFile, 'H9 missing closed-book control: separate verifier mode')
+      fail(taskFile, `${closedBookLabel} missing closed-book control: separate verifier mode`)
     }
     if (!/^network_mode = "public"$/m.test(verifierBlock)) {
-      fail(taskFile, 'H9 separate verifier must own the public network phase')
+      fail(taskFile, `${closedBookLabel} separate verifier must own the public network phase`)
     }
     if (!/不得使用服务端网页搜索/.test(normalized)) {
-      fail(instructionFile, 'H9 must explicitly prohibit provider-side web search')
+      fail(instructionFile, `${closedBookLabel} must explicitly prohibit provider-side web search`)
     }
-    for (const [pattern, label] of [
-      [/已发布到\s*npm\s*的\s*v0\.3\.9/i, 'published target answer'],
-      [/dsh-web-all[^\n]{0,80}17\s*个/i, 'exact aggregate verifier topology'],
-    ]) {
-      if (pattern.test(instruction)) fail(instructionFile, `H9 prompt leaks ${label}`)
+    if (taskId === 'H9-dsh-web-alpha2') {
+      for (const [pattern, label] of [
+        [/已发布到\s*npm\s*的\s*v0\.3\.9/i, 'published target answer'],
+        [/dsh-web-all[^\n]{0,80}17\s*个/i, 'exact aggregate verifier topology'],
+      ]) {
+        if (pattern.test(instruction)) fail(instructionFile, `H9 prompt leaks ${label}`)
+      }
     }
 
     const agentDockerfile = join(taskRoot, 'environment', 'Dockerfile')
@@ -187,22 +203,22 @@ for (const [taskId, mode] of expectedModes) {
         readFile(closedBookRunner, 'utf8'),
       ])
       if (!/^COPY fixture \/app\/fixture$/m.test(agentImage)) {
-        fail(agentDockerfile, 'agent image must copy only the source fixture')
+        fail(agentDockerfile, `${closedBookLabel} agent image must copy only the source fixture`)
       }
       if (/^COPY (?:\. |.*(?:solution|tests))/m.test(agentImage)) {
-        fail(agentDockerfile, 'agent image must not embed the task, solution, or tests')
+        fail(agentDockerfile, `${closedBookLabel} agent image must not embed the task, solution, or tests`)
       }
       if (!/npm cache clean --force/.test(agentImage)) {
-        fail(agentDockerfile, 'agent image must clear npm download cache')
+        fail(agentDockerfile, `${closedBookLabel} agent image must clear npm download cache`)
       }
       if (!/COPY \. \/tests/.test(verifierImage)) {
-        fail(verifierDockerfile, 'separate verifier image must embed sealed tests')
+        fail(verifierDockerfile, `${closedBookLabel} separate verifier image must embed sealed tests`)
       }
       if (!/--ak web_search=disabled/.test(runner)) {
-        fail(closedBookRunner, 'Codex runner must disable provider-side web search')
+        fail(closedBookRunner, `${closedBookLabel} Codex runner must disable provider-side web search`)
       }
     } catch (error) {
-      fail(taskRoot, `cannot read H9 closed-book controls: ${error.message}`)
+      fail(taskRoot, `cannot read ${closedBookLabel} closed-book controls: ${error.message}`)
     }
   }
 

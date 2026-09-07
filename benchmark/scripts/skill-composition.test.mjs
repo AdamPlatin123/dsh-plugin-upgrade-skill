@@ -28,11 +28,15 @@ for (const [name, workflow, options, owners] of cases) {
   })
 }
 
+// Skills installed in this repo but not owned by any workflow-planner phase
+// (benchmark-authoring side, not plugin workflow composition).
+const NON_COMPOSITION_SKILLS = ['dsh-benchmark-case']
+
 test('every installed Skill has an exercised phase owner; new Skills require coverage', () => {
   const root = fileURLToPath(new URL('../../skills/', import.meta.url))
   const installed = readdirSync(root).filter((name) => existsSync(`${root}/${name}/SKILL.md`)).sort()
   const exercised = new Set(cases.flatMap(([, workflow, options]) => buildWorkflowPlan(selection(workflow, options)).ledger.map((phase) => phase.owner)))
-  assert.deepEqual([...exercised].sort(), installed)
+  assert.deepEqual([...exercised, ...NON_COMPOSITION_SKILLS].sort(), installed)
 })
 
 test('all eight owners compose without duplicating phases or silently publishing', () => {
