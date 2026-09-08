@@ -2,9 +2,9 @@
 # H23 oracle: declare the dependency and write the graded artifacts.
 set -euo pipefail
 cp -r "$(dirname "$0")/plugin/." /app/fixture/
-mkdir -p /app/agent-output/H23-undeclared-import-trap
+mkdir -p /app/agent-output/H27-undeclared-import-trap
 
-cat > /app/agent-output/H23-undeclared-import-trap/diagnosis.md <<'DIAG'
+cat > /app/agent-output/H27-undeclared-import-trap/diagnosis.md <<'DIAG'
 # H23 · Declares Nothing, Crashes on Load — Diagnosis
 
 ## Symptom
@@ -35,7 +35,7 @@ Declare `@deepseek-ai/dsh-llm` in `peerDependencies` (cohort floor
   key in the container; the alive signal — exit code is not a criterion).
 DIAG
 
-cat > /app/agent-output/H23-undeclared-import-trap/smoke.md <<'SMOKE'
+cat > /app/agent-output/H27-undeclared-import-trap/smoke.md <<'SMOKE'
 # H23 · Smoke evidence
 
 - `dsh plugin --profile bench-h23-undeclared-import-trap add /app/fixture` → exit 0

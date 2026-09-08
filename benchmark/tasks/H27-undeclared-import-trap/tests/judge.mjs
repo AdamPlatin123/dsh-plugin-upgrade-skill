@@ -16,7 +16,7 @@ import {
   HEADLESS_ACTIVATED_SIGNAL,
 } from './judge-utils.mjs'
 
-const TASK = 'H23-undeclared-import-trap'
+const TASK = 'H27-undeclared-import-trap'
 const PKG = '@demo/dsh-bench-undeclared'
 
 async function main() {
