@@ -2,8 +2,8 @@
 # H22 oracle: apply the manifest fix and write the graded artifacts.
 set -euo pipefail
 cp -r "$(dirname "$0")/plugin/." /app/fixture/
-mkdir -p /app/agent-output/H24-notlisted-trap
-cat > /app/agent-output/H24-notlisted-trap/diagnosis.md <<'EOF'
+mkdir -p /app/agent-output/H26-notlisted-trap
+cat > /app/agent-output/H26-notlisted-trap/diagnosis.md <<'EOF'
 # H22 · The Package That Installs But Never Registers — Diagnosis
 
 ## Symptom
@@ -36,7 +36,7 @@ needs no change — it was already written against 0.1.2-alpha.2.
   which is the alive signal: the plugin tree loaded and startup reached the host
   application layer. Exit code is not a criterion.
 EOF
-cat > /app/agent-output/H24-notlisted-trap/smoke.md <<'EOF'
+cat > /app/agent-output/H26-notlisted-trap/smoke.md <<'EOF'
 # H22 · Smoke evidence
 
 - `dsh plugin --profile bench-h22-notlisted-trap add /app/fixture` → exit 0
