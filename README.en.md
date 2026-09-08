@@ -104,7 +104,13 @@ You can also ask directly in the conversation (any agent); the skill triggers on
 Inspect this DSH plugin and let me choose upgrade, testing, cloud naming, and release stages.
 What breaking changes are there for upgrading my plugin from 0.1.1 to 0.1.2?
 Upgrade the dsh-ads plugin to dsh-v0.1.2-alpha.2
+Validate this plugin's names and query the central registry; preserve the index URL and SHA-256 without submitting a registration.
 ```
+
+`naming-registry` runs offline naming validation and a read-only central query by default; central
+registration remains a separate external-publication step. On a proxied network, run the query with
+Node 24+ and `node --use-env-proxy`; Node 20-23 built-in `fetch` is not guaranteed to consume proxy
+environment variables. A failed, oversized, or invalid-v2 query is unknown/not checked, never available.
 
 ## What each of the 8 skills does
 
