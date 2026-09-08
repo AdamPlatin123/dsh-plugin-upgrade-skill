@@ -15,7 +15,7 @@ import {
   HEADLESS_ACTIVATED_SIGNAL,
 } from './judge-utils.mjs'
 
-const TASK = 'H24-notlisted-trap'
+const TASK = 'H26-notlisted-trap'
 const PKG = '@demo/dsh-bench-notlisted'
 
 async function main() {
