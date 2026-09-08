@@ -8,7 +8,7 @@
 
 ## 这个仓库里有什么
 
-- **95 张升级说明卡**：每张卡记录一个真实的坑——什么坏了、为什么坏、怎么修、信息来源是哪个版本。按版本排好序，从 0.1.0-rc.8 一路到 0.1.5-rc.2（alpha.5→rc.1 无插件面变更，0 张卡；alpha.2→alpha.3 有 2 张卡（1 张新增能力卡 + SQLite 移除回填）；alpha.3→alpha.4 有 6 张；rc.8→rc.1 为 9 张草稿卡；0.1.2-rc.1→0.1.3-alpha.1 有 5 张（2 张 session-log 实测 + 3 张钉 tag）、0.1.3-alpha.1→0.1.3-alpha.2 有 5 张草稿卡、0.1.5-rc.1→0.1.5-rc.2 有 6 张草稿卡；中间 0.1.3-alpha.2 → 0.1.5-rc.1 的三条边中，alpha.2→alpha.1 有 20 张草稿卡（本 PR），其余两条仍在开放 PR 中）。
+- **94 张升级说明卡**：每张卡记录一个真实的坑——什么坏了、为什么坏、怎么修、信息来源是哪个版本。按版本排好序，从 0.1.0-rc.8 一路到 0.1.5-rc.2（alpha.5→rc.1 无插件面变更，0 张卡；alpha.2→alpha.3 有 2 张卡（1 张新增能力卡 + SQLite 移除回填）；alpha.3→alpha.4 有 6 张；rc.8→rc.1 为 9 张草稿卡；0.1.2-rc.1→0.1.3-alpha.1 有 5 张（2 张 session-log 实测 + 3 张钉 tag）、0.1.3-alpha.1→0.1.3-alpha.2 有 5 张草稿卡、0.1.5-rc.1→0.1.5-rc.2 有 6 张草稿卡；中间 0.1.3-alpha.2 → 0.1.5-rc.1 的三条边中，alpha.2→alpha.1 有 19 张草稿卡（本 PR），其余两条仍在开放 PR 中）。
 - **13 条通用对策**：有些坑和版本无关（比如"先备份再动手""新旧版本怎么共存"），这些写成了一份对策清单。
 - **9 个 skill**：一个统一工作流负责选择和编排，另外八个分别负责查升级、写新插件、测插件、发插件、对比两个版本的差别、排查运行时故障、给轻量插件接入重依赖，以及把插件升级经验提取成 benchmark 考题。
 - **56 道考题（benchmark）**：用来测"AI 装了我们的 skill 之后到底会不会升级插件"，每道题都有自动判分；其中包含 dsh-web v0.3.8 → v0.3.9 和 dsh-data-agent v0.1.3 → v0.1.4 两道真实迁移。
@@ -137,7 +137,7 @@ Claude Code 中按名字调用 skill（插件安装后带命名空间）：
 | 0.1.2-alpha.5 → 0.1.2-rc.1 | ✅ 完成 | [v0.1.2-rc.1.md](skills/plugin-upgrade/references/v0.1.2-rc.1.md) | 0 张卡（纯版本 bump；含核对记录、macOS 真机验证与 release notes 覆盖矩阵） |
 | 0.1.2-rc.1 → 0.1.3-alpha.1 | 📝 草稿 | [v0.1.3-alpha.1.md](skills/plugin-upgrade/references/v0.1.3-alpha.1.md) | 5 张草稿卡（A1-01/02 session-log 实测：v0→v1 迁移器拒读 0.1.2-alpha.x writer 日志、跨版本 resume cursor 报错；A1-04…06 钉 tag：出站 HTTP(S)/ALL_PROXY 启动代理、SessionHandle/异步 agentLoop + session 锁、Session 格式 v2） |
 | 0.1.3-alpha.1 → 0.1.3-alpha.2 | 📝 草稿 | [v0.1.3-alpha.2.md](skills/plugin-upgrade/references/v0.1.3-alpha.2.md) | 5 张草稿卡（persona 拆前缀/后缀、`SubprocessHandle.pid` 移除、base 移除 str-replace 编辑器默认行、launcher `runCli()`/`import.meta.main`、pi-ai 0.84.2→0.85.1） |
-| 0.1.3-alpha.2 → 0.1.5-alpha.1 | 📝 草稿 | [v0.1.5-alpha.1.md](skills/plugin-upgrade/references/v0.1.5-alpha.1.md) | 18 张草稿卡（Session 格式 V3 + `EpochHeader.system` 移除、`ctx.agent` 移除、Inbox 类型化、会话事件校验收紧、PTC 改名、system prompt 入消息历史、CLI 拒 `desktop`、`--from-default-profile`、文件面新 API、Web Client `details`→`rightbar` 重构、右栏/资源扩展点、`tool-subagent` 契约；版本号跳跃边 0.1.3-alpha.2 → 0.1.5-alpha.1） |
+| 0.1.3-alpha.2 → 0.1.5-alpha.1 | 📝 草稿 | [v0.1.5-alpha.1.md](skills/plugin-upgrade/references/v0.1.5-alpha.1.md) | 19 张草稿卡（Session 格式 V3 + `EpochHeader.system` 移除、`ctx.agent` 移除、Inbox 类型化、会话事件校验收紧、PTC 改名、system prompt 入消息历史、CLI 拒 `desktop`、`--from-default-profile`、文件面新 API、Web Client `details`→`rightbar` 重构、右栏/资源扩展点、`tool-subagent` 契约、host SSH/指令发现 seam；版本号跳跃边 0.1.3-alpha.2 → 0.1.5-alpha.1） |
 | 0.1.5-rc.1 → 0.1.5-rc.2 | 📝 草稿 | [v0.1.5-rc.2.md](skills/plugin-upgrade/references/v0.1.5-rc.2.md) | 6 张草稿卡（反馈面注入契约去掉 `toggle`/`acknowledge`、`openDialog` 加必填 `rating`；点赞/点踩都改为弹窗确认、提交失败转 6s 警告 toast；`FileTypeIcon` 48 个代码分类换设计导出 artwork；回合尾动作条与文件区 20/16/20px 间距契约；`service-stability` 中英文文案改字；以及"宿主面零行为变更"的负面证据） |
 | 跨版本通用对策 | ✅ 完成 | [rollup-0.1.2.md](skills/plugin-upgrade/references/rollup-0.1.2.md) | 13 条（新旧共存、先备份、启动卡死怎么办等） |
 | 0.1.1 → 0.1.2 正式版 | 🔄 等官方发版 | — | dsh 0.1.2 还没发正式版（npm `latest` 仍是 rc.1；走廊已延伸到 0.1.5-rc.2，draft 卡），正式版发布后我们要复核一遍 |
