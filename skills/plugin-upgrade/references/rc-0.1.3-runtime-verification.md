@@ -2,7 +2,7 @@
 kind: dsh-version-card-set
 schema: 1
 from: dsh-v0.1.2-alpha.2
-to: dsh-v0.1.2-rc.1
+to: dsh-v0.1.3-alpha.2
 status: reviewed
 coverage: runtime
 cardCount: 0

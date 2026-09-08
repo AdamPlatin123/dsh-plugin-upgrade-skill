@@ -23,6 +23,8 @@ source: if a field is removed in alpha.1 and restored in alpha.2, do not delete 
 | 9 | [v0.1.3-alpha.2.md](v0.1.3-alpha.2.md) | `dsh-v0.1.3-alpha.1` | `dsh-v0.1.3-alpha.2` | 5 | draft / curated (persona `text`/`persona` config splits into prefix + suffix with `PERSONA_SECTION` removed, `SubprocessHandle.pid` removal, base bundle drops the `tool-str-replace-editor` default row, launcher `runCli()`/`import.meta.main`, pi-ai `^0.84.2`→`^0.85.1`; first 0.1.3 build on npm — alpha.1 items debut for npm upgrades, read the [alpha.1 corridor](v0.1.3-alpha.1.md) first) |
 | — | [rollup-0.1.2.md](rollup-0.1.2.md) | `dsh-v0.1.1-rc.2` → `dsh-v0.1.2-rc.1` full corridor | rollup | non-card file: corridor-level increment (cross-cohort coexistence, unpublished-cohort installation, `RemoteResult` error flow, pre-migration baseline attribution, bounded retry for boot race, base-only preset precondition, type-surface export drift, host-self safety boundary, three install-channel pitfalls, layered validation checklist); based on rc.1, subject to final-release review |
 
+| — | [rc-0.1.3-runtime-verification.md](rc-0.1.3-runtime-verification.md) | `dsh-v0.1.2-alpha.2` → `dsh-v0.1.3-alpha.2` runtime companion | runtime record | non-card file: plugin runtime verification across rc.1 / 0.1.3-alpha.2 (five real plugins, isolated-profile cold boots — survival surface stable; dsh-web-ui degrades to install-failed on 0.1.3-alpha.2) |
+
 `curated` means only the identified plugin-relevant changes are included, not a complete
 API diff. When a corridor edge is missing, stop the automatic migration and report the gap
 to the user; one-off upstream research for the current task and adding cards to this
