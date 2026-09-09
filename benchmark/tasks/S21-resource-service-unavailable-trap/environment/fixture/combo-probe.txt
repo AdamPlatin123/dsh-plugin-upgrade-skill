@@ -1,0 +1,26 @@
+# Combo / per-module probes on the running 0.1.5-alpha.2 host (no auth needed for
+# the /plugins/?? route).
+
+## Probe 1 — the boot manifest's first combo URL (single module):
+
+GET /plugins/??@deepseek-ai/dsh-api-gateway/client.js&rev=234716e8f7370214-0
+→ 200, 73 616 bytes. (Serves correctly.)
+
+## Probe 2 — naive full-join of all 62 entries into one URL (INVALID diagnostic):
+
+GET /plugins/??<62 modules comma-joined>&rev=234716e8f7370214-0
+→ 404, zero-length body.
+
+INVALID as evidence: the joined URL is ~4–5 KB, above the host's 3 KB combo-URL cap
+(MAX_COMBO_URL_BYTES = 3 * 1024 in packages/client/modules/src/index.ts). The real
+loader PARTITIONS the roster into ≤3 KB chunks; a manual all-in-one join is not a
+request the loader ever makes. Do not cite the 404 as "modules missing".
+
+## Probe 3 — per-module sweep: all 62 manifest entries fetched one by one:
+
+→ 62/62 HTTP 200, zero 404s. Static artifact serving is complete on this host.
+
+## Implication
+
+Static serving is fine per-module. The failing read is a RUNTIME registration/chain
+issue (the workspaceFiles resource provider/RPC), not a missing-bytes issue.

@@ -1,0 +1,23 @@
+# Contrast probe — two readers, same file, same moment
+
+File: E:\deepseek-harness\test-lhh010\.dsh\tmp\sidebar-open-test-2.md
+      (session-scoped address:
+       dsh-resource://file/session/session-2844c12c-5870-41e0-bb46-7d1fdc7c183a/.dsh/tmp/sidebar-open-test-2.md)
+
+| Reader | Transport | Result |
+|---|---|---|
+| file-trace plugin (own host RPC, /dsh-file-trace/* routes) | its own HTTP face | READS FINE — 原文 and 阅读 modes both show the content |
+| documentpreview sidebar tab (useResource → workspaceFiles.stat RPC via the Typert gateway) | api-workspace-files Remote | FAILS — meta.status stays 'none', the tab shows 文件资源服务不可用。 |
+
+The failing read's provider chain: useResource('file', address) → the `file` provider
+registered by @deepseek-ai/dsh-api-workspace-files' client half → workspaceFiles.stat
+over the Typert gateway → the host WorkspaceFiles service (injects fs, sandboxPolicy,
+sessions, typert).
+
+Host-side notes (0.1.5-alpha.2 tree):
+- The workspace-files host row IS in the web-app bundle patch
+  (cordis.patch.yml: "- id: workspace-files / name: '@deepseek-ai/dsh-api-workspace-files'").
+- The service resolves each session's workspace root via a typert lookups.register entry
+  (sessions.get(sessionId)?.header.cwd, falling back to sandboxPolicy.workspaceRoot).
+- Files OUTSIDE the session workspace are allowed ("files outside it are allowed" —
+  index.ts read() doc), so .dsh/tmp being under the workspace root is not the blocker.

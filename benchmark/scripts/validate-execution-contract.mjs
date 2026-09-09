@@ -48,6 +48,7 @@ const expectedModes = new Map([
   ['S16-self-host-upgrade-trap', 'readonly'],
   ['S17-external-ui-plugin-onboarding-trap', 'readonly'],
   ['S20-msvc-flock-trap', 'readonly'],
+  ['S21-resource-service-unavailable-trap', 'readonly'],
   ['H12-remote-result-boundary-trap', 'readonly'],
   ['M2-optional-dep-trap', 'mutable'],
   ['M3-session-projection', 'mutable'],
