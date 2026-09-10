@@ -135,7 +135,7 @@ Claude Code 中按名字调用 skill（插件安装后带命名空间）：
 | 0.1.2-alpha.3 → 0.1.2-alpha.4 | ✅ 完成 | [v0.1.2-alpha.4.md](skills/plugin-upgrade/references/v0.1.2-alpha.4.md) | 6 张卡（`report` → `send_message`、Python 运行时包改名、`Session.events` 移除、seq 强类型、PTC `workflow` 与 base `web_fetch` 默认值；三台真宿主验证） |
 | 0.1.2-alpha.4 → 0.1.2-alpha.5 | ✅ 完成 | [v0.1.2-alpha.5.md](skills/plugin-upgrade/references/v0.1.2-alpha.5.md) | 3 张卡（storage 域 `compatibleVersions` 读兼容与 `backup-and-skip` 兜底；旧家升级拒启/标题丢失修复；storage 层复现核对） |
 | 0.1.2-alpha.5 → 0.1.2-rc.1 | ✅ 完成 | [v0.1.2-rc.1.md](skills/plugin-upgrade/references/v0.1.2-rc.1.md) | 0 张卡（纯版本 bump；含核对记录、macOS 真机验证与 release notes 覆盖矩阵） |
-| 0.1.2-rc.1 → 0.1.3-alpha.1 | 📝 草稿 | [v0.1.3-alpha.1.md](skills/plugin-upgrade/references/v0.1.3-alpha.1.md) | 5 张草稿卡（A1-01/02 session-log 实测：v0→v1 迁移器拒读 0.1.2-alpha.x writer 日志、跨版本 resume cursor 报错；A1-04…06 钉 tag：出站 HTTP(S)/ALL_PROXY 启动代理、SessionHandle/异步 agentLoop + session 锁、Session 格式 v2） |
+| 0.1.2-rc.1 → 0.1.3-alpha.1 | 📝 草稿 | [v0.1.3-alpha.1.md](skills/plugin-upgrade/references/v0.1.3-alpha.1.md) | 7 张草稿卡（session-log 走廊 A1-01/02 + host-plane/policy A1-04/05/06 + A1-07/08 未发布 cohort 源码宿主验证配方与 composer/read_image 运行时复核；release tarball 实测，tag 对齐待上游复核） |
 | 0.1.3-alpha.1 → 0.1.3-alpha.2 | 📝 草稿 | [v0.1.3-alpha.2.md](skills/plugin-upgrade/references/v0.1.3-alpha.2.md) | 5 张草稿卡（persona 拆前缀/后缀、`SubprocessHandle.pid` 移除、base 移除 str-replace 编辑器默认行、launcher `runCli()`/`import.meta.main`、pi-ai 0.84.2→0.85.1） |
 | 跨版本通用对策 | ✅ 完成 | [rollup-0.1.2.md](skills/plugin-upgrade/references/rollup-0.1.2.md) | 13 条（新旧共存、先备份、启动卡死怎么办等） |
 | 0.1.1 → 0.1.2 正式版 | 🔄 等官方发版 | — | dsh 0.1.2 还没发正式版（npm `latest` 仍是 rc.1；走廊已延伸到 0.1.3-alpha.2，draft 卡），正式版发布后我们要复核一遍 |
