@@ -49,6 +49,15 @@ candidate reports. It gets no reference answer or out-of-band solver identity or
 skill-condition label. Candidate text can identify its author, so this alone does
 not guarantee complete blinding.
 
+The model-free `skill-evaluation` CI controls run the six deterministic tasks in
+that suite. S1 remains in the seven-task model suite; the control manifest lists
+it separately under `semanticProtocolTasks`. The same CI job runs
+`test:report-judge` for all seven semantic verifiers, with mocked responses and no
+model credentials. This validates their protocol, not reference-answer quality.
+The manual Actions model job has not been wired to a report-judge credential;
+without explicit verifier configuration Harbor rejects it before any trial.
+Use a separately authorized local API or Codex run for actual report grading.
+
 ## Criteria and scoring
 
 | Task | Criteria / points |
