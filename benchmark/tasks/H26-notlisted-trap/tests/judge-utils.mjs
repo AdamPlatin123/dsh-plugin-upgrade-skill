@@ -1,10 +1,12 @@
-// Shared benchmark grading library (harbor edition, zero dependencies).
+// Shared grading library for the benchmark (harbor edition, zero dependencies).
 // Conventions:
-// - every judge.mjs always exits with code 0; the last stdout line outputs {"score": 0-100, "max": 100, "reasons": [...]};
-// - static tasks put agent artifacts under /app/agent-output/<task-id>/;
-// - container tasks (M1/H1/H2/H3) let the agent modify /app/fixture/ directly, and the judge does a real cold boot inside the task container
-//   (the image has dsh 0.1.2-alpha.2 installed globally, no docker exec needed);
-// - each task uses its own profile (bench-<task>) and its own /tmp plugin directory; the judge cleans up the assets it created.
+// - Every judge.mjs always exits 0; the last stdout line is {"score": 0-100, "max": 100, "reasons": [...]};
+// - For static tasks, agent artifacts live under /app/agent-output/<task-id>/;
+// - For container tasks (M1/H1/H2/H3), the agent modifies /app/fixture/ directly and the judge does real
+//   cold-boot verification inside the task container (the image has dsh 0.1.2-alpha.2 installed globally,
+//   no docker exec needed);
+// - Each task uses its own profile (bench-<task>) and its own /tmp plugin directory; the judge cleans up
+//   the assets it created.
 import { execFile } from 'node:child_process'
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative, resolve, sep } from 'node:path'
@@ -15,7 +17,7 @@ export const DEFAULT_AGENT_OUTPUT = join(APP_ROOT, 'agent-output')
 export const BENCH_TMP = (taskId) => `/tmp/bench-${taskId.toLowerCase()}`
 export const PROFILE = (taskId) => `bench-${taskId.toLowerCase()}`
 
-// ── Result output ──────────────────────────────────────
+// ── result output ──────────────────────────────────────────────
 
 export function emit(score, reasons) {
   const result = { score: Math.max(0, Math.min(100, Math.round(score))), max: 100, reasons }
@@ -23,7 +25,7 @@ export function emit(score, reasons) {
   process.exit(0)
 }
 
-// ── Agent output collection (static tasks) ─────────────
+// ── agent output collection (static tasks) ─────────────────────
 
 const TEXT_EXT = new Set(['.md', '.txt', '.json', '.jsonl', '.log'])
 
@@ -39,7 +41,7 @@ function walkFiles(dir) {
   return out
 }
 
-/** Collect all text artifacts under <agentOutput>/<taskId>/ and join them into one big string. */
+/** Collect all text artifacts under <agentOutput>/<taskId>/ and join them into a single string. */
 export function readAgentText(agentOutput, taskId) {
   const root = agentOutput || DEFAULT_AGENT_OUTPUT
   const dir = join(root, taskId)
@@ -48,7 +50,7 @@ export function readAgentText(agentOutput, taskId) {
   return { text, files: files.map((file) => relative(root, file)) }
 }
 
-// ── Git status (whether the fixture changed) ───────────
+// ── git status (whether the fixture changed) ───────────────────
 
 function git(args, cwd) {
   return new Promise((resolvePromise) => {
@@ -69,7 +71,7 @@ export async function fixtureChanges(relFixtureDir = 'fixture') {
   }
 }
 
-// ── Local command primitives (judge runs in the task container) ──
+// ── local command primitives (the judge runs inside the task container) ──
 
 export function localExec(script, { stdin = '', timeout = 60000 } = {}) {
   return new Promise((resolvePromise) => {
@@ -91,7 +93,7 @@ export async function dshAvailable() {
   return result.code === 0
 }
 
-// ── Profile lifecycle ──────────────────────────────────
+// ── profile lifecycle ──────────────────────────────────────
 
 /** Create an isolated profile (bundles is an array of host package names). */
 export async function createProfile(profile, bundles) {
@@ -120,33 +122,34 @@ export async function addPlugin(profile, pluginDir) {
   return { ok: result.code === 0, detail: (result.stdout + result.stderr).trim().slice(-400) }
 }
 
-/** Clean up task-created assets: profile, temporary plugin directory, leftover boot processes. */
+/** Clean up task-created assets: the profile, the temporary plugin directory, and leftover boot processes. */
 export async function cleanupProfile(profile, tmpDir) {
-  // The pkill pattern uses the [first-letter] bracket trick to avoid matching the sh -c process running this cleanup script itself.
+  // The pkill pattern uses the [first-letter] bracket trick to avoid matching the sh -c process that is running this cleanup script itself.
   const selfSafe = `[${profile[0]}]${profile.slice(1)}`
   await localExec(
     `pkill -f 'profile ${selfSafe}' 2>/dev/null; rm -rf '/root/.dsh/profiles/${profile}' '${tmpDir}' /tmp/${profile}-boot.log; true`,
   )
 }
 
-// ── Cold boot signal detection ─────────────────────────
+// ── cold-boot judgment signals ─────────────────────────────────
 
 export const NEGATIVE_SIGNAL = /plugin tree failed|did not activate|pending \(waiting for service|FAILED fiber|ClientPackageCompositionError/i
-// A headless profile without an API key always reaches MISSING_CREDENTIAL — emitting this line proves
-// the plugin tree fully activated and the boot flow reached the host application layer (consistent with the validation report attribution).
+// A headless profile without an API key is guaranteed to reach MISSING_CREDENTIAL — being able to emit
+// this line proves the plugin tree activated as a whole and startup progressed to the host application layer
+// (consistent with the validation report's attribution).
 export const HEADLESS_ACTIVATED_SIGNAL = /MISSING_CREDENTIAL|no API key|dsh: AUTH/i
 
-/** Headless cold boot: returns the full output. Exit code is not a verdict (success is also 1 without a key). */
+/** Headless cold boot: returns the full output. The exit code is not used for judgment (even a success exits 1 when there is no key). */
 export async function bootHeadless(profile) {
   const result = await localExec(`cd /root && timeout 30 dsh --profile '${profile}' 'ping' 2>&1`, { timeout: 60000 })
   return { output: result.stdout + result.stderr, code: result.code }
 }
 
 /**
- * Web cold boot and read __DSH_BOOT__:
- * 1. start `dsh --profile <p> --no-open` in the background, wait for a dsh web: URL line in the log;
- * 2. exchange the bootstrap token for a Cookie, GET / for the HTML;
- * 3. return { output, html }; the caller judges negative signals and the plugin entry.
+ * Web cold boot and read of __DSH_BOOT__:
+ * 1. Launch `dsh --profile <p> --no-open` in the background and wait for a dsh web: URL in the log;
+ * 2. Exchange the bootstrap token for a Cookie, then GET / for the HTML;
+ * 3. Return { output, html }; the caller judges negative signals and plugin entry.
  */
 export async function bootWebAndFetchIndex(profile, pkgName) {
   const logPath = `/tmp/${profile}-boot.log`

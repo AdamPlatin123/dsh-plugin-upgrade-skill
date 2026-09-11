@@ -1,8 +1,8 @@
 # dsh plugin upgrade tasks (benchmark v2.4 · Harbor format)
 
-The 57 plugin-upgrade tasks measure one thing: **once an AI has our upgrade skill
+The 58 plugin-upgrade tasks measure one thing: **once an AI has our upgrade skill
 installed, will it actually upgrade the plugin**. The first 21 are written exams (read
-the code, produce the answer); the last 36 are hands-on (actually install dsh and run
+the code, produce the answer); the last 37 are hands-on (actually install dsh and run
 the plugin — whether it is alive is obvious at a glance). Every task ships with
 auto-grading, so no human marking is involved.
 
@@ -10,10 +10,12 @@ auto-grading, so no human marking is involved.
 task format** — each question is a standard Harbor task (directory layout below) that
 can be run directly with `harbor run` on any agent / provider Harbor supports.
 
-An opt-in [S1–S4 semantic report-judge pilot](docs/report-judge-pilot.md) adds
-LLM criterion grading with sealed source evidence, deterministic checks and
-old/new calibration comparisons. Generate its separate tasks with
-`node benchmark/report-judge/prepare.mjs --out /tmp/report-judge-pilot`.
+**S1–S4, S10, S12 and S15 use [LLM-as-judge by default](docs/report-judge-pilot.md).**
+Run their registered `benchmark/tasks/<task>` directories directly. Configure
+`REPORT_JUDGE_BASE_URL`, `REPORT_JUDGE_MODEL` and `REPORT_JUDGE_API_KEY` for the
+separate verifier; a missing/broken judge is an evaluator failure, never a
+keyword-score fallback. The version-3 semantic scores are not interchangeable
+with archived keyword scores.
 
 Every task tests a real trap: some fixtures hide a misleading comment like "try
 changing it this way" (following it is fatal), and some plugins ship with a
@@ -81,6 +83,7 @@ honestly instead of quietly fixing it and pretending nothing happened).
 | H23-storage-domain-version-compat-trap | Hands-on | alpha.4 → alpha.5: after a domain version bump the plugin boots and the storage domain opens green while older version-4 per-record documents silently read as absent — can the agent repair the version-stamp compatibility declaration (v4 records reappear, the v5 record stays, the unlisted v3 stamp stays foreign, writes re-stamp 5) without downgrading or patching the runtime |
 | H24-invalid-record-salvage-trap | Hands-on | alpha.4 → alpha.5: one current-version schema-invalid record in a disposable derived-index domain rejects the entire domain open — can the agent salvage it through the backup-and-skip contract (corrupted bytes preserved on disk, healthy records kept, damaged key rebuildable) instead of deleting evidence, swallowing the error, or loosening the schema |
 | H25-session-seed-boundary-trap | Hands-on | alpha.3 → alpha.4: a fork-aware session state helper migrates from header.seedLength to isSeeded + inheritedEventCount and from plain numbers to branded SessionSeq / SessionLogOffset — does the agent keep the ORIGINAL inherited cut on a RESUMED fork (where the stored log has grown) instead of silently reclassifying own events as inherited |
+| H26-notlisted-trap | Hands-on | A package that installs cleanly but never registers (`dsh plugin add` succeeds, the entry never appears in the list; distilled from a 22k★ real failure): does it separate dependency installation from plugin registration, attribute the gap to the missing manifest self-description (`main`/`exports`/`dsh`) rather than the host, resist the in-source reinstall memo, and prove the fix live (listed + cold boot reaches the application layer) |
 
 ## Benchmark results
 
@@ -281,7 +284,7 @@ harbor run -p benchmark/tasks/S1-static-scan -a oracle
 # evaluate a single task with an agent
 harbor run -p benchmark/tasks/M1-host-migration -a claude-code -m anthropic/claude-opus-4-1
 
-# all 57 tasks: pointing -p at the tasks/ directory runs them as a dataset batch
+# all 58 tasks: pointing -p at the tasks/ directory runs them as a dataset batch
 harbor run -p benchmark/tasks -a claude-code -m anthropic/claude-opus-4-1
 ```
 
@@ -293,7 +296,7 @@ the judge's per-item reasons are in the verifier log.
 
 ### Unattended authorization
 
-All 57 `instruction.md` files carry the `BENCHMARK-AUTH-v1` marker: the task prompt
+All 58 `instruction.md` files carry the `BENCHMARK-AUTH-v1` marker: the task prompt
 itself is the user's confirmation of the plan and the execution within the stated
 scope. The agent should complete the necessary analysis/planning and then proceed — it
 must not stop just because Harbor will not send a second round of "confirmation". The
@@ -320,7 +323,7 @@ node benchmark/scripts/validate-execution-contract.mjs
    - Build-cache diagnosis task (H4): the agent keeps `src/` unchanged, may only clean
      the `lib/` build artifacts, and writes its report to
      `/app/agent-output/H4-tsbuildinfo-trap/`;
-   - Hands-on tasks (M1/H1/H2/H3/H5/M2/M3/M4/H7/M5/H8/H9/H10/H21/H22): the agent edits files under `/app/fixture/`
+   - Hands-on tasks (M1/H1/H2/H3/H5/M2/M3/M4/H7/M5/H8/H9/H10/H21/H22/H26): the agent edits files under `/app/fixture/`
      directly; H2 additionally requires writing the migration report to
      `/app/agent-output/H2-baseline-trap/`.
 3. **Grading**: after the agent finishes, Harbor automatically runs `tests/test.sh`;
@@ -470,7 +473,7 @@ numbers cannot be compared across models or against later runs.
   adding ordinary fixture tasks** — the point is to stop anyone from accidentally
   publishing fake plugins to npm.
 - When adding a task, scaffold it with `harbor task init`, then fill in
-  judge / solve.sh following the layout of the existing 57 tasks, and verify the
+  judge / solve.sh following the layout of the existing 58 tasks, and verify the
   reference answer scores 1.0 with `harbor run -p <task> -a oracle`.
 - After adding or modifying prompts, run
   `node benchmark/scripts/validate-execution-contract.mjs` to make sure the
