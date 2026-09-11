@@ -80,12 +80,20 @@ async function main() {
   reasons.push(`no-VS discipline (+${noVs}/10), card citation DSH-0.1.3-A1-03 (+${cited}/5)`)
 
   // caps
-  const vsOnly = /(install|use).{0,40}visual studio/i.test(text) && !/pnpm patch|patchedDependencies/.test(text)
+  const patchTokens = /pnpm patch|patchedDependencies|patches\//
+  // vsOnly must be affirmative: negated advice ("do not / never install Visual
+  // Studio") is the correct answer, not a VS-reliant plan — strip negated
+  // mentions before testing, and word-match so "because" cannot read as "use".
+  const affirmativeVs = text.replace(
+    /\b(?:do not|don't|not|never|no|without|avoid|skip|refuse\w*|unnecessary)\b[^.\n]{0,60}\bvisual studio\b/gi,
+    '',
+  )
+  const vsOnly = /\b(?:install|use)\b.{0,40}\bvisual studio\b/i.test(affirmativeVs) && !patchTokens.test(text)
   if (vsOnly && score > 50) {
     reasons.push('plan relies on installing Visual Studio — capped at 50')
     score = 50
   }
-  const ignoreOnly = /--ignore-scripts/.test(text) && !/pnpm patch|patchedDependencies/.test(text)
+  const ignoreOnly = /--ignore-scripts/.test(text) && !patchTokens.test(text)
   if (ignoreOnly && score > 40) {
     reasons.push('plan relies on --ignore-scripts alone — capped at 40')
     score = 40
