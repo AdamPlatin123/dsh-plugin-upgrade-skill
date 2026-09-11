@@ -20,8 +20,10 @@ The model adapts three ideas from [DeepSWE](https://github.com/datacurve-ai/deep
    agent must fix the trap without breaking what already worked).
 3. **Per-component reward breakdown** — the judge emits a structured
    `checkpoints: [{ id, label, type, points, awarded, patched, pristine }]` ledger,
-   and `test.sh` writes it to `/logs/verifier/reward.json` next to the Harbor
-   `reward.txt`.
+   and `test.sh` writes it to `/logs/verifier/grading.json` next to the Harbor
+   `reward.txt` and numeric `reward.json`. Harbor reserves `reward.json` for a flat numeric reward map and
+   reads it before `reward.txt`; structured reasons/checkpoints must use a different
+   filename. Historical structured `reward.json` files remain valid exporter inputs.
 
 Deliberately **not** borrowed: DeepSWE's network allowlists, its real-repository task
 set, and trajectory critique — those do not fit this benchmark's scope.
@@ -31,6 +33,9 @@ set, and trajectory critique — those do not fit this benchmark's scope.
 - **Gate** — environment health, scored before any checkpoint (fixture untouched →
   0, dsh unavailable → 0, etc.). Gates are not task checkpoints; they protect the
   scoring from infrastructure noise.
+  Command wrappers report timeouts, signal termination, and spawn failures
+  with nonzero status. Successful commands return zero; normal numeric exit
+  statuses and captured output are preserved.
 - **Checkpoint type**:
   - `fail-to-pass` — patched must pass **and** the pristine baseline must not pass.
     If the baseline already passes, the trap fixture has drifted: the judge stops
@@ -91,12 +96,12 @@ explicit.
 ## Export to DeepSWE-style reports
 
 `benchmark/scripts/export-deepswe-report.mjs` converts a checkpoint-graded judge
-result (the `/logs/verifier/reward.json` ledger) into the report fields DeepSWE
+result (the `/logs/verifier/grading.json` ledger) into the report fields DeepSWE
 writes ([reward.json/ctrf.json](https://github.com/datacurve-ai/deep-swe)), so the
 two benchmarks can be compared side by side:
 
 ```sh
-node benchmark/scripts/export-deepswe-report.mjs /logs/verifier/reward.json --task M5-token-auth-smoke
+node benchmark/scripts/export-deepswe-report.mjs /logs/verifier/grading.json --task M5-token-auth-smoke
 ```
 
 Mapping (verified against DeepSWE's `grader.py` output schema):
@@ -116,6 +121,11 @@ bucket defaults its ratio to 1.0, matching DeepSWE's own edge behavior.
 - `evaluateCheckpoints` / `restorePristine` live in each task's own copy of
   `judge-utils.mjs` (the repo convention is per-task copies); when one copy
   changes, update the other in the same PR.
+- `bootWebAndFetchIndex` (the Web cold-boot probe shared by M5 and H8) must
+  fetch the index at the origin of the `dsh web:` URL it discovers, never a
+  hardcoded `127.0.0.1:3080`. `benchmark/scripts/web-boot-probe.test.mjs`
+  executes the generated script with a non-default port and mocked HTTP
+  responses, checking the request URLs and Cookie propagation.
 - The manifest's `gates` and `measure` fields are documentation-only today;
   validating them mechanically is a planned enhancement.
 - `cap.when` (cross-checkpoint caps) is exercised by H8's raw-route trap.
@@ -130,7 +140,7 @@ bucket defaults its ratio to 1.0, matching DeepSWE's own edge behavior.
    the per-task facts now duplicated in the README/scoring tables (cards covered,
    trap description), becoming the single source of truth that
    `validate-task-registry.mjs` cross-checks the prose tables against.
-3. **Publish the ledger** — `reward.json` already carries the structured
+3. **Publish the ledger** — `grading.json` already carries the structured
    checkpoints; `export-deepswe-report.mjs` maps it onto DeepSWE-style report
    fields (reward/ctrf) for cross-benchmark comparison.
 4. **Pin the trap states** — the baseline-mismatch verdict turns fixture drift into
