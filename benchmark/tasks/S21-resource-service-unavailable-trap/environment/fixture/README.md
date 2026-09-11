@@ -8,7 +8,7 @@ client plugins junction-linked). The report goes to /app/agent-output/<task-id>/
 |---|---|
 | symptom-log.txt | the timeline: two distinct dialogs (absolute-scope claim error on alpha.1; session-scoped 内容读取失败 on alpha.2), the terminal output, the F12 observation |
 | boot-manifest-excerpt.txt | the __DSH_BOOT__ roster excerpt: which sidebar/workspace-files modules the 0.1.5-alpha.2 host lists, and the ui-sidebar-textpreview absence (renamed in alpha.2) |
-| combo-probe.txt | the per-module sweep (62/62 HTTP 200) plus the INVALID full-join probe (404) with the reason it must not be cited |
-| contrast-probe.txt | two readers of the same file: file-trace's own RPC (works) vs the workspaceFiles stat RPC (never arrives) |
+| combo-probe.txt | the per-module sweep (62/62 HTTP 200) plus the all-entries-joined probe (404) |
+| contrast-probe.txt | two readers of the same file: file-trace's own RPC (works) vs the sidebar tab's read (never arrives) |
 | console-excerpt.txt | the browser console: no documentpreview errors; only dsh-paste-input fold-skip warnings |
 | discussion-excerpt.txt | the 0.1.5-alpha.1 round of the same failure family (discussion #5999) |

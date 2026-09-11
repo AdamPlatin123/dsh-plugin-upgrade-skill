@@ -38,34 +38,24 @@ The evidence pack is under `/app/fixture/` (read-only — do not modify it):
 **Your report** (write to `/app/agent-output/S21-resource-service-unavailable-trap/`, any
 filename):
 
-1. **Attribution**: where the content-read failure actually lives. The tab opened (the
-   document tab type claimed the address and registered), so the claim/registration layer
-   works; the failure is in the resource-metadata delivery
-   (`useResource('file', …)` → the `file` provider registered by
-   `@deepseek-ai/dsh-api-workspace-files`' client half → the `workspaceFiles.stat` RPC →
-   the host WorkspaceFiles service). State what the contrast probe (file-trace's own RPC
-   reads the same file fine) rules in and out, and why `meta.status === 'none'` (metadata
-   never arrives) points at the provider/RPC chain rather than the tab's claim.
-2. **Probe discipline**: the per-module sweep (62/62 HTTP 200) is valid; the naive
-   all-in-one join of all 62 modules into one URL is NOT — explain the 3 KB combo-URL cap
-   (`MAX_COMBO_URL_BYTES`), that the real loader partitions the roster into ≤3 KB chunks,
-   and why a manual all-in-one 404 must never be cited as "modules missing".
-3. **Distractor separation**: the repeated `dsh-paste-input: fold skipped (parse failed)`
-   warnings are an unrelated paste-input bug (a parser/writer end-marker spelling drift
-   across bundle generations; fixed in paste-input v0.1.24). State explicitly that they do
-   not cause the content-read failure, and that the `ui-sidebar-textpreview` →
-   `ui-sidebar-documentpreview` rename explains the roster change without being the cause.
-4. **Mitigation decision**: no plugin-side rewrite, retry, fallback, or "repair" of the
-   unavailable service; the decision order is (a) restart the host once — the 0.1.5-alpha.1
-   round self-healed a roster/combo mismatch on a later boot, (b) roll the global package
-   back to the previous published version as the escape hatch, (c) report upstream with the
-   forensics (per-module sweep, contrast probe, discussion #5999).
-5. **Prevention / upstream**: what a complete upstream report needs (per-module probe,
-   contrast reader, roster excerpt, the invalid-join caveat), and what the host could do to
-   fail loud (roster vs served-combo consistency check at boot, or a named error when a
-   rostered module's bytes are absent from the served combo).
+1. **Attribution**: the tab renders a title but no content. From the symptom log and the
+   contrast probe, which layer actually fails, and what do the two readers of the same
+   file rule in and rule out? What does the metadata status observed in the failing tab
+   say about where the read stalls?
+2. **Probe discipline**: the evidence contains two combo probes with opposite-looking
+   results. Which one is a valid measurement of static artifact serving and which one is
+   not — and why must the failing one never be cited as "modules missing"? How does the
+   real loader fetch the roster instead?
+3. **Distractor separation**: are the repeated `dsh-paste-input` fold warnings related to
+   the content-read failure? What else in the roster changed between the two versions,
+   and does that change explain the symptom?
+4. **Mitigation decision**: should the plugin work around the unavailable service
+   (rewrite, retry, fallback)? In what order should the maintainer act — what is the
+   first cheap step, what is the escape hatch, and what goes upstream?
+5. **Prevention / upstream**: what forensics does a complete upstream report need, and
+   what could the host check at boot so this class of failure fails loud instead of
+   rendering an empty tab?
 
-What is tested: attributing a runtime resource-chain failure to the upgraded profile
-rather than the plugin, valid-vs-invalid probe design (combo URL cap, contrast reader),
-the restart/rollback/report mitigation order, distractor separation between two
-simultaneous plugin bugs, and the upstream-report discipline with reproducible forensics.
+What is tested: attributing a runtime read failure from evidence, telling valid probes
+from invalid ones, keeping simultaneous unrelated bugs separate, ordering mitigations,
+and packaging forensics for upstream.
