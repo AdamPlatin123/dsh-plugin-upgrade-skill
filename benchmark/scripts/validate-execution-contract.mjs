@@ -50,6 +50,7 @@ const expectedModes = new Map([
   ['S20-msvc-flock-trap', 'readonly'],
   ['S19-phantom-update-stale-host', 'readonly'],
   ['S18-terminal-sprite-render-trap', 'readonly'],
+  ['S22-duplicate-insert-boot-crash-trap', 'readonly'],
   ['H12-remote-result-boundary-trap', 'readonly'],
   ['M2-optional-dep-trap', 'mutable'],
   ['M3-session-projection', 'mutable'],
