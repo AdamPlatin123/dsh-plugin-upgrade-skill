@@ -33,6 +33,9 @@ set, and trajectory critique — those do not fit this benchmark's scope.
 - **Gate** — environment health, scored before any checkpoint (fixture untouched →
   0, dsh unavailable → 0, etc.). Gates are not task checkpoints; they protect the
   scoring from infrastructure noise.
+  Command wrappers report timeouts, signal termination, and spawn failures
+  with nonzero status. Successful commands return zero; normal numeric exit
+  statuses and captured output are preserved.
 - **Checkpoint type**:
   - `fail-to-pass` — patched must pass **and** the pristine baseline must not pass.
     If the baseline already passes, the trap fixture has drifted: the judge stops
@@ -118,6 +121,11 @@ bucket defaults its ratio to 1.0, matching DeepSWE's own edge behavior.
 - `evaluateCheckpoints` / `restorePristine` live in each task's own copy of
   `judge-utils.mjs` (the repo convention is per-task copies); when one copy
   changes, update the other in the same PR.
+- `bootWebAndFetchIndex` (the Web cold-boot probe shared by M5 and H8) must
+  fetch the index at the origin of the `dsh web:` URL it discovers, never a
+  hardcoded `127.0.0.1:3080`. `benchmark/scripts/web-boot-probe.test.mjs`
+  executes the generated script with a non-default port and mocked HTTP
+  responses, checking the request URLs and Cookie propagation.
 - The manifest's `gates` and `measure` fields are documentation-only today;
   validating them mechanically is a planned enhancement.
 - `cap.when` (cross-checkpoint caps) is exercised by H8's raw-route trap.
