@@ -71,7 +71,7 @@ function rejectsAdvice(clause, match) {
     || /(?:不要|不需|不用|无需|别)\s*$/.test(prefix)
     || /^never\b/i.test(clause)
     || /(?:wrong advice|incorrect claim|bad advice|reject the claim)\b/i.test(clause)
-    || /["']?\s+(?:is|would(?: be| have been))\s+(?:exactly )?(?:wrong|incorrect|false|bad advice)\b/.test(suffix)
+    || /["']?\s+(?:is|would(?: be| have been)|have been)\s+(?:exactly )?(?:the )?(?:wrong|incorrect|false|bad advice|wrong move)\b/.test(suffix)
     || /\b(?:would misattribute|misattributes?|misattribution)\b/.test(suffix)
 }
 

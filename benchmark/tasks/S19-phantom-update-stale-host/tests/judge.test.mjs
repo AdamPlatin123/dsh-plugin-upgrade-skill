@@ -29,10 +29,10 @@ for (const advice of [
   '"Restart is unnecessary" is incorrect for host-plane changes.',
   'Do not trust the session payload without validation.',
   'Never repair the traced file; the source SVG is well-formed.',
+  'Editing or "repairing" the traced file would have been the wrong move.',
   '不要跳过校验，也不要修改源文件。',
 ]) {
   test('correct or explicitly rejected advice stays valid: ' + advice, () => {
     assert.equal(gradeReport(oracle + '\n\n' + advice).score, 100)
   })
 }
-
