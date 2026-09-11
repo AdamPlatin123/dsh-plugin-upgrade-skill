@@ -16,8 +16,3 @@
 - insert:
     - id: settings-controller
       name: '@deepseek-ai/dsh-settings-controller'
-
-# Conclusion: the web-app bundle already provides workspace-files. The profile patch's
-# duplicate insert is the direct cause of the boot crash. Removing the profile patch's
-# insert block restores the boot; the workspace-files service remains provided by the
-# bundle layer.

@@ -18,6 +18,3 @@
 - insert:
     - id: workspace-files
       name: '@deepseek-ai/dsh-api-workspace-files'
-
-# NOTE: the comment's "冗余" (redundant) assessment was WRONG — Cordis treats a duplicate
-# insert as a FATAL boot error, not a silent override. The next boot crashed.

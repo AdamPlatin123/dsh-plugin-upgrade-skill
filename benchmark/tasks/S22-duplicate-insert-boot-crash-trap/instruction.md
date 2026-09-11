@@ -36,23 +36,20 @@ cordis.patch.yml showing the workspace-files row), and `README.md`.
 **Your report** (write to `/app/agent-output/S22-duplicate-insert-boot-crash-trap/`, any
 filename):
 
-1. **Root cause**: why inserting a plugin id that the web-app bundle already provides causes
-   a fatal crash — Cordis treats a duplicate `insert` of the same plugin id as an error
-   (EntryGroup.update → duplicate loader entry id), not a silent override or merge.
-2. **Cordis layering rules**: the distinction between (a) config override by id (safe — the
-   profile patch can override a bundle-provided plugin's config), (b) `insert` of a NEW
-   plugin id (adds to the composition), and (c) `insert` of an ALREADY-PROVIDED id (fatal).
-   State which of the three the maintainer's action falls into and why.
-3. **Fix**: what the maintainer should do — remove the duplicate insert block from the
-   profile patch (the web-app bundle already provides workspace-files; no manual insert is
-   needed). State explicitly that this is NOT a plugin defect and NOT fixable by modifying
-   the plugin.
-4. **Prevention**: what the maintainer should check BEFORE manually inserting a plugin id
-   into the profile patch (grep the web-app bundle's cordis.patch.yml for the id; if it's
-   already there, the composition already includes it), and what the host could do to fail
-   with a more actionable error message (e.g. naming the bundle that already provides the
-   id, or suggesting "remove the duplicate from your profile patch").
+1. **Root cause**: from the crash log and the two patch excerpts, which two declarations
+   collide, and at which Cordis layer is the collision detected? Why does the loader
+   refuse the whole boot here instead of accepting the later row?
+2. **Layering rules**: for a profile patch acting on a bundle-provided plugin, which
+   operations are safe and which one is fatal — changing the plugin's config by id,
+   adding a row for an id no bundle ships, or adding a row for an id a bundle already
+   ships? Which case is the maintainer's action, and which evidence row proves it?
+3. **Fix**: what exactly should the maintainer change, and in which file? State whether
+   the plugin's own code is at fault, and whether any plugin-side change could resolve
+   the boot failure.
+4. **Prevention**: before adding such a row by hand, what should the maintainer look at
+   in the installed bundle, and what could the host print at boot to make this failure
+   actionable (whom to blame, what to delete)?
 
-What is tested: understanding Cordis's insert-duplication rule (fatal, not merge),
-distinguishing profile-patch insert from bundle-provided plugins, and the correct fix
-(remove the duplicate, not add more).
+What is tested: reading a loader crash against profile and bundle patch evidence,
+choosing the safe layering operation, prescribing the minimal correct change, and
+turning the incident into author- and host-side prevention.
