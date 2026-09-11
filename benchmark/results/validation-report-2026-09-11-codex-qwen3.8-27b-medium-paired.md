@@ -11,11 +11,11 @@ Motivated by [issue #102](https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill/
 - **The skill is a net negative on this stack.** Paired per task: with-skill better on 7 tasks, no-skill better on 18, identical on 31. The deficit concentrates in wall time and timeouts rather than in generated output (3,988,952 vs 3,940,227 output tokens, +1.2%).
 - **Timeout is the dominant failure mode**: 108/168 (64.3%) with-skill and 86/167 (51.5%) no-skill trials ended in `AgentTimeoutError`.
 - **19 of 56 tasks scored zero under both conditions** (H8, H9, H14-H19, H22, M5, M8-M12, S1, S3, S15, S17). Per-command forensics on H14-H19 show the agent spending the whole 900 s budget reading (52-101 commands, of which only 2-6 touch the graded fixture, and 12/18 trials make zero writes) — this is budget exhaustion, not an incorrect migration.
-- **Two infrastructure defects were found and fixed during the round**, both of which had previously produced empty scores: codex remote compaction targeting endpoints vLLM 0.28.0 does not implement (H9/H22 now run with zero timeouts and zero exceptions), and a 32-character truncation of Harbor trial directory prefixes.
+- **Two infrastructure defects were found and fixed during the round**, both of which had previously produced empty scores: codex remote compaction targeting endpoints vLLM 0.28.0 does not implement (H9/H22 trials now settle with zero timeouts and recorded scores), and a 32-character truncation of Harbor trial directory prefixes.
 
 ## Execution and provenance
 
-- Frozen task/grader source: **`74af446`** with the documented local deltas (anti-cheat stripping, CRLF normalization, digest-pinned `FROM` rewritten to the shadow image).
+- Frozen task/grader source: **`74af446`** with the documented local deltas (anti-cheat stripping, CRLF normalization, digest-pinned `FROM` rewritten to the shadow image). Note that `74af446` predates grader fixes merged to main afterwards for H8, M5, S5, S6 and S7, so scores for those five tasks reflect the pre-fix graders and are not comparable with future runs on the fixed graders.
 - Codex CLI **0.153.4**; model `qwen3.8-27b` served locally by **vLLM 0.28.0** (`max_model_len=262144`, 1x NVIDIA H20 96 GB, BF16); **Harbor 0.22.0** manages containers and verification.
 - Reasoning effort **medium** for every trial. `-k 3 -n 1` (three attempts per condition, single GPU, serial).
 - `plugin-upgrade` mounted from the frozen snapshot; H11 and H21 use their task-pinned historical skill snapshots. No other skills, plugins, apps, memories or web search are injected.
@@ -106,10 +106,10 @@ The 300 s tier is where the timeout wall bites hardest: 13 of the 17 S-series ta
 
 ## Grading anomalies retained
 
-- H8 and M5 report `verifier_result: null` in the Harbor job metadata while their verifier artifacts exist (`verifier/reward.json` with `score: 0`). Their rewards were recovered from the verifier artifacts and marked `scored (recovered from verifier artifact)` in the CSV; nothing was altered to recover points.
+- H8 and M5 report `verifier_result: null` in the Harbor job metadata while their verifier artifacts exist (`verifier/reward.json` with `score: 0`). Their rewards were recovered from the verifier artifacts; nothing was altered to recover points. The per-task CSV carries no grading-status column, so this recovery is documented here rather than in the CSV.
 - **One trial out of 336 has no score at all**: H8-fire-drill no-skill `eUkk83R` failed with `VerifierTimeoutError: Verifier execution timed out after 600.0 seconds`, leaving an empty `test-stdout.txt` and no reward file. It is retained as unscored rather than imputed, which is why the no-skill denominator is 167 rather than 168. H8's other five trials all carry the verifier message below.
 - H8's verifier message is `fixture unchanged relative to baseline` in all five graded trials: the agent never modified the graded fixture. The same message appears for H14-H19.
-- H9 and H22 ran with automatic context compaction disabled after the infrastructure defect below was diagnosed. They complete with zero timeouts and zero exceptions yet still score zero on both arms.
+- H9 and H22 ran with automatic context compaction disabled after the infrastructure defect below was diagnosed. Their trials now settle with zero timeouts and recorded (zero) scores on both arms; the remaining exceptions are transport-level (`NetworkConnectionError` / `NonZeroAgentExitCodeError` / `ApiRateLimitError` — see the CSV), not compaction failures.
 
 ## Infrastructure defects found during the round
 
