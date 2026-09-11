@@ -7,9 +7,10 @@
 //
 //   - selectionDefinitionCommit exists and is an ancestor of the local main;
 //   - skill freeze commit/tree/blob and task source commit match git exactly;
-//   - the ten task IDs equal temporal-holdout-v1.primaryTasks exactly, with
-//     no duplicates, and every pinned task tree resolves at the task source
-//     commit;
+//   - the ten task IDs equal temporal-holdout-v1.primaryTasks exactly AS
+//     COMMITTED at the pinned selectionDefinitionCommit (never the living
+//     working tree), with no duplicates, and every pinned task tree resolves
+//     at the task source commit;
 //   - exactly 2 models with the exact preregistered IDs, 2 conditions with
 //     the exact names, attemptsPerCell 3, concurrency 1, logicalSlots 120;
 //   - the committed schedule regenerates byte-identically from the protocol
@@ -147,12 +148,15 @@ function gitFailures(protocol, repoRoot, file) {
   if (mainSha !== null && !isAncestor(repoRoot, definition, mainSha)) {
     fail(`selectionDefinitionCommit is not an ancestor of main (${mainSha?.slice(0, 12)})`)
   }
-  // split authority: the protocol's ten tasks must equal v1.primaryTasks exactly
-  const splitPath = join(repoRoot, 'benchmark', 'holdouts', 'temporal-holdout-v1.json')
-  if (!existsSync(splitPath)) {
-    fail('temporal-holdout-v1.json missing from the working tree')
+  // split authority: the protocol's ten tasks must equal v1.primaryTasks
+  // exactly, read at the PINNED definition commit — never from the living
+  // working tree, so a later amendment of the split file on main cannot
+  // break validation of this immutable preregistration
+  const splitText = git(repoRoot, ['show', `${definition}:benchmark/holdouts/temporal-holdout-v1.json`], { allowFailure: true })
+  if (splitText === null) {
+    fail('temporal-holdout-v1.json missing at selectionDefinitionCommit')
   } else {
-    const split = JSON.parse(readFileSync(splitPath, 'utf8'))
+    const split = JSON.parse(splitText)
     const primary = [...split.primaryTasks].sort()
     const protocolTasks = protocol.tasks.map((task) => task.id).sort()
     if (JSON.stringify(primary) !== JSON.stringify(protocolTasks)) {

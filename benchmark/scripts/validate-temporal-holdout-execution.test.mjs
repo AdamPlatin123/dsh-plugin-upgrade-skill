@@ -398,11 +398,25 @@ test('zero model calls declared and enforced', () => {
 
 test('split authority: protocol tasks must equal v1 primaryTasks exactly', () => {
   const repo = buildRepo()
-  // rewrite the split with a different primary list → mismatch
+  // rewrite the split with a different primary list at a NEW committed
+  // definition and point the protocol at it → mismatch
   const splitPath = join(repo.root, 'benchmark/holdouts/temporal-holdout-v1.json')
   const split = JSON.parse(readFileSync(splitPath, 'utf8'))
   split.primaryTasks = TASKS.slice(0, 9)
   writeFileSync(splitPath, JSON.stringify(split, null, 2))
-  const failures = run(repo.protocol, repo.root)
+  const amendedDefinition = commitAll(repo.root, 'amend split definition')
+  const def = { ...repo.protocol, selectionDefinitionCommit: amendedDefinition }
+  const failures = run(def, repo.root)
   assert.ok(failures.some((f) => f.includes('primaryTasks')))
+})
+
+test('split authority reads the pinned definition commit, not the working tree', () => {
+  const repo = buildRepo()
+  // dirty the working-tree split WITHOUT committing: the preregistration
+  // pins the definition commit, so uncommitted drift must not fail it
+  const splitPath = join(repo.root, 'benchmark/holdouts/temporal-holdout-v1.json')
+  const split = JSON.parse(readFileSync(splitPath, 'utf8'))
+  split.primaryTasks = TASKS.slice(0, 9)
+  writeFileSync(splitPath, JSON.stringify(split, null, 2))
+  assert.deepStrictEqual(run(repo.protocol, repo.root), [])
 })
