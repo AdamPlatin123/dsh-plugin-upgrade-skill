@@ -49,6 +49,7 @@ const expectedModes = new Map([
   ['S17-external-ui-plugin-onboarding-trap', 'readonly'],
   ['S20-msvc-flock-trap', 'readonly'],
   ['S19-phantom-update-stale-host', 'readonly'],
+  ['S18-terminal-sprite-render-trap', 'readonly'],
   ['H12-remote-result-boundary-trap', 'readonly'],
   ['M2-optional-dep-trap', 'mutable'],
   ['M3-session-projection', 'mutable'],
