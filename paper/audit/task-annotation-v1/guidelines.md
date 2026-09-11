@@ -49,9 +49,11 @@ exposure-ledger columns, holdout verdicts, skill revision SHAs — is
 
 Concretely: the `H` prefix does not imply Hands-on (H4 and H6 are Static),
 does not imply Hard, does not imply any trap type, and does not imply any
-incident family. Validators reject any annotation that can be derived from
-the ID prefix alone; annotators must ground every label in the packet
-evidence.
+incident family. The prefix rule is a human rule: no machine check can prove
+a label was not prefix-derived, so the validator instead requires every
+filled row to carry non-empty `family_evidence` and `rationale`, and the
+adjudicator discards any label whose stated evidence reduces to the ID
+prefix. Annotators must ground every label in the packet evidence.
 
 ## 3. incident_family (P0)
 

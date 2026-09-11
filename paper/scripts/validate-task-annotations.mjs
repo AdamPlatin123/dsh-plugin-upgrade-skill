@@ -106,7 +106,7 @@ export function validateInventoryShape(inventory, file = 'inventory.json') {
   if (inventory.id !== 'task-annotation-v1-inventory') fail('id must be task-annotation-v1-inventory')
   if (inventory.inventoryStatus !== 'pre-freeze-main56') fail(`inventoryStatus must be pre-freeze-main56, got ${JSON.stringify(inventory.inventoryStatus)}`)
   if (typeof inventory.inventoryCommit !== 'string' || !FULL_SHA_RE.test(inventory.inventoryCommit)) fail('inventoryCommit must be a full 40-char SHA')
-  if (!['not-started', 'in-progress', 'single-pass-incomplete', 'adjudicating', 'complete'].includes(inventory.annotationStatus)) fail(`annotationStatus invalid: ${JSON.stringify(inventory.annotationStatus)}`)
+  if (!['not-started', 'in-progress', 'single-pass-incomplete', 'complete'].includes(inventory.annotationStatus)) fail(`annotationStatus invalid: ${JSON.stringify(inventory.annotationStatus)}`)
   if (!Array.isArray(inventory.tasks) || inventory.tasks.length !== 56) fail(`tasks must be exactly 56 entries, got ${Array.isArray(inventory.tasks) ? inventory.tasks.length : 'not an array'}`)
   const seen = new Set()
   const ids = []

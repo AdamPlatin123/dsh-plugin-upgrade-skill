@@ -8,7 +8,7 @@
       "id": "string, task-annotation-v1-inventory",
       "inventoryStatus": "string, pre-freeze-main56 — this is NOT a formal frozen benchmark snapshot; the 56-task snapshot is created by the research plan's QC process later",
       "inventoryCommit": "string, full git SHA of main at inventory time; every source of the packet resolves from git objects at THIS commit",
-      "annotationStatus": "string, not-started | in-progress | single-pass-incomplete | adjudicating | complete",
+      "annotationStatus": "string, not-started | in-progress | single-pass-incomplete | complete — computed by the validator from the templates; 'adjudicating' is a workflow phase (guidelines §8), not a storable status: while adjudication is open the status stays in-progress",
       "tasks": "array of {id, interactionMode: Static|Hands-on, treeSha} — exactly the benchmark/tasks/ directories at inventoryCommit, lexical order; interactionMode machine-derived from the pinned README Type column"
     },
     "rules": [
@@ -25,8 +25,9 @@
       "inventoryCommit": "string, must equal inventory.inventoryCommit",
       "inventoryStatus": "string, must equal inventory.inventoryStatus",
       "generatedBy": "string, script path",
+      "annotationStatus": "string, copied from inventory.annotationStatus at generation time",
       "taskCount": "number, must equal inventory task count",
-      "tasks": "array of per-task evidence objects: {taskId, interactionMode, taskTreeSha, taskToml: {name, version, description, keywords}, instruction: full pinned instruction.md text, readme: {summary, environment, verifier} paragraphs pinned and outcome-scrubbed, fixtureFiles: relative paths pinned, referencedCards: [{cardId, source, text}] pinned}"
+      "tasks": "array of per-task evidence objects: {taskId, interactionMode, taskTreeSha, taskToml: {name, version, description, keywords}, instruction: full pinned instruction.md text, readme: {summary, environment, verifier} paragraphs pinned and outcome-scrubbed, fixtureFiles: relative paths pinned, referencedCards: [{cardId, source, text}] pinned, unresolvedCardRefs: [cardId] referenced by the instruction but not found in the pinned references corpus}"
     },
     "leakageRules": [
       "no benchmark/results/ source path may appear anywhere",
