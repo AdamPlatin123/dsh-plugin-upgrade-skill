@@ -1,4 +1,4 @@
-// H22 judge: the package that installs but never registers.
+// H26 judge: the package that installs but never registers.
 // Layered: diagnosis (two-layer attribution, anti-reinstall) + manifest fix +
 // live re-verification (add → listed → cold boot reaches the app layer).
 // Coarse keyword sieve for the report; container-verified signals for the fix.
@@ -21,7 +21,7 @@ const PKG = '@demo/dsh-bench-notlisted'
 async function main() {
   const reasons = []
   let score = 0
-  const changed = await fixtureChanges()
+  const gate = await fixtureChanges()
   const text = readAgentText(undefined, TASK).text
 
   // ── Act 1: diagnosis ──────────────────────────────────────────
@@ -56,7 +56,7 @@ async function main() {
   else reasons.push('package.json still has no plugin self-description')
 
   // ── Act 3: live re-verification in a clean profile ────────────
-  if (changed && (await dshAvailable())) {
+  if (gate.changed === true && (await dshAvailable())) {
     const profile = `bench-${TASK.toLowerCase()}`
     const tmpDir = `/tmp/${profile}`
     let listedOk = false, bootOk = false, addOk = false

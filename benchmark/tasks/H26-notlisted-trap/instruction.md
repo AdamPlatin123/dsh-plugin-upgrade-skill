@@ -1,4 +1,4 @@
-# H22 · The Package That Installs But Never Registers
+# H26 · The Package That Installs But Never Registers
 
 ## Unattended Evaluation Authorization (BENCHMARK-AUTH-v1)
 

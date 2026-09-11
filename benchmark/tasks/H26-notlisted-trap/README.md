@@ -1,4 +1,4 @@
-# H22 · not-listed trap (installs but never registers)
+# H26 · not-listed trap (installs but never registers)
 
 Distilled from a real top-tier failure: `anywhere-labs/dsh-desktop` (22.2k★) failed a
 50-plugin live verification on 2026-09-01 with exactly this shape — `dsh plugin add`

@@ -1,4 +1,4 @@
-# H22 Reference Solution
+# H26 Reference Solution
 
 ## Reference Changes
 
@@ -29,9 +29,9 @@ The real defect never was in the install layer.
 ## Verification (in-container, isolated profile)
 
 ```
-dsh plugin --profile bench-h22-notlisted-trap add /app/fixture   # ok
-dsh plugin --profile bench-h22-notlisted-trap list               # entry now present
-dsh --profile bench-h22-notlisted-trap 'ping'                    # MISSING_CREDENTIAL → alive
+dsh plugin --profile bench-h26-notlisted-trap add /app/fixture   # ok
+dsh plugin --profile bench-h26-notlisted-trap list               # entry now present
+dsh --profile bench-h26-notlisted-trap 'ping'                    # MISSING_CREDENTIAL → alive
 ```
 
 ## Report contents the judge credits
