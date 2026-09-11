@@ -8,8 +8,10 @@
 
 ## What's in this repo
 
-- **95 upgrade cards** — each records one real pitfall: what breaks, why, how to fix it, and which version the information comes from. Ordered by version, from 0.1.0-rc.8 all the way to 0.1.5-rc.2 (alpha.5→rc.1 has no plugin-facing changes: 0 cards; alpha.2→alpha.3 has 2 cards (1 additive capability + SQLite removal backfill); alpha.3→alpha.4 has 6; rc.8→rc.1 carries 9 draft cards; 0.1.2-rc.1→0.1.3-alpha.1 adds 5 (2 session-log measured + 3 git-tag anchored), 0.1.3-alpha.1→alpha.2 adds 5 draft cards and 0.1.5-rc.1→rc.2 adds 6 draft cards; of the three edges between 0.1.3-alpha.2 and 0.1.5-rc.1, alpha.2→alpha.1 adds 20 draft cards (this PR), while the other two are still in open pull requests).
+- **97 upgrade cards** — each records one real pitfall: what breaks, why, how to fix it, and which version the information comes from. Ordered by version, from 0.1.0-rc.8 all the way to 0.1.5-rc.2 (alpha.5→rc.1 has no plugin-facing changes: 0 cards; alpha.2→alpha.3 has 2 cards (1 additive capability + SQLite removal backfill); alpha.3→alpha.4 has 6; rc.8→rc.1 carries 9 draft cards; 0.1.2-rc.1→0.1.3-alpha.1 adds 7 (2 session-log measured + 3 git-tag anchored + A1-07/08 unpublished-cohort recipe and runtime re-verification), 0.1.3-alpha.1→alpha.2 adds 5 draft cards and 0.1.5-rc.1→rc.2 adds 6 draft cards; of the three edges between 0.1.3-alpha.2 and 0.1.5-rc.1, alpha.2→alpha.1 adds 20 draft cards (this PR), while the other two are still in open pull requests).
 - **13 general-purpose countermeasures** — some problems have nothing to do with the version (back up first, run old and new side by side, what to do when startup hangs). These live in one checklist.
+- **9 skills** — one unified workflow selects and coordinates stages, while the other eight check upgrades, write plugins, test plugins, release plugins, diff two dsh versions, debug runtime failures, integrate heavy dependencies into lightweight plugins, and turn real upgrade experiences into auto-graded benchmark tasks.
+- **56 exam questions (benchmark)** — tests whether an AI with our skill actually knows how to upgrade a plugin. Every question is auto-graded; two reproduce the real dsh-web v0.3.8 → v0.3.9 and dsh-data-agent v0.1.3 → v0.1.4 migrations.
 - **Multiple validation reports** — we installed two real dsh versions in Docker and confirmed that following the cards really does fix plugins, followed by several rounds of agent benchmark runs.
 
 ## Quick Start
@@ -142,7 +144,7 @@ environment variables. A failed, oversized, or invalid-v2 query is unknown/not c
 | 0.1.5-rc.1 → 0.1.5-rc.2 | 📝 Draft | [v0.1.5-rc.2.md](skills/plugin-upgrade/references/v0.1.5-rc.2.md) | 6 draft cards (the feedback surface's injected contract loses `toggle`/`acknowledge` and `openDialog` gains a required `rating`; both ratings confirm in the dialog and a failed submission becomes a 6s warning toast; `FileTypeIcon`'s 48 code categories move to the design-export artwork; the completed-turn footer and file-section spacing become a 20/16/20px contract; `service-stability` is re-labelled in both languages; plus negative evidence that no Host-plane surface changed) |
 | Cross-version countermeasures | ✅ Done | [rollup-0.1.2.md](skills/plugin-upgrade/references/rollup-0.1.2.md) | 13 items (running old and new side by side, back up first, what to do when startup hangs, etc.) |
 | 0.1.1 → 0.1.2 final | 🔄 Waiting for the official release | — | dsh 0.1.2 final isn't out yet (npm `latest` is still rc.1; the corridor now extends to 0.1.5-rc.2 with draft cards); we'll re-verify everything once 0.1.2 final is out |
-| 0.1.5-alpha.1 → later versions (0.1.3 final, etc.) | 📝 Up for grabs | — | Want to help write cards? See the [contributing guide](CONTRIBUTING.md) |
+| 0.1.5-alpha.1 → later versions | 📝 Up for grabs | — | Want to help write cards? See the [contributing guide](CONTRIBUTING.md) |
 
 ## The exam (benchmark)
 
