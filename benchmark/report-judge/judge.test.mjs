@@ -7,7 +7,7 @@ import { execFileSync } from 'node:child_process'
 import { apiConfig, auditCitations, callJudge, collectFiles, grade, JudgeError, scoreDecisions, sha256, SubmissionError, SYSTEM, writeResult } from './judge.mjs'
 import { makePacket, prepare, REPO } from './prepare.mjs'
 import { RUBRICS } from './rubrics.mjs'
-import { legacyScore, samples } from './calibrate.mjs'
+import { samples } from './calibrate.mjs'
 
 function sandbox(t) {
   const root = mkdtempSync(join(tmpdir(), 'report-judge-test-'))
@@ -15,11 +15,11 @@ function sandbox(t) {
   return root
 }
 function responseFor(packet, verdict = 'pass') {
-  const source = Object.entries(packet.fixture).find(([p]) => p.endsWith('.ts') || p.endsWith('.js'))
+  const source = Object.entries(packet.fixture)[0]
   return { decisions: packet.rubric.criteria.map(c => ({ id: c.id, verdict, reason: 'Protocol test only, not semantic calibration.',
     evidence: verdict === 'missing' ? [] : [{ report: 'report.md', quote: 'candidate evidence' }],
     sources: c.sourceRequired ? [{ path: source[0], quote: source[1].text.split('\n').find(x => x.trim()) }] : [],
-    references: [packet.references[0].id] })),
+    references: packet.references.slice(0, 1).map(r => r.id) })),
   caps: packet.rubric.caps.map(c => ({ id: c.id, triggered: false, reason: 'No assertion.', evidence: [] })) }
 }
 const report = { 'report.md': 'candidate evidence' }
@@ -29,7 +29,7 @@ function apiResponse(content, extra = {}) {
     choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(content) } }], ...extra }), { status: 200 })
 }
 
-test('all four packets use exact source bytes, bounded excerpts and 100-point rubrics', () => {
+test('all seven packets use exact source bytes, bounded excerpts and 100-point rubrics', () => {
   for (const task of Object.keys(RUBRICS)) {
     const packet = makePacket(task)
     assert.equal(packet.rubric.criteria.reduce((sum, c) => sum + c.points, 0), 100)
@@ -191,16 +191,16 @@ test('CLI failure produces details and nonzero exit, never a default-zero reward
   assert.equal(existsSync(join(logs, 'reward.txt')), false)
 })
 
-test('pilot preparation keeps agent prompts/fixtures exact and puts references/keys only in verifier', t => {
+test('preparation keeps agent prompts/fixtures exact and puts references/keys only in verifier', t => {
   const dir = sandbox(t); const out = join(dir, 'pilot')
   const manifest = prepare(out)
-  assert.equal(manifest.tasks.length, 4)
+  assert.equal(manifest.tasks.length, 7)
   for (const { task } of manifest.tasks) {
     assert.equal(readFileSync(join(out, task, 'instruction.md'), 'utf8'), readFileSync(join(REPO, 'benchmark/tasks', task, 'instruction.md'), 'utf8'))
     assert.deepEqual(collectFiles(join(out, task, 'environment/fixture')), makePacket(task).fixture)
     const toml = readFileSync(join(out, task, 'task.toml'), 'utf8')
     assert.match(toml, /environment_mode = "separate"/)
-    assert.match(toml, /version = "2.0.0"/)
+    assert.match(toml, /version = "3.0.0"/)
     assert.match(toml, /\[verifier.env\]/)
     assert.doesNotMatch(toml, /source = "\/app\/\.git"/)
     assert.doesNotMatch(readFileSync(join(out, task, 'environment/Dockerfile'), 'utf8'), /REPORT_JUDGE|packet.json|COPY .*tests/)
@@ -221,12 +221,12 @@ test('generated standalone entry executes through symlinked paths (including mac
   assert.equal(JSON.parse(readFileSync(join(logs, 'details.json'))).status, 'scored')
 })
 
-test('calibration includes adversarial and alternative cases; legacy keyword exploit remains reproducible', () => {
+test('calibration retains keyword, wrong, injection and copied-prompt cases for every semantic task', () => {
   for (const task of Object.keys(RUBRICS)) {
     const cases = samples(task)
-    assert.equal(cases.length, 7)
-    const keywords = cases.find(c => c.id === 'keywords')
-    assert.equal(legacyScore(task, keywords.report), 100)
+    assert.equal(cases.length, 8)
+    assert.ok(cases.every(c => typeof c.report === 'string' && c.report.trim()))
+    assert.deepEqual(cases.find(c => c.id === 'prompt-echo').expected, [0, 0])
     assert.equal(cases.find(c => c.id === 'historical-oracle').expected, null)
   }
 })

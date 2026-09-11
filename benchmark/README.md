@@ -10,10 +10,12 @@ auto-grading, so no human marking is involved.
 task format** — each question is a standard Harbor task (directory layout below) that
 can be run directly with `harbor run` on any agent / provider Harbor supports.
 
-An opt-in [S1–S4 semantic report-judge pilot](docs/report-judge-pilot.md) adds
-LLM criterion grading with sealed source evidence, deterministic checks and
-old/new calibration comparisons. Generate its separate tasks with
-`node benchmark/report-judge/prepare.mjs --out /tmp/report-judge-pilot`.
+**S1–S4, S10, S12 and S15 use [LLM-as-judge by default](docs/report-judge-pilot.md).**
+Run their registered `benchmark/tasks/<task>` directories directly. Configure
+`REPORT_JUDGE_BASE_URL`, `REPORT_JUDGE_MODEL` and `REPORT_JUDGE_API_KEY` for the
+separate verifier; a missing/broken judge is an evaluator failure, never a
+keyword-score fallback. The version-3 semantic scores are not interchangeable
+with archived keyword scores.
 
 Every task tests a real trap: some fixtures hide a misleading comment like "try
 changing it this way" (following it is fatal), and some plugins ship with a
