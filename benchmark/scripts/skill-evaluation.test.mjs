@@ -38,8 +38,8 @@ test('controls never invoke a model or inject Skills; invalid inputs fail before
 })
 
 test('control manifests disclose semantic coverage and preserve the complete model suite', () => {
-  assert.deepEqual(SEMANTIC_TASKS, ['S1-static-scan'])
-  assert.equal(CONTROL_TASKS.length, 6)
+  assert.deepEqual(SEMANTIC_TASKS, ['S1-static-scan', 'S5-negative-naming', 'S9-composer-coordinate-trap'])
+  assert.equal(CONTROL_TASKS.length, 4)
   assert.deepEqual([...CONTROL_TASKS, ...SEMANTIC_TASKS].sort(), [...TASKS].sort())
   const model = evaluationConfig({ condition: 'no-injected-skill', model: 'openai/test-model', output: '.artifacts/eval-test' })
   assert.deepEqual(model.tasks.map(task => basename(task.path)), TASKS)
@@ -55,7 +55,7 @@ test('control manifests disclose semantic coverage and preserve the complete mod
     }
   } finally { rmSync(directory, { recursive: true, force: true }) }
   const workflow = readFileSync(new URL('../../.github/workflows/skill-evaluation.yml', import.meta.url), 'utf8')
-  assert.match(workflow, /Check all seven semantic report protocols without model requests[\s\S]*?run: npm run test:report-judge/)
+  assert.match(workflow, /Check all semantic report protocols without model requests[\s\S]*?run: npm run test:report-judge/)
   assert.doesNotMatch(workflow, /REPORT_JUDGE_API_KEY/)
 })
 

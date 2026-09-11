@@ -29,7 +29,7 @@ function apiResponse(content, extra = {}) {
     choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(content) } }], ...extra }), { status: 200 })
 }
 
-test('all seven packets use exact source bytes, bounded excerpts and 100-point rubrics', () => {
+test('all registered packets use exact source bytes, bounded excerpts and 100-point rubrics', () => {
   for (const task of Object.keys(RUBRICS)) {
     const packet = makePacket(task)
     assert.equal(packet.rubric.criteria.reduce((sum, c) => sum + c.points, 0), 100)
@@ -52,12 +52,16 @@ test('aggregation is deterministic: full, half and missing; model totals ignored
 })
 
 test('declared caps require quoted claims and apply after aggregation', () => {
-  const packet = makePacket('S4-legacy-client-imports')
-  const response = responseFor(packet)
-  response.caps[0].triggered = true
-  assert.throws(() => scoreDecisions(packet, report, response), /missing report evidence/)
-  response.caps[0].evidence = [{ report: 'report.md', quote: 'candidate evidence' }]
-  assert.equal(scoreDecisions(packet, report, response).score, 70)
+  for (const [task, rubric] of Object.entries(RUBRICS)) {
+    for (const [index, cap] of (rubric.caps ?? []).entries()) {
+      const packet = makePacket(task)
+      const response = responseFor(packet)
+      response.caps[index].triggered = true
+      assert.throws(() => scoreDecisions(packet, report, response), /missing report evidence/)
+      response.caps[index].evidence = [{ report: 'report.md', quote: 'candidate evidence' }]
+      assert.equal(scoreDecisions(packet, report, response).score, cap.total)
+    }
+  }
 })
 
 test('unknown, duplicate and omitted criteria/caps cannot produce a reward', () => {
@@ -194,7 +198,7 @@ test('CLI failure produces details and nonzero exit, never a default-zero reward
 test('preparation keeps agent prompts/fixtures exact and puts references/keys only in verifier', t => {
   const dir = sandbox(t); const out = join(dir, 'pilot')
   const manifest = prepare(out)
-  assert.equal(manifest.tasks.length, 7)
+  assert.equal(manifest.tasks.length, 12)
   for (const { task } of manifest.tasks) {
     assert.equal(readFileSync(join(out, task, 'instruction.md'), 'utf8'), readFileSync(join(REPO, 'benchmark/tasks', task, 'instruction.md'), 'utf8'))
     assert.deepEqual(collectFiles(join(out, task, 'environment/fixture')), makePacket(task).fixture)
@@ -224,9 +228,19 @@ test('generated standalone entry executes through symlinked paths (including mac
 test('calibration retains keyword, wrong, injection and copied-prompt cases for every semantic task', () => {
   for (const task of Object.keys(RUBRICS)) {
     const cases = samples(task)
-    assert.equal(cases.length, 8)
+    assert.ok(cases.length >= 8)
+    assert.equal(new Set(cases.map(c => c.id)).size, cases.length)
     assert.ok(cases.every(c => typeof c.report === 'string' && c.report.trim()))
     assert.deepEqual(cases.find(c => c.id === 'prompt-echo').expected, [0, 0])
     assert.equal(cases.find(c => c.id === 'historical-oracle').expected, null)
+  }
+})
+
+test('S5-S9 retain bilingual, negated and contradictory reports as live calibration cases', () => {
+  for (const task of Object.keys(RUBRICS).filter(task => /^S[5-9]-/.test(task))) {
+    const cases = samples(task)
+    assert.deepEqual(cases.find(c => c.id === 'paraphrase-zh').expected, [90, 100])
+    assert.deepEqual(cases.find(c => c.id === 'correct-negation').expected, [90, 100])
+    assert.ok(cases.find(c => c.id === 'contradiction').expected[1] < 100)
   }
 })
