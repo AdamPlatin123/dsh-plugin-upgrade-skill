@@ -120,7 +120,7 @@ export function readAgentText(agentOutput, taskId) {
 function git(args, cwd) {
   return new Promise((resolvePromise) => {
     execFile('git', args, { cwd, timeout: 20000 }, (error, stdout, stderr) => {
-      resolvePromise({ code: error?.code ?? 0, stdout, stderr: stderr ?? '' })
+      resolvePromise({ code: typeof error?.code === 'number' ? error.code : error ? 1 : 0, stdout, stderr: stderr ?? '' })
     })
   })
 }
@@ -142,7 +142,7 @@ export function localExec(script, { stdin = '', timeout = 60000 } = {}) {
   return new Promise((resolvePromise) => {
     const child = execFile('sh', ['-c', script], { timeout }, (error, stdout, stderr) => {
       resolvePromise({
-        code: error?.code ?? 0,
+        code: typeof error?.code === 'number' ? error.code : error ? 1 : 0,
         stdout: stdout ?? '',
         stderr: stderr ?? '',
         killed: error?.killed === true || (error && error.code === undefined) === true,
@@ -237,7 +237,7 @@ if (match) {
     const r1 = await fetch(match[1], { redirect: "manual" });
     const setCookie = r1.headers.getSetCookie ? r1.headers.getSetCookie() : [r1.headers.get("set-cookie")];
     const cookie = setCookie.filter(Boolean).map((c) => c.split(";")[0]).join("; ");
-    const r2 = await fetch("http://127.0.0.1:3080/", { headers: { cookie } });
+    const r2 = await fetch(new URL(match[1]).origin + "/", { headers: { cookie } });
     outcome.html = await r2.text();
   } catch (error) {
     outcome.fetchError = String(error);
