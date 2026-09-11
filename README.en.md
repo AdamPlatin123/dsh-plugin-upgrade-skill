@@ -102,7 +102,13 @@ You can also ask directly in the conversation (any agent); the skill triggers on
 Inspect this DSH plugin and let me choose upgrade, testing, cloud naming, and release stages.
 What breaking changes are there for upgrading my plugin from 0.1.1 to 0.1.2?
 Upgrade the dsh-ads plugin to dsh-v0.1.2-alpha.2
+Validate this plugin's names and query the central registry; preserve the index URL and SHA-256 without submitting a registration.
 ```
+
+`naming-registry` runs offline naming validation and a read-only central query by default; central
+registration remains a separate external-publication step. On a proxied network, run the query with
+Node 24+ and `node --use-env-proxy`; Node 20-23 built-in `fetch` is not guaranteed to consume proxy
+environment variables. A failed, oversized, or invalid-v2 query is unknown/not checked, never available.
 
 ## What each of the 9 skills does
 
@@ -130,7 +136,7 @@ Upgrade the dsh-ads plugin to dsh-v0.1.2-alpha.2
 | 0.1.2-alpha.3 → 0.1.2-alpha.4 | ✅ Done | [v0.1.2-alpha.4.md](skills/plugin-upgrade/references/v0.1.2-alpha.4.md) | 6 cards (`report` → `send_message`, Python runtime package rename, `Session.events` removal, branded seq types, PTC `workflow` and base `web_fetch` defaults; verified on three real hosts) |
 | 0.1.2-alpha.4 → 0.1.2-alpha.5 | ✅ Done | [v0.1.2-alpha.5.md](skills/plugin-upgrade/references/v0.1.2-alpha.5.md) | 3 cards (storage-domain `compatibleVersions` read tolerance and `backup-and-skip` salvage; boot/title-loss fix for legacy homes; storage-layer reproduction record) |
 | 0.1.2-alpha.5 → 0.1.2-rc.1 | ✅ Done | [v0.1.2-rc.1.md](skills/plugin-upgrade/references/v0.1.2-rc.1.md) | 0 cards (pure version bump; verification record, macOS real-host validation, and release-notes coverage matrix) |
-| 0.1.2-rc.1 → 0.1.3-alpha.1 | 📝 Draft | [v0.1.3-alpha.1.md](skills/plugin-upgrade/references/v0.1.3-alpha.1.md) | 5 draft cards (A1-01/02 session-log measured on the release tarball: v0→v1 migrator refuses 0.1.2-alpha.x-writer logs, cross-version resume cursor error; A1-04…06 git-tag anchored: outbound HTTP(S)/ALL_PROXY bootstrap, SessionHandle + async `agentLoop.create()` + session lock, Session format v2) |
+| 0.1.2-rc.1 → 0.1.3-alpha.1 | 📝 Draft | [v0.1.3-alpha.1.md](skills/plugin-upgrade/references/v0.1.3-alpha.1.md) | 7 draft cards (session-log corridor A1-01/02 + host-plane/policy A1-04/05/06 + A1-07/08 unpublished-cohort source-launch recipe and composer/read_image runtime re-verification; release tarball measured, tag alignment pending) |
 | 0.1.3-alpha.1 → 0.1.3-alpha.2 | 📝 Draft | [v0.1.3-alpha.2.md](skills/plugin-upgrade/references/v0.1.3-alpha.2.md) | 5 draft cards (persona prefix/suffix split, `SubprocessHandle.pid` removal, base drops the str-replace editor default row, launcher `runCli()`/`import.meta.main`, pi-ai 0.84.2→0.85.1) |
 | 0.1.3-alpha.2 → 0.1.5-alpha.1 | 📝 Draft | [v0.1.5-alpha.1.md](skills/plugin-upgrade/references/v0.1.5-alpha.1.md) | 20 draft cards (Session format V3 + `EpochHeader.system` removal, `ctx.agent` removal, `Inbox` typed interface, tighter session-event validation, PTC rename, system prompts in message history, CLI rejects `desktop`, `--from-default-profile`, new file surface, Web Client `details`→`rightbar` rework, right-sidebar/resource extension points, `tool-subagent` contract, host SSH/instruction-discovery seams; version-jump edge) |
 | 0.1.5-rc.1 → 0.1.5-rc.2 | 📝 Draft | [v0.1.5-rc.2.md](skills/plugin-upgrade/references/v0.1.5-rc.2.md) | 6 draft cards (the feedback surface's injected contract loses `toggle`/`acknowledge` and `openDialog` gains a required `rating`; both ratings confirm in the dialog and a failed submission becomes a 6s warning toast; `FileTypeIcon`'s 48 code categories move to the design-export artwork; the completed-turn footer and file-section spacing become a 20/16/20px contract; `service-stability` is re-labelled in both languages; plus negative evidence that no Host-plane surface changed) |

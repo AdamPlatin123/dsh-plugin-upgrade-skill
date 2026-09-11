@@ -55,7 +55,7 @@ export function readAgentText(agentOutput, taskId) {
 function git(args, cwd) {
   return new Promise((resolvePromise) => {
     execFile('git', args, { cwd, timeout: 20000 }, (error, stdout, stderr) => {
-      resolvePromise({ code: error?.code ?? 0, stdout, stderr: stderr ?? '' })
+      resolvePromise({ code: typeof error?.code === 'number' ? error.code : error ? 1 : 0, stdout, stderr: stderr ?? '' })
     })
   })
 }
@@ -77,7 +77,7 @@ export function localExec(script, { stdin = '', timeout = 60000 } = {}) {
   return new Promise((resolvePromise) => {
     const child = execFile('sh', ['-c', script], { timeout }, (error, stdout, stderr) => {
       resolvePromise({
-        code: error?.code ?? 0,
+        code: typeof error?.code === 'number' ? error.code : error ? 1 : 0,
         stdout: stdout ?? '',
         stderr: stderr ?? '',
         killed: error?.killed === true || (error && error.code === undefined) === true,
@@ -93,7 +93,7 @@ export async function dshAvailable() {
   return result.code === 0
 }
 
-// ── profile lifecycle ──────────────────────────────────────────
+// ── profile lifecycle ──────────────────────────────────────
 
 /** Create an isolated profile (bundles is an array of host package names). */
 export async function createProfile(profile, bundles) {

@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
+import { RUBRICS } from '../report-judge/rubrics.mjs'
 
 const benchmarkRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const repoRoot = resolve(benchmarkRoot, '..')
@@ -68,6 +69,7 @@ const expectedModes = new Map([
   ['H19-workspace-ya', 'mutable'],
   ['H20-session-events-ledger', 'mutable'],
   ['H21-question-answerer-waterfall', 'mutable'],
+  ['H26-notlisted-trap', 'mutable'],
 ])
 
 const compact = (text) => text.replaceAll('\r\n', '\n').replace(/\s+/g, ' ')
@@ -149,8 +151,9 @@ for (const [taskId, mode] of expectedModes) {
   if (count(taskToml, 'execution_contract = "BENCHMARK-AUTH-v1"') !== 1) {
     fail(taskFile, 'must declare execution_contract = "BENCHMARK-AUTH-v1" exactly once')
   }
-  if (!/^version = "1\.1\.0"$/m.test(taskToml)) {
-    fail(taskFile, 'task version must be 1.1.0 for BENCHMARK-AUTH-v1')
+  const expectedVersion = Object.hasOwn(RUBRICS, taskId) ? '3.0.0' : '1.1.0'
+  if (taskToml.match(/^version = "([^"]+)"$/m)?.[1] !== expectedVersion) {
+    fail(taskFile, `task version must be ${expectedVersion} for its current verifier; execution authorization remains BENCHMARK-AUTH-v1`)
   }
 
   // A prompt-level closed-book clause is not an execution boundary: every task
