@@ -8,7 +8,7 @@
 
 ## What's in this repo
 
-- **69 upgrade cards** — each records one real pitfall: what breaks, why, how to fix it, and which version the information comes from. Ordered by version, from 0.1.0-rc.8 all the way to 0.1.3-alpha.2 (alpha.5→rc.1 has no plugin-facing changes: 0 cards; alpha.2→alpha.3 has 2 cards (1 additive capability + SQLite removal backfill); alpha.3→alpha.4 has 6; rc.8→rc.1 carries 9 draft cards; 0.1.2-rc.1→0.1.3-alpha.1 adds 5 (2 session-log measured + 3 git-tag anchored) and 0.1.3-alpha.1→alpha.2 adds 5 draft cards).
+- **75 upgrade cards** — each records one real pitfall: what breaks, why, how to fix it, and which version the information comes from. Ordered by version, from 0.1.0-rc.8 all the way to 0.1.5-rc.2 (alpha.5→rc.1 has no plugin-facing changes: 0 cards; alpha.2→alpha.3 has 2 cards (1 additive capability + SQLite removal backfill); alpha.3→alpha.4 has 6; rc.8→rc.1 carries 9 draft cards; 0.1.2-rc.1→0.1.3-alpha.1 adds 5 (2 session-log measured + 3 git-tag anchored), 0.1.3-alpha.1→alpha.2 adds 5 draft cards and 0.1.5-rc.1→rc.2 adds 6 draft cards; the three edges between 0.1.3-alpha.2 and 0.1.5-rc.1 are still in open pull requests).
 - **13 general-purpose countermeasures** — some problems have nothing to do with the version (back up first, run old and new side by side, what to do when startup hangs). These live in one checklist.
 - **9 skills** — one unified workflow selects and coordinates stages, while the other eight check upgrades, write plugins, test plugins, release plugins, diff two dsh versions, debug runtime failures, integrate heavy dependencies into lightweight plugins, and turn real upgrade experiences into auto-graded benchmark tasks.
 - **56 exam questions (benchmark)** — tests whether an AI with our skill actually knows how to upgrade a plugin. Every question is auto-graded; two reproduce the real dsh-web v0.3.8 → v0.3.9 and dsh-data-agent v0.1.3 → v0.1.4 migrations.
@@ -104,7 +104,13 @@ You can also ask directly in the conversation (any agent); the skill triggers on
 Inspect this DSH plugin and let me choose upgrade, testing, cloud naming, and release stages.
 What breaking changes are there for upgrading my plugin from 0.1.1 to 0.1.2?
 Upgrade the dsh-ads plugin to dsh-v0.1.2-alpha.2
+Validate this plugin's names and query the central registry; preserve the index URL and SHA-256 without submitting a registration.
 ```
+
+`naming-registry` runs offline naming validation and a read-only central query by default; central
+registration remains a separate external-publication step. On a proxied network, run the query with
+Node 24+ and `node --use-env-proxy`; Node 20-23 built-in `fetch` is not guaranteed to consume proxy
+environment variables. A failed, oversized, or invalid-v2 query is unknown/not checked, never available.
 
 ## What each of the 9 skills does
 
@@ -134,6 +140,7 @@ Upgrade the dsh-ads plugin to dsh-v0.1.2-alpha.2
 | 0.1.2-alpha.5 → 0.1.2-rc.1 | ✅ Done | [v0.1.2-rc.1.md](skills/plugin-upgrade/references/v0.1.2-rc.1.md) | 0 cards (pure version bump; verification record, macOS real-host validation, and release-notes coverage matrix) |
 | 0.1.2-rc.1 → 0.1.3-alpha.1 | 📝 Draft | [v0.1.3-alpha.1.md](skills/plugin-upgrade/references/v0.1.3-alpha.1.md) | 5 draft cards (A1-01/02 session-log measured on the release tarball: v0→v1 migrator refuses 0.1.2-alpha.x-writer logs, cross-version resume cursor error; A1-04…06 git-tag anchored: outbound HTTP(S)/ALL_PROXY bootstrap, SessionHandle + async `agentLoop.create()` + session lock, Session format v2) |
 | 0.1.3-alpha.1 → 0.1.3-alpha.2 | 📝 Draft | [v0.1.3-alpha.2.md](skills/plugin-upgrade/references/v0.1.3-alpha.2.md) | 5 draft cards (persona prefix/suffix split, `SubprocessHandle.pid` removal, base drops the str-replace editor default row, launcher `runCli()`/`import.meta.main`, pi-ai 0.84.2→0.85.1) |
+| 0.1.5-rc.1 → 0.1.5-rc.2 | 📝 Draft | [v0.1.5-rc.2.md](skills/plugin-upgrade/references/v0.1.5-rc.2.md) | 6 draft cards (the feedback surface's injected contract loses `toggle`/`acknowledge` and `openDialog` gains a required `rating`; both ratings confirm in the dialog and a failed submission becomes a 6s warning toast; `FileTypeIcon`'s 48 code categories move to the design-export artwork; the completed-turn footer and file-section spacing become a 20/16/20px contract; `service-stability` is re-labelled in both languages; plus negative evidence that no Host-plane surface changed) |
 | Cross-version countermeasures | ✅ Done | [rollup-0.1.2.md](skills/plugin-upgrade/references/rollup-0.1.2.md) | 13 items (running old and new side by side, back up first, what to do when startup hangs, etc.) |
 | 0.1.1 → 0.1.2 final | 🔄 Waiting for the official release | — | dsh 0.1.2 final isn't out yet (npm `latest` is still rc.1; the corridor now extends to 0.1.3-alpha.2 with draft cards); we'll re-verify everything once 0.1.2 final is out |
 | 0.1.3-alpha.2 → later versions (0.1.3 final, etc.) | 📝 Up for grabs | — | Want to help write cards? See the [contributing guide](CONTRIBUTING.md) |
