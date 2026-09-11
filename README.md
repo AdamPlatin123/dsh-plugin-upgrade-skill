@@ -107,7 +107,12 @@ Claude Code 中按名字调用 skill（插件安装后带命名空间）：
 先检查这个 DSH 插件，让我选择要不要升级、测试、查云端命名或发布
 我需要把插件从 0.1.1 升级到 0.1.2，有哪些破坏性变更？
 帮我把 dsh-ads 这个插件升级到 dsh-v0.1.2-alpha.2
+校验这个插件的命名并查询中央注册表；保留索引 URL 和 SHA-256，不要提交注册
 ```
+
+`naming-registry` 默认执行离线命名校验和只读中央查询；中央注册仍是单独的外部发布步骤。
+代理网络下使用 Node 24+ 的 `node --use-env-proxy` 运行查询，Node 20-23 不保证内置 `fetch`
+自动读取代理环境变量。查询失败、索引超限或 v2 契约不合法都表示“未知/未检查”，不能解释为名称可用。
 
 ## 9 个 skill 各自管什么
 
@@ -135,7 +140,7 @@ Claude Code 中按名字调用 skill（插件安装后带命名空间）：
 | 0.1.2-alpha.3 → 0.1.2-alpha.4 | ✅ 完成 | [v0.1.2-alpha.4.md](skills/plugin-upgrade/references/v0.1.2-alpha.4.md) | 6 张卡（`report` → `send_message`、Python 运行时包改名、`Session.events` 移除、seq 强类型、PTC `workflow` 与 base `web_fetch` 默认值；三台真宿主验证） |
 | 0.1.2-alpha.4 → 0.1.2-alpha.5 | ✅ 完成 | [v0.1.2-alpha.5.md](skills/plugin-upgrade/references/v0.1.2-alpha.5.md) | 3 张卡（storage 域 `compatibleVersions` 读兼容与 `backup-and-skip` 兜底；旧家升级拒启/标题丢失修复；storage 层复现核对） |
 | 0.1.2-alpha.5 → 0.1.2-rc.1 | ✅ 完成 | [v0.1.2-rc.1.md](skills/plugin-upgrade/references/v0.1.2-rc.1.md) | 0 张卡（纯版本 bump；含核对记录、macOS 真机验证与 release notes 覆盖矩阵） |
-| 0.1.2-rc.1 → 0.1.3-alpha.1 | 📝 草稿 | [v0.1.3-alpha.1.md](skills/plugin-upgrade/references/v0.1.3-alpha.1.md) | 5 张草稿卡（A1-01/02 session-log 实测：v0→v1 迁移器拒读 0.1.2-alpha.x writer 日志、跨版本 resume cursor 报错；A1-04…06 钉 tag：出站 HTTP(S)/ALL_PROXY 启动代理、SessionHandle/异步 agentLoop + session 锁、Session 格式 v2） |
+| 0.1.2-rc.1 → 0.1.3-alpha.1 | 📝 草稿 | [v0.1.3-alpha.1.md](skills/plugin-upgrade/references/v0.1.3-alpha.1.md) | 7 张草稿卡（session-log 走廊 A1-01/02 + host-plane/policy A1-04/05/06 + A1-07/08 未发布 cohort 源码宿主验证配方与 composer/read_image 运行时复核；release tarball 实测，tag 对齐待上游复核） |
 | 0.1.3-alpha.1 → 0.1.3-alpha.2 | 📝 草稿 | [v0.1.3-alpha.2.md](skills/plugin-upgrade/references/v0.1.3-alpha.2.md) | 5 张草稿卡（persona 拆前缀/后缀、`SubprocessHandle.pid` 移除、base 移除 str-replace 编辑器默认行、launcher `runCli()`/`import.meta.main`、pi-ai 0.84.2→0.85.1） |
 | 0.1.5-rc.1 → 0.1.5-rc.2 | 📝 草稿 | [v0.1.5-rc.2.md](skills/plugin-upgrade/references/v0.1.5-rc.2.md) | 6 张草稿卡（反馈面注入契约去掉 `toggle`/`acknowledge`、`openDialog` 加必填 `rating`；点赞/点踩都改为弹窗确认、提交失败转 6s 警告 toast；`FileTypeIcon` 48 个代码分类换设计导出 artwork；回合尾动作条与文件区 20/16/20px 间距契约；`service-stability` 中英文文案改字；以及"宿主面零行为变更"的负面证据） |
 | 跨版本通用对策 | ✅ 完成 | [rollup-0.1.2.md](skills/plugin-upgrade/references/rollup-0.1.2.md) | 13 条（新旧共存、先备份、启动卡死怎么办等） |
