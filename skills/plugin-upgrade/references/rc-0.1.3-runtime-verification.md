@@ -1,15 +1,3 @@
----
-kind: dsh-version-card-set
-schema: 1
-from: dsh-v0.1.2-alpha.2
-to: dsh-v0.1.3-alpha.2
-status: reviewed
-coverage: runtime
-cardCount: 0
-idPrefix: DSH-0.1.2-RC1
-verifiedAt: 2026-09-08
----
-
 # Plugin runtime verification across the 0.1.2-rc.1 / 0.1.3-alpha.2 corridor (2026-09-08)
 
 Runtime companion to the corridor cards: five real top-tier plugins,
@@ -40,7 +28,7 @@ load = alive; exit codes not a criterion). Zero model calls.
    0.1.3 stabilizes.
 3. **dsh-desktop's not-listed failure persists across three generations**
    (22k★; `dsh plugin add` succeeds, the entry never registers). The
-   registration-layer gap H22 (benchmark) is distilled from remains unfixed
+   registration-layer gap H26 (benchmark) is distilled from remains unfixed
    on `latest`.
 
 ## Environment
