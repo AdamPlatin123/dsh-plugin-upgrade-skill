@@ -55,7 +55,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Check all seven semantic report protocols without model requests
+      - name: Check all semantic report protocols without model requests
         if: matrix.condition == 'oracle'
         run: npm run test:report-judge
       - uses: actions/setup-python@v5

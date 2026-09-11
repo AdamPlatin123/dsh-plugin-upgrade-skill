@@ -81,7 +81,7 @@ export function syncDefaults({ root = REPO, check = false } = {}) {
     if (!check) { mkdirSync(dirname(path), { recursive: true }); writeFileSync(path, text) }
   }
   for (const task of Object.keys(RUBRICS)) {
-    for (const name of ['judge-utils.mjs', 'report-grading.mjs', 'report-grading-utils.mjs', 'prompt.txt']) {
+    for (const name of ['judge-utils.mjs', 'report-claims.mjs', 'report-grading.mjs', 'report-grading-utils.mjs', 'prompt.txt']) {
       const path = join(root, 'benchmark/tasks', task, 'tests', name)
       if (!existsSync(path)) continue
       stale.push(relative(root, path))
