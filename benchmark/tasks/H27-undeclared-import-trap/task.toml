@@ -1,7 +1,7 @@
 schema_version = "1.4"
 # Harbor task config: dsh plugin migration exam task H27 (undeclared-import trap)
 [task]
-name = "dsh-plugin-upgrade/h23-undeclared-import-trap"
+name = "dsh-plugin-upgrade/h27-undeclared-import-trap"
 version = "1.1.0"
 description = "A plugin that installs and lists fine but crashes on load: an import with no declared dependency — attribute it, declare it, revive it"
 keywords = ["dsh", "plugin-migration", "baseline", "regression-attribution", "harbor"]
