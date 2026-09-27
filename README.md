@@ -2,7 +2,7 @@
 
 **简体中文** | [English](README.en.md)
 
-[![arXiv](https://img.shields.io/badge/arXiv-2609.30120-b31b1b.svg)](https://arxiv.org/abs/2609.30120) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE) ![Skills](https://img.shields.io/badge/skills-10-blue) ![Upgrade cards](https://img.shields.io/badge/upgrade%20cards-165-blue) ![Benchmark](https://img.shields.io/badge/benchmark-63%20tasks-blue)
+[![arXiv](https://img.shields.io/badge/arXiv-2609.30120-b31b1b.svg)](https://arxiv.org/abs/2609.30120) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE) ![Skills](https://img.shields.io/badge/skills-10-blue) ![Upgrade cards](https://img.shields.io/badge/upgrade%20cards-169-blue) ![Benchmark](https://img.shields.io/badge/benchmark-63%20tasks-blue)
 
 **教 AI 帮你升级 DSH 插件的 skill 集合**，社区共建。
 
@@ -12,7 +12,7 @@
 
 ## 这个仓库里有什么
 
-- **165 张升级说明卡**：每张卡记录一个真实的坑——什么坏了、为什么坏、怎么修、信息来自哪个版本。按版本走廊排好序，覆盖 0.1.0-rc.8 → 0.1.6-alpha.1，每条边的卡数与状态见下方[覆盖表](#升级卡覆盖到哪个版本了)。
+- **169 张升级说明卡**：每张卡记录一个真实的坑——什么坏了、为什么坏、怎么修、信息来自哪个版本。按版本走廊排好序，覆盖 0.1.0-rc.8 → 0.1.6-alpha.2，每条边的卡数与状态见下方[覆盖表](#升级卡覆盖到哪个版本了)。
 - **13 条通用对策**：与具体版本无关的坑（先备份、新旧共存、启动卡死怎么办等），集中在一份清单里。
 - **10 个 skill**：统一工作流负责选择与编排，另外八个分别负责查升级、写插件、测插件、发插件、对比两个版本、排查运行时故障、接入重依赖、把升级经验提取成考题；还有一个不含 DSH 专有知识的通用迁移方法论，用作对照实验的控制组。
 - **63 道自动判分的考题（benchmark）**：22 道静态诊断、14 道混合、27 道实操，其中包含 dsh-web 与 dsh-data-agent 两次真实迁移。
@@ -153,8 +153,9 @@ Claude Code 中按名字调用 skill（插件安装后带命名空间）：
 | 0.1.5-rc.1 → 0.1.5-rc.2 | 📝 草稿 | [v0.1.5-rc.2.md](skills/plugin-upgrade/references/v0.1.5-rc.2.md) | 6 张草稿卡（反馈面注入契约去掉 `toggle`/`acknowledge`、`openDialog` 加必填 `rating`；点赞/点踩都改为弹窗确认、提交失败转 6s 警告 toast；`FileTypeIcon` 48 个代码分类换设计导出 artwork；回合尾动作条与文件区 20/16/20px 间距契约；`service-stability` 中英文文案改字；以及"宿主面零行为变更"的负面证据） |
 | 跨版本通用对策 | ✅ 完成 | [rollup-0.1.2.md](skills/plugin-upgrade/references/rollup-0.1.2.md) | 13 条（新旧共存、先备份、启动卡死怎么办等） |
 | 0.1.5-rc.2 → 0.1.6-alpha.1 | 📝 草稿 | [v0.1.6-alpha.1.md](skills/plugin-upgrade/references/v0.1.6-alpha.1.md) | 38 张草稿卡（目前最宽的一条边：800 个提交、4015 个改动文件。宿主面：`agent/session-start` 删除、`agent/created` 改串行可等待并携带 `source`/`signal`、`auditStartupEntries` 取代 `assertEntries*`、会话事件同步读取弃用、新增 `registerMessageProjection()` 与"无解释器即拒读"、session-log 默认上传；运行时：`codeRuntime`→`ptcRuntime` 且 `run` 拆成 `resolve`/`run`、`SandboxProvider.confine` 与 `ShellExecutor.start` 异步化、子进程 provider 新增 `terminalEnvironment()` 与可选控制通道、`workflow-ptc` 取代 worker-thread、MCP 升 2.0 SDK、新增 `ctx.mcpResources` 与 `ctx.ssh`；LLM：适配器改为上报 `IMAGE_OFFLOAD_REQUIRED`、`deepseek-official` 默认 Anthropic Messages 协议、图片进 v41 token 网格、投影 stateVersion 5、`AssistantProvenance`→`AssistantProviderMetadata`；客户端：provenance→producer/provider metadata、`CommandClaim.name` 必填、新增 `conversation.input.permission` 与 keyed guide slot、`reconnectLabel` 移除、diff 带上下文、`?fixture` 模式退役；打包面：base 行替换、默认挂载 `image-offload`（`image/offload` 必读事件）与 `mcp-resources`、默认关闭 `tool-ralph`、Web 包去掉 `code-runtime` 行、+22/−7 包账单、headless `--session-id`/`--json`、公共包清单重建、实验包改黑名单发布、原生依赖下限 `^0.1.4`→`^0.1.6`；并附"未改动面"负面证据） |
-| 0.1.1 → 0.1.2 正式版 | 🔄 等官方发版 | — | dsh 0.1.2 还没发正式版（npm `latest` 仍是 rc.1；走廊已延伸到 0.1.5-rc.2，draft 卡），正式版发布后我们要复核一遍 |
-| 0.1.6-alpha.1 → 更新版本（0.1.5/0.1.6 正式版等） | 📝 等社区认领 | — | 想帮忙写卡？看 [贡献指南](CONTRIBUTING.md) |
+| 0.1.6-alpha.1 → 0.1.6-alpha.2 | 📝 草稿 | [v0.1.6-alpha.2.md](skills/plugin-upgrade/references/v0.1.6-alpha.2.md) | 4 张草稿卡（`SessionListState.current` 删除，主会话改经 `uiSession.adapter.current` 解析；全局标准 props 用 `useSessionStatus` + `useSessionRetainInfo` 取代 `useSessionPendingInteraction`，`useSessions` 保留；新增 Plugin Manager 管理 profile bundle 与 patch 行开关，link 安装的插件不在其管理范围；GitHub 发版后 npm 有 E404 窗口；三个外部插件已发修复版的一手证据） |
+| 0.1.1 → 0.1.2 正式版 | 🔄 等官方发版 | — | dsh 0.1.2 还没发正式版（npm `latest` 仍是 rc.1；走廊已延伸到 0.1.6-alpha.2，draft 卡），正式版发布后我们要复核一遍 |
+| 0.1.6-alpha.2 → 更新版本（0.1.5/0.1.6 正式版等） | 📝 等社区认领 | — | 想帮忙写卡？看 [贡献指南](CONTRIBUTING.md) |
 
 ## 考题（benchmark）
 
