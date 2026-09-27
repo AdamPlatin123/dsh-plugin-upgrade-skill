@@ -76,6 +76,8 @@
     "test:s22-judge": "node --test --test-name-pattern=S22- benchmark/report-judge/defaults.test.mjs benchmark/report-judge/diagnosis.test.mjs",
     "check:paper-contracts": "node paper/scripts/analyze-contract-coverage.mjs --check && node paper/scripts/summarize-submission-evidence.mjs --check",
     "check:paper-glm53": "node paper/scripts/analyze-glm53-supplement.mjs --check",
-    "check:paper-mechanisms": "node paper/scripts/check-case-mechanisms.mjs --check && node paper/scripts/analyze-focal-robustness.mjs --check"
+    "check:paper-mechanisms": "node paper/scripts/check-case-mechanisms.mjs --check && node paper/scripts/analyze-focal-robustness.mjs --check",
+    "test:s23-judge": "node --test --test-name-pattern=S23- benchmark/report-judge/defaults.test.mjs benchmark/report-judge/diagnosis.test.mjs",
+    "test:s24-judge": "node --test --test-name-pattern=S24- benchmark/report-judge/defaults.test.mjs benchmark/report-judge/diagnosis.test.mjs"
   }
 }
