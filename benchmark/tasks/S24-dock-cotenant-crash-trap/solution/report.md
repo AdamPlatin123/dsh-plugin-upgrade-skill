@@ -10,10 +10,11 @@ TypeError: useSessionPendingInteraction is not a function
     at SessionProgressBar (plugin://dsh-external/dsh-ui-progress/...)
 ```
 
-Why now: the dock's standard kit was reduced between the two contracts. alpha.1's
-`SessionStandardProps` carried `useSessions` and `useSessionPendingInteraction`;
-alpha.2's carries only `useConversation`, `useInput`, `inputActions`. Plugin A's
-component destructures the two removed seats and calls them unconditionally:
+Why now: the standard props changed between the two contracts. alpha.1's
+`SessionStandardProps` carried `useSessionPendingInteraction`; alpha.2's no longer does —
+it is replaced by `useSessionStatus` (whose per-session record carries
+`pendingInteraction`), while `useSessions` stays. Plugin A's component destructures the
+removed seat and calls it unconditionally:
 
 ```ts
 const pendingBySession = useSessionPendingInteraction(interactions => interactions)  // throws
@@ -21,7 +22,8 @@ const subPending = subagentPendingState(useSessions(s => s.byId), ...)
 const subRunning = subagentRunningCount(useSessions(s => s.byId), sessionId)
 ```
 
-The first call throws `TypeError: undefined is not a function` during render.
+The first call throws `TypeError: undefined is not a function` during render (the
+`useSessions` calls are fine on alpha.2).
 
 **Why plugin B's chips vanish too**: the dock is a list slot whose entries all mount
 under ONE shared `DrawerErrorBoundary` (see `dock-render-tree.md`). React error-boundary
@@ -64,7 +66,7 @@ const EMPTY_INTERACTIONS: ReadonlyMap<SessionId, SessionPendingInteraction> = ne
 
 export function SessionProgressBar({
   session, sessionId, t, useConversation, useProjection, useSessions,
-  useSessionPendingInteraction,
+  useSessionPendingInteraction, useSessionStatus,
 }: SessionProgressBarProps) {
   if (session === undefined || session === null) return null
   // ... chat/todos/running/percent/elapsed derivation unchanged ...
@@ -72,9 +74,11 @@ export function SessionProgressBar({
   const todos = useProjection('todos')
   const running = session.running
 
-  // alpha.2: both seats removed from the standard kit - degrade instead of throw.
-  const pendingBySession =
-    useSessionPendingInteraction?.(interactions => interactions) ?? EMPTY_INTERACTIONS
+  // alpha.1 supplies useSessionPendingInteraction, alpha.2 useSessionStatus; the prop
+  // set is fixed per host, so the branch is stable across renders. Degrade, never throw.
+  const pendingBySession = useSessionStatus
+    ? useSessionStatus(selectPendingBySession)
+    : useSessionPendingInteraction?.(interactions => interactions) ?? EMPTY_INTERACTIONS
   const sessionsById = useSessions?.(s => s.byId) ?? EMPTY_BY_ID
   const ownPending = pendingKindOf(pendingBySession.get(sessionId)?.kind)
   const subPending = subagentPendingState(sessionsById, pendingBySession, sessionId)
@@ -83,7 +87,7 @@ export function SessionProgressBar({
 }
 ```
 
-**What degrades**: the amber "pending human interaction" attention state and the
+**What degrades** (only on a host that supplies neither pending hook): the amber "pending human interaction" attention state and the
 subagent pending/running indicators (own pending label, subtree waits, background
 counter) — they read as absent. **What keeps working**: running/thinking state, todos
 percent, tool name, elapsed/ETA, token usage, interrupted state — everything derived
@@ -93,10 +97,10 @@ from `session`, `useConversation`, and `useProjection`, which all survive.
 every co-tenant. A missing indicator is a cosmetic degradation; a throw is a
 multi-plugin outage. Degradation must therefore never escalate to a throw.
 
-**Full function later**: subagent pending/running state now lives in the `uiSession`
-service's status domain (`sourceFor(owner)` / the `PendingInteractionDomain`); the
-plugin re-adds detection by integrating with that service (its own fiber, not the dock
-standard kit).
+`selectPendingBySession` maps the `SessionStatus` records to their
+`pendingInteraction` (a module-level selector returning a memoized map, so reference
+identity stays stable). On a host that supplies neither hook the pending indicators
+read as absent while everything else keeps working.
 
 ## 4. Multi-tenant hygiene
 

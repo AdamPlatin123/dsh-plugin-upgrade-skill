@@ -7,10 +7,10 @@ stops rendering — while the paste attach button (a different slot) survives.
 
 Derived from a real 2026-09-17/18 session on this deployment. The trap has three layers:
 
-1. exactly ONE plugin crashes — the strip destructures and unconditionally calls two
-   seats (`useSessions`, `useSessionPendingInteraction`) removed from the dock's
-   standard kit by the multi-instance refactor; the attachment plugin uses no
-   standard-kit hooks at all;
+1. exactly ONE plugin crashes — the strip destructures and unconditionally calls
+   `useSessionPendingInteraction`, which the multi-instance refactor removed from the
+   global standard props (replaced by `useSessionStatus`; `useSessions` stays); the
+   attachment plugin uses no standard-kit hooks at all;
 2. the second "victim" is collateral damage: the dock is a list slot whose entries all
    mount under ONE shared error boundary, so the crashing strip unmounts the innocent
    co-tenant's chips entry with it (React boundary semantics), while the same plugin's
@@ -32,6 +32,6 @@ Derived from a real 2026-09-17/18 session on this deployment. The trap has three
   the frozen statistics file live under `benchmark/report-judge/`; the packet seals
   the rubric and reference excerpts (generated — do not edit `tests/` by hand).
 - **Card dependency**: references the DSH-0.1.6-A2-02 corridor card
-  (`skills/plugin-upgrade/references/v0.1.6-alpha.2.md`, PR #248). The card names the
-  removed seats; the co-tenant error-boundary mechanism, the experiment reading, and
+  (`skills/plugin-upgrade/references/v0.1.6-alpha.2.md`). The card names the
+  removed seat and its replacement; the co-tenant error-boundary mechanism, the experiment reading, and
   the never-throw rationale are NOT in the skill and must be derived from the fixture.

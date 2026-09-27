@@ -45,10 +45,10 @@ filename):
    Also explain why reinstalling plugin B could never have helped, and what is wrong
    with the colleague's "both plugins were hit" theory.
 3. **The fix**: write the corrected component code (fenced) using graceful
-   degradation for the removed seats — state exactly which feature of the strip
-   degrades and which parts keep working, and why the degradation must be silent
-   rather than throwing. Where does subagent pending/running detection move to if
-   the plugin later wants full function back?
+   degradation for the removed seat — state which hook supplies the pending state on
+   alpha.2, which feature of the strip degrades on a host that supplies neither
+   pending hook and which parts keep working, and why the degradation must be silent
+   rather than throwing.
 4. **Multi-tenant hygiene**: what should a dock tenant do so its own crash cannot
    take down co-tenants, and what could the HOST change so one entry's failure
    isolates to that entry? Name the trade-off the host faces.
